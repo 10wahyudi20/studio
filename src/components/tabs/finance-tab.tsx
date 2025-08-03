@@ -108,8 +108,14 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
                     control={control} name="type"
                     render={({ field }) => (
                         <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4 pt-1">
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="debit" id="debit" /><Label htmlFor="debit" className="font-normal">Pemasukan (Debit)</Label></div>
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="credit" id="credit" /><Label htmlFor="credit" className="font-normal">Pengeluaran (Kredit)</Label></div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="debit" id="debit" />
+                                <Label htmlFor="debit" className="font-normal dark:text-green-400">Pemasukan (Debit)</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="credit" id="credit" />
+                                <Label htmlFor="credit" className="font-normal dark:text-red-400">Pengeluaran (Kredit)</Label>
+                            </div>
                         </RadioGroup>
                     )} 
                 />
