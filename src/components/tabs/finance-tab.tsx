@@ -110,11 +110,11 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
                         <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4 pt-1">
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="debit" id="debit" />
-                                <Label htmlFor="debit" className="font-normal dark:text-green-400">Pemasukan (Debit)</Label>
+                                <Label htmlFor="debit" className="font-normal text-green-700 dark:text-green-400">Pemasukan (Debit)</Label>
                             </div>
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="credit" id="credit" />
-                                <Label htmlFor="credit" className="font-normal dark:text-red-400">Pengeluaran (Kredit)</Label>
+                                <Label htmlFor="credit" className="font-normal text-red-700 dark:text-red-400">Pengeluaran (Kredit)</Label>
                             </div>
                         </RadioGroup>
                     )} 
@@ -153,7 +153,7 @@ export default function FinanceTab() {
   );
 
   const TransactionRow = ({ t }: { t: Transaction }) => (
-    <TableRow key={t.id}>
+    <TableRow key={t.id} className={t.type === 'debit' ? 'bg-green-100/50 dark:bg-green-900/20' : 'bg-red-100/50 dark:bg-red-900/20'}>
       <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
       <TableCell>{t.description}</TableCell>
       <TableCell>{t.quantity}</TableCell>
