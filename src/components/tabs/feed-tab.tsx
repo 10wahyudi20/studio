@@ -98,7 +98,7 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
           </div>
           <div className="space-y-2">
             <Label htmlFor="schema">Skema Pakan (gram)</Label>
-            <Input id="schema" type="number" {...register("schema")} />
+            <Input id="schema" type="number" {...register("schema")} className="text-green-700 dark:text-green-400 font-semibold"/>
             {errors.schema && <p className="text-sm text-destructive">{errors.schema.message}</p>}
           </div>
           <DialogFooter>
