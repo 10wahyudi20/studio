@@ -6,6 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { predictEggProduction, PredictEggProductionInput, PredictEggProductionOutput } from "@/ai/flows/predict-egg-production";
+import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BrainCircuit, Loader2 } from "lucide-react";
+import { BrainCircuit, Loader2, Volume2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
@@ -30,13 +31,14 @@ type PredictionFormData = z.infer<typeof predictionSchema>;
 export default function AiPredictionTab() {
   const { ducks, eggProduction } = useAppStore();
   const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(null);
+  const [audio, setAudio] = React.useState<TextToSpeechOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isGeneratingAudio, setIsGeneratingAudio] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   const totalAge = ducks.reduce((sum, duck) => sum + (duck.quantity * duck.ageMonths), 0);
   const avgAge = totalDucks > 0 ? Math.round(totalAge / totalDucks) : 0;
-  const todayProd = eggProduction.daily.at(-1)?.totalEggs || 0;
   
   const { register, handleSubmit, control, formState: { errors } } = useForm<PredictionFormData>({
     resolver: zodResolver(predictionSchema),
@@ -53,9 +55,22 @@ export default function AiPredictionTab() {
     setIsLoading(true);
     setError(null);
     setPrediction(null);
+    setAudio(null);
     try {
       const result = await predictEggProduction(data);
       setPrediction(result);
+      
+      setIsGeneratingAudio(true);
+      try {
+        const audioResult = await textToSpeech(result.reasoning);
+        setAudio(audioResult);
+      } catch (audioError) {
+        console.error("Audio generation failed:", audioError);
+        // Do not show audio error to user, just log it.
+      } finally {
+        setIsGeneratingAudio(false);
+      }
+
     } catch (e) {
       setError("Gagal menghasilkan prediksi. Silakan coba lagi.");
       console.error(e);
@@ -158,7 +173,16 @@ export default function AiPredictionTab() {
                     </div>
                     <Separator />
                     <div>
-                        <h4 className="font-semibold mb-2">Alasan Prediksi:</h4>
+                        <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-semibold">Alasan Prediksi:</h4>
+                            {isGeneratingAudio && <Loader2 className="h-4 w-4 animate-spin" />}
+                            {audio && (
+                                <audio controls autoPlay className="h-8">
+                                    <source src={audio.media} type="audio/wav" />
+                                    Browser Anda tidak mendukung elemen audio.
+                                </audio>
+                            )}
+                        </div>
                         <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
                     </div>
                 </div>
