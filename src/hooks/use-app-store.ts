@@ -38,6 +38,8 @@ type DailyProductionInput = {
     perCage: { [key: string]: number };
 }
 
+type WeeklyProductionInput = Omit<WeeklyProduction, 'id' | 'totalEggs' | 'totalValue'>;
+
 export const useAppStore = create<AppState & {
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
@@ -46,7 +48,9 @@ export const useAppStore = create<AppState & {
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
-  addWeeklyProduction: (data: Omit<WeeklyProduction, 'id' | 'totalEggs' | 'totalValue'>) => void;
+  addWeeklyProduction: (data: WeeklyProductionInput) => void;
+  updateWeeklyProduction: (id: number, data: Partial<WeeklyProductionInput>) => void;
+  removeWeeklyProduction: (id: number) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   updateTransaction: (id: number, transaction: Partial<Omit<Transaction, 'id'>>) => void;
   removeTransaction: (id: number) => void;
@@ -151,6 +155,37 @@ export const useAppStore = create<AppState & {
         };
     });
   },
+  
+  updateWeeklyProduction: (id, data) => {
+     set(state => {
+        const updatedWeekly = state.eggProduction.weekly.map(prod => {
+            if (prod.id === id) {
+                const updatedProd = { ...prod, ...data };
+                const totalEggs = updatedProd.gradeA + updatedProd.gradeB + updatedProd.gradeC + updatedProd.consumption;
+                const totalValue = (updatedProd.gradeA * updatedProd.priceA) + (updatedProd.gradeB * updatedProd.priceB) + (updatedProd.gradeC * updatedProd.priceC) + (updatedProd.consumption * updatedProd.priceConsumption);
+                return { ...updatedProd, totalEggs, totalValue };
+            }
+            return prod;
+        });
+        return {
+            eggProduction: {
+                ...state.eggProduction,
+                weekly: updatedWeekly
+            },
+            isDirty: true,
+        };
+     })
+  },
+
+  removeWeeklyProduction: (id) => {
+      set(state => ({
+          eggProduction: {
+              ...state.eggProduction,
+              weekly: state.eggProduction.weekly.filter(prod => prod.id !== id),
+          },
+          isDirty: true,
+      }));
+  },
 
   addTransaction: (transaction) => {
     set(state => ({ finance: [...state.finance, { ...transaction, id: Date.now() }], isDirty: true }));
@@ -231,7 +266,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...parsedState.eggProduction,
                 daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
-                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, date: new Date(w.date)})),
+                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now() })),
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)}))
@@ -255,6 +290,8 @@ export const useAppStore = create<AppState & {
     delete st.resetDuck;
     delete st.addDailyProduction;
     delete st.addWeeklyProduction;
+    delete st.updateWeeklyProduction;
+    delete st.removeWeeklyProduction;
     delete st.addTransaction;
     delete st.updateTransaction;
     delete st.removeTransaction;
@@ -277,7 +314,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...state.eggProduction,
                 daily: state.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
-                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, date: new Date(w.date)})),
+                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now() })),
             },
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)}))
@@ -290,3 +327,5 @@ export const useAppStore = create<AppState & {
   },
 
 }));
+
+    

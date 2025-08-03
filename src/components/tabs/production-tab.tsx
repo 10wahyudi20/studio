@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -22,6 +22,7 @@ import { DailyProduction, Duck, WeeklyProduction } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 
 
 const getWeekOfMonth = (date: Date) => {
@@ -140,14 +141,13 @@ const weeklySchema = z.object({
 });
 type WeeklyFormData = z.infer<typeof weeklySchema>;
 
-const WeeklyDataForm = () => {
-  const { addWeeklyProduction } = useAppStore();
+const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyProduction; onSave: (data: any) => void; children: React.ReactNode }) => {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
   const { control, register, handleSubmit, formState: { errors } } = useForm<WeeklyFormData>({
     resolver: zodResolver(weeklySchema),
-    defaultValues: {
+    defaultValues: production || {
       week: getWeekOfMonth(new Date()),
       buyer: "",
       gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0,
@@ -156,23 +156,18 @@ const WeeklyDataForm = () => {
   });
 
   const onSubmit = (data: WeeklyFormData) => {
-    addWeeklyProduction(data);
+    onSave(data);
     setOpen(false);
-    toast({ title: "Data Mingguan Disimpan", description: `Data untuk minggu ke-${data.week} telah ditambahkan.` });
+    toast({ title: `Data Mingguan ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk minggu ke-${data.week} telah disimpan.` });
   };
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Input Data Mingguan
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
             <DialogHeader>
-            <DialogTitle>Input Data Produksi Mingguan</DialogTitle>
+            <DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Mingguan</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
                 <div className="space-y-2">
@@ -249,7 +244,8 @@ const WeeklyDataForm = () => {
 };
 
 export default function ProductionTab() {
-  const { ducks, eggProduction } = useAppStore();
+  const { ducks, eggProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
+  const { toast } = useToast();
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   const todayProduction = eggProduction.daily.at(-1)?.totalEggs || 0;
@@ -319,7 +315,11 @@ export default function ProductionTab() {
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
                  <TabsContent value="daily" className="m-0"><DailyDataForm /></TabsContent>
-                 <TabsContent value="weekly" className="m-0"><WeeklyDataForm /></TabsContent>
+                 <TabsContent value="weekly" className="m-0">
+                    <WeeklyDataForm onSave={addWeeklyProduction}>
+                        <Button><PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan</Button>
+                    </WeeklyDataForm>
+                 </TabsContent>
             </div>
             
             <TabsContent value="daily">
@@ -373,6 +373,7 @@ export default function ProductionTab() {
                       <TableHead colSpan={2} className="text-center border-l">Konsumsi</TableHead>
                       <TableHead rowSpan={2} className="align-bottom border-l">Total Telur</TableHead>
                       <TableHead rowSpan={2} className="align-bottom border-l">Total Harga</TableHead>
+                      <TableHead rowSpan={2} className="align-bottom border-l">Aksi</TableHead>
                     </TableRow>
                     <TableRow>
                       <TableHead className="text-center border-l">Jumlah</TableHead>
@@ -407,46 +408,80 @@ export default function ProductionTab() {
                               <TableRow key={week.id}>
                                   <TableCell>{week.week}</TableCell>
                                   <TableCell>{week.buyer}</TableCell>
-                                  <TableCell className="border-l">{week.gradeA}</TableCell>
+                                  <TableCell className="border-l">{week.gradeA.toLocaleString('id-ID')}</TableCell>
                                   <TableCell>Rp {week.priceA.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.gradeB}</TableCell>
+                                  <TableCell className="border-l">{week.gradeB.toLocaleString('id-ID')}</TableCell>
                                   <TableCell>Rp {week.priceB.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.gradeC}</TableCell>
+                                  <TableCell className="border-l">{week.gradeC.toLocaleString('id-ID')}</TableCell>
                                   <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.consumption}</TableCell>
+                                  <TableCell className="border-l">{week.consumption.toLocaleString('id-ID')}</TableCell>
                                   <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.totalEggs}</TableCell>
+                                  <TableCell className="border-l">{week.totalEggs.toLocaleString('id-ID')}</TableCell>
                                   <TableCell className="border-l">Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="border-l">
+                                    <div className="flex gap-1">
+                                        <WeeklyDataForm
+                                            production={week}
+                                            onSave={(updatedData) => updateWeeklyProduction(week.id, updatedData)}
+                                        >
+                                            <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-600 h-8 w-8">
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                        </WeeklyDataForm>
+                                         <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 h-8 w-8">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Hapus data penjualan ini?</AlertDialogTitle>
+                                                    <AlertDialogDescription>Aksi ini akan menghapus data penjualan dari pembeli "{week.buyer}" untuk minggu ke-{week.week} secara permanen.</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => {
+                                                        removeWeeklyProduction(week.id);
+                                                        toast({ variant: 'destructive', title: `Data penjualan dihapus!` });
+                                                    }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                  </TableCell>
                               </TableRow>
                           ))}
                           <TableRow className="bg-secondary/50 font-bold">
                             <TableCell colSpan={2}>Subtotal Minggu {weekNumber}</TableCell>
-                            <TableCell className="border-l">{subtotal.gradeA}</TableCell>
+                            <TableCell className="border-l">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.gradeB}</TableCell>
+                            <TableCell className="border-l">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.gradeC}</TableCell>
+                            <TableCell className="border-l">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.consumption}</TableCell>
+                            <TableCell className="border-l">{subtotal.consumption.toLocaleString('id-ID')}</TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.totalEggs}</TableCell>
+                            <TableCell className="border-l">{subtotal.totalEggs.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="border-l">Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="border-l"></TableCell>
                           </TableRow>
                         </React.Fragment>
                       );
                     })}
                     <TableRow className="bg-primary/20 font-extrabold text-lg">
                       <TableCell colSpan={2}>Grand Total</TableCell>
-                      <TableCell className="border-l">{grandTotal.gradeA}</TableCell>
+                      <TableCell className="border-l">{grandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
                        <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.gradeB}</TableCell>
+                      <TableCell className="border-l">{grandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
                        <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.gradeC}</TableCell>
+                      <TableCell className="border-l">{grandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
                        <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.consumption}</TableCell>
+                      <TableCell className="border-l">{grandTotal.consumption.toLocaleString('id-ID')}</TableCell>
                        <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.totalEggs}</TableCell>
+                      <TableCell className="border-l">{grandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="border-l">Rp {grandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="border-l"></TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -486,3 +521,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
