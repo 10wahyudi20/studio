@@ -156,7 +156,7 @@ export default function FinanceTab() {
     <TableRow key={t.id} className={t.type === 'debit' ? "bg-green-100/50 dark:bg-green-900/20" : "bg-red-100/50 dark:bg-red-900/20"}>
       <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
       <TableCell>{t.description}</TableCell>
-      <TableCell className={t.type === 'debit' ? 'text-green-700 dark:text-green-400 font-semibold' : 'text-red-700 dark:text-red-400 font-semibold'}>{t.quantity}</TableCell>
+      <TableCell className={t.type === 'debit' ? 'text-green-700 dark:text-green-400 font-semibold' : 'text-red-700 dark:text-red-400 font-semibold'}>{t.quantity.toLocaleString('id-ID')}</TableCell>
       <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
       <TableCell>Rp {t.total.toLocaleString('id-ID')}</TableCell>
       <TableCell className="text-right">
