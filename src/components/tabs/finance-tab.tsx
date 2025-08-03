@@ -153,7 +153,7 @@ export default function FinanceTab() {
   );
 
   const TransactionRow = ({ t }: { t: Transaction }) => (
-    <TableRow key={t.id}>
+    <TableRow key={t.id} className={t.type === 'debit' ? "bg-green-100/50 dark:bg-green-900/20" : "bg-red-100/50 dark:bg-red-900/20"}>
       <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
       <TableCell>{t.description}</TableCell>
       <TableCell>{t.quantity}</TableCell>
@@ -238,5 +238,3 @@ export default function FinanceTab() {
     </div>
   );
 }
-
-    
