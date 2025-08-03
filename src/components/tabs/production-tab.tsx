@@ -177,7 +177,12 @@ export default function ProductionTab() {
                       <TableHead>Hari</TableHead>
                       <TableHead>Jumlah Telur</TableHead>
                       <TableHead>Produktifitas</TableHead>
-                      {ducks.map(duck => <TableHead key={duck.cage}>Kandang {duck.cage}</TableHead>)}
+                      {ducks.map(duck => (
+                        <TableHead key={duck.cage}>
+                          Kandang {duck.cage}
+                          <div className="font-normal text-xs">({duck.quantity} ekor)</div>
+                        </TableHead>
+                      ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
