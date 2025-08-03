@@ -5,7 +5,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, PieChart, Egg, Package, DollarSign, Wallet } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -37,7 +37,7 @@ export default function HomeTab() {
   const chartData = eggProduction.daily.slice(-30).map(d => ({
     name: new Date(d.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
     "Produksi Telur": d.totalEggs,
-    "Persentase": totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
+    "Produktifitas (%)": totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
   }));
   
   const pieChartData = [
@@ -87,9 +87,12 @@ export default function HomeTab() {
                   <RechartsBarChart data={chartData}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
-                    <YAxis />
+                    <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" />
+                    <YAxis yAxisId="right" orientation="right" stroke="#e85d04" />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="Produksi Telur" fill="var(--color-primary)" radius={4} />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="Produksi Telur" fill="hsl(var(--primary))" radius={4} />
+                    <Bar yAxisId="right" dataKey="Produktifitas (%)" fill="#e85d04" radius={4} />
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </ChartContainer>
