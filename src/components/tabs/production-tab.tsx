@@ -135,6 +135,12 @@ const weeklySchema = z.object({
   consumption: z.coerce.number().min(0),
   priceA: z.coerce.number().min(0),
   priceB: z.coerce.number().min(0),
+  gradeA: z.coerce.number().min(0),
+  gradeB: z.coerce.number().min(0),
+  gradeC: z.coerce.number().min(0),
+  consumption: z.coerce.number().min(0),
+  priceA: z.coerce.number().min(0),
+  priceB: z.coerce.number().min(0),
   priceC: z.coerce.number().min(0),
   priceConsumption: z.coerce.number().min(0),
 });
@@ -273,6 +279,27 @@ export default function ProductionTab() {
       </CardContent>
     </Card>
   );
+  
+  const weeklyDataByWeek = eggProduction.weekly.reduce((acc, current) => {
+    const week = current.week;
+    if (!acc[week]) {
+      acc[week] = [];
+    }
+    acc[week].push(current);
+    return acc;
+  }, {} as Record<number, WeeklyProduction[]>);
+
+  const grandTotal = eggProduction.weekly.reduce(
+    (acc, week) => {
+      acc.gradeA += week.gradeA;
+      acc.gradeB += week.gradeB;
+      acc.gradeC += week.gradeC;
+      acc.consumption += week.consumption;
+      acc.totalValue += week.totalValue;
+      return acc;
+    },
+    { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalValue: 0 }
+  );
 
   return (
     <div className="space-y-6">
@@ -360,21 +387,58 @@ export default function ProductionTab() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {eggProduction.weekly.map((week) => (
-                                <TableRow key={week.id}>
-                                    <TableCell>{week.week}</TableCell>
-                                    <TableCell>{week.buyer}</TableCell>
-                                    <TableCell>{week.gradeA}</TableCell>
-                                    <TableCell>{week.gradeB}</TableCell>
-                                    <TableCell>{week.gradeC}</TableCell>
-                                    <TableCell>{week.consumption}</TableCell>
-                                    <TableCell>Rp {week.priceA.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>Rp {week.priceB.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
+                          {Object.keys(weeklyDataByWeek).sort((a,b) => Number(a) - Number(b)).map(weekNumber => {
+                            const weekEntries = weeklyDataByWeek[Number(weekNumber)];
+                            const subtotal = weekEntries.reduce(
+                              (acc, week) => {
+                                acc.gradeA += week.gradeA;
+                                acc.gradeB += week.gradeB;
+                                acc.gradeC += week.gradeC;
+                                acc.consumption += week.consumption;
+                                acc.totalValue += week.totalValue;
+                                return acc;
+                              },
+                              { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalValue: 0 }
+                            );
+
+                            return (
+                              <React.Fragment key={weekNumber}>
+                                {weekEntries.map((week) => (
+                                    <TableRow key={week.id}>
+                                        <TableCell>{week.week}</TableCell>
+                                        <TableCell>{week.buyer}</TableCell>
+                                        <TableCell>{week.gradeA}</TableCell>
+                                        <TableCell>{week.gradeB}</TableCell>
+                                        <TableCell>{week.gradeC}</TableCell>
+                                        <TableCell>{week.consumption}</TableCell>
+                                        <TableCell>Rp {week.priceA.toLocaleString('id-ID')}</TableCell>
+                                        <TableCell>Rp {week.priceB.toLocaleString('id-ID')}</TableCell>
+                                        <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
+                                        <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
+                                        <TableCell>Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
+                                    </TableRow>
+                                ))}
+                                <TableRow className="bg-secondary/50 font-bold">
+                                  <TableCell colSpan={2}>Subtotal Minggu {weekNumber}</TableCell>
+                                  <TableCell>{subtotal.gradeA}</TableCell>
+                                  <TableCell>{subtotal.gradeB}</TableCell>
+                                  <TableCell>{subtotal.gradeC}</TableCell>
+                                  <TableCell>{subtotal.consumption}</TableCell>
+                                  <TableCell colSpan={4}></TableCell>
+                                  <TableCell>Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
                                 </TableRow>
-                            ))}
+                              </React.Fragment>
+                            );
+                          })}
+                          <TableRow className="bg-primary/20 font-extrabold text-lg">
+                            <TableCell colSpan={2}>Grand Total</TableCell>
+                            <TableCell>{grandTotal.gradeA}</TableCell>
+                            <TableCell>{grandTotal.gradeB}</TableCell>
+                            <TableCell>{grandTotal.gradeC}</TableCell>
+                            <TableCell>{grandTotal.consumption}</TableCell>
+                            <TableCell colSpan={4}></TableCell>
+                            <TableCell>Rp {grandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
+                          </TableRow>
                         </TableBody>
                     </Table>
                 </div>
@@ -413,3 +477,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
