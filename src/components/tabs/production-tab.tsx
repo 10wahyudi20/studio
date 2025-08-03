@@ -365,83 +365,91 @@ export default function ProductionTab() {
               </div>
             </TabsContent>
             <TabsContent value="weekly">
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead rowSpan={2}>Minggu</TableHead>
-                                <TableHead rowSpan={2}>Pembeli</TableHead>
-                                <TableHead colSpan={4} className="text-center">Jumlah Telur</TableHead>
-                                <TableHead colSpan={4} className="text-center">Harga</TableHead>
-                                <TableHead rowSpan={2}>Total Harga</TableHead>
-                            </TableRow>
-                             <TableRow>
-                                <TableHead>Grade A</TableHead>
-                                <TableHead>Grade B</TableHead>
-                                <TableHead>Grade C</TableHead>
-                                <TableHead>Konsumsi</TableHead>
-                                <TableHead>Harga A</TableHead>
-                                <TableHead>Harga B</TableHead>
-                                <TableHead>Harga C</TableHead>
-                                <TableHead>Harga Konsumsi</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {Object.keys(weeklyDataByWeek).sort((a,b) => Number(a) - Number(b)).map(weekNumber => {
-                            const weekEntries = weeklyDataByWeek[Number(weekNumber)];
-                            const subtotal = weekEntries.reduce(
-                              (acc, week) => {
-                                acc.gradeA += week.gradeA;
-                                acc.gradeB += week.gradeB;
-                                acc.gradeC += week.gradeC;
-                                acc.consumption += week.consumption;
-                                acc.totalValue += week.totalValue;
-                                return acc;
-                              },
-                              { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalValue: 0 }
-                            );
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead rowSpan={2} className="align-bottom">Minggu</TableHead>
+                      <TableHead rowSpan={2} className="align-bottom">Pembeli</TableHead>
+                      <TableHead colSpan={2} className="text-center border-l">Grade A</TableHead>
+                      <TableHead colSpan={2} className="text-center border-l">Grade B</TableHead>
+                      <TableHead colSpan={2} className="text-center border-l">Grade C</TableHead>
+                      <TableHead colSpan={2} className="text-center border-l">Konsumsi</TableHead>
+                      <TableHead rowSpan={2} className="align-bottom border-l">Total Harga</TableHead>
+                    </TableRow>
+                    <TableRow>
+                      <TableHead className="text-center border-l">Jumlah</TableHead>
+                      <TableHead className="text-center">Harga</TableHead>
+                      <TableHead className="text-center border-l">Jumlah</TableHead>
+                      <TableHead className="text-center">Harga</TableHead>
+                      <TableHead className="text-center border-l">Jumlah</TableHead>
+                      <TableHead className="text-center">Harga</TableHead>
+                      <TableHead className="text-center border-l">Jumlah</TableHead>
+                      <TableHead className="text-center">Harga</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Object.keys(weeklyDataByWeek).sort((a,b) => Number(a) - Number(b)).map(weekNumber => {
+                      const weekEntries = weeklyDataByWeek[Number(weekNumber)];
+                      const subtotal = weekEntries.reduce(
+                        (acc, week) => {
+                          acc.gradeA += week.gradeA;
+                          acc.gradeB += week.gradeB;
+                          acc.gradeC += week.gradeC;
+                          acc.consumption += week.consumption;
+                          acc.totalValue += week.totalValue;
+                          return acc;
+                        },
+                        { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalValue: 0 }
+                      );
 
-                            return (
-                              <React.Fragment key={weekNumber}>
-                                {weekEntries.map((week) => (
-                                    <TableRow key={week.id}>
-                                        <TableCell>{week.week}</TableCell>
-                                        <TableCell>{week.buyer}</TableCell>
-                                        <TableCell>{week.gradeA}</TableCell>
-                                        <TableCell>{week.gradeB}</TableCell>
-                                        <TableCell>{week.gradeC}</TableCell>
-                                        <TableCell>{week.consumption}</TableCell>
-                                        <TableCell>Rp {week.priceA.toLocaleString('id-ID')}</TableCell>
-                                        <TableCell>Rp {week.priceB.toLocaleString('id-ID')}</TableCell>
-                                        <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
-                                        <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
-                                        <TableCell>Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
-                                    </TableRow>
-                                ))}
-                                <TableRow className="bg-secondary/50 font-bold">
-                                  <TableCell colSpan={2}>Subtotal Minggu {weekNumber}</TableCell>
-                                  <TableCell>{subtotal.gradeA}</TableCell>
-                                  <TableCell>{subtotal.gradeB}</TableCell>
-                                  <TableCell>{subtotal.gradeC}</TableCell>
-                                  <TableCell>{subtotal.consumption}</TableCell>
-                                  <TableCell colSpan={4}></TableCell>
-                                  <TableCell>Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
-                                </TableRow>
-                              </React.Fragment>
-                            );
-                          })}
-                          <TableRow className="bg-primary/20 font-extrabold text-lg">
-                            <TableCell colSpan={2}>Grand Total</TableCell>
-                            <TableCell>{grandTotal.gradeA}</TableCell>
-                            <TableCell>{grandTotal.gradeB}</TableCell>
-                            <TableCell>{grandTotal.gradeC}</TableCell>
-                            <TableCell>{grandTotal.consumption}</TableCell>
-                            <TableCell colSpan={4}></TableCell>
-                            <TableCell>Rp {grandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
+                      return (
+                        <React.Fragment key={weekNumber}>
+                          {weekEntries.map((week) => (
+                              <TableRow key={week.id}>
+                                  <TableCell>{week.week}</TableCell>
+                                  <TableCell>{week.buyer}</TableCell>
+                                  <TableCell className="border-l">{week.gradeA}</TableCell>
+                                  <TableCell>Rp {week.priceA.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="border-l">{week.gradeB}</TableCell>
+                                  <TableCell>Rp {week.priceB.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="border-l">{week.gradeC}</TableCell>
+                                  <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="border-l">{week.consumption}</TableCell>
+                                  <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="border-l">Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
+                              </TableRow>
+                          ))}
+                          <TableRow className="bg-secondary/50 font-bold">
+                            <TableCell colSpan={2}>Subtotal Minggu {weekNumber}</TableCell>
+                            <TableCell className="border-l">{subtotal.gradeA}</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="border-l">{subtotal.gradeB}</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="border-l">{subtotal.gradeC}</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="border-l">{subtotal.consumption}</TableCell>
+                            <TableCell></TableCell>
+                            <TableCell className="border-l">Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
                           </TableRow>
-                        </TableBody>
-                    </Table>
-                </div>
+                        </React.Fragment>
+                      );
+                    })}
+                    <TableRow className="bg-primary/20 font-extrabold text-lg">
+                      <TableCell colSpan={2}>Grand Total</TableCell>
+                      <TableCell className="border-l">{grandTotal.gradeA}</TableCell>
+                       <TableCell></TableCell>
+                      <TableCell className="border-l">{grandTotal.gradeB}</TableCell>
+                       <TableCell></TableCell>
+                      <TableCell className="border-l">{grandTotal.gradeC}</TableCell>
+                       <TableCell></TableCell>
+                      <TableCell className="border-l">{grandTotal.consumption}</TableCell>
+                       <TableCell></TableCell>
+                      <TableCell className="border-l">Rp {grandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
             </TabsContent>
              <TabsContent value="monthly">
                 <div className="overflow-x-auto">
@@ -477,5 +485,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
