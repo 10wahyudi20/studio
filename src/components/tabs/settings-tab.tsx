@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Upload, Download, Cloud, Trash2, Volume2, Loader2 } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ttsVoices = [
     { id: 'algenib', name: 'Female 1 (Algenib)' },
@@ -40,6 +41,7 @@ export default function SettingsTab() {
   const [logoPreview, setLogoPreview] = React.useState<string | null>(companyInfo.logo);
   const [audioPreview, setAudioPreview] = React.useState<TextToSpeechOutput | null>(null);
   const [isPreviewing, setIsPreviewing] = React.useState(false);
+  const [audioError, setAudioError] = React.useState<string | null>(null);
 
   const { toast } = useToast();
 
@@ -49,18 +51,25 @@ export default function SettingsTab() {
   
   const handleVoiceChange = (voice: string) => {
     setInfo({ ...info, ttsVoice: voice });
+    setAudioPreview(null);
+    setAudioError(null);
   };
 
   const handlePreviewVoice = async () => {
       if (!info.ttsVoice) return;
       setIsPreviewing(true);
       setAudioPreview(null);
+      setAudioError(null);
       try {
           const result = await textToSpeech({ text: "Ini adalah pratinjau suara yang dipilih.", voice: info.ttsVoice });
           setAudioPreview(result);
-      } catch (error) {
+      } catch (error: any) {
           console.error("Gagal membuat pratinjau suara:", error);
-          toast({ variant: "destructive", title: "Gagal", description: "Tidak dapat membuat pratinjau suara." });
+          if (error.message?.includes('429')) {
+            setAudioError("Kuota API harian untuk pratinjau suara telah habis. Silakan coba lagi besok.");
+          } else {
+            setAudioError("Gagal membuat pratinjau suara. Coba lagi.");
+          }
       } finally {
           setIsPreviewing(false);
       }
@@ -177,6 +186,7 @@ export default function SettingsTab() {
                       {isPreviewing ? <Loader2 className="animate-spin" /> : <Volume2 />}
                   </Button>
               </div>
+              {audioError && <Alert variant="destructive" className="mt-2"><AlertDescription>{audioError}</AlertDescription></Alert>}
               {audioPreview && (
                   <audio controls autoPlay className="w-full h-10 mt-2">
                       <source src={audioPreview.media} type="audio/wav" />
