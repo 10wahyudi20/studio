@@ -150,18 +150,20 @@ export default function Header() {
             ) : (
                 <DuckIcon className="h-10 w-10 text-primary" data-ai-hint="duck logo"/>
             )}
-            <div className="text-center sm:text-left">
-                <h1 className="text-xl font-bold text-primary font-headline">
-                    {companyInfo.name}
-                </h1>
-                <p className="text-xs text-muted-foreground hidden md:block">
-                    {companyInfo.address}
-                </p>
-                <p className="text-xs text-muted-foreground hidden md:block">
-                    {companyInfo.phone} | {companyInfo.email}
-                </p>
-            </div>
         </div>
+
+        <div className="absolute left-1/2 -translate-x-1/2 text-center">
+            <h1 className="text-xl font-bold text-primary font-headline">
+                {companyInfo.name}
+            </h1>
+            <p className="text-xs text-muted-foreground hidden md:block">
+                {companyInfo.address}
+            </p>
+            <p className="text-xs text-muted-foreground hidden md:block">
+                {companyInfo.phone} | {companyInfo.email}
+            </p>
+        </div>
+
         <div className="flex items-center gap-2">
             <ModeToggle />
             <Button variant="ghost" size="icon" onClick={handleSave}>
