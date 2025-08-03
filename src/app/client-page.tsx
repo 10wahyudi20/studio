@@ -14,6 +14,7 @@ import ReportsTab from "@/components/tabs/reports-tab";
 import AiPredictionTab from "@/components/tabs/ai-prediction-tab";
 import SettingsTab from "@/components/tabs/settings-tab";
 import { useAppStore } from "@/hooks/use-app-store";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function ClientPage() {
   const loadState = useAppStore(state => state.loadState);
@@ -60,6 +61,7 @@ export default function ClientPage() {
         </Tabs>
       </main>
       <Footer />
+      <Toaster />
     </div>
   );
 }
