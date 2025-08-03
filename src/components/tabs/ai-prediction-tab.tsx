@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BrainCircuit, Loader2, Volume2 } from "lucide-react";
+import { BrainCircuit, Loader2, PlayCircle, Volume2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
@@ -35,6 +35,7 @@ export default function AiPredictionTab() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [audioError, setAudioError] = React.useState<string | null>(null);
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   const totalAge = ducks.reduce((sum, duck) => sum + (duck.quantity * duck.ageMonths), 0);
@@ -56,26 +57,36 @@ export default function AiPredictionTab() {
     setError(null);
     setPrediction(null);
     setAudio(null);
+    setAudioError(null);
     try {
       const result = await predictEggProduction(data);
       setPrediction(result);
-      
-      setIsGeneratingAudio(true);
-      try {
-        const audioResult = await textToSpeech({ text: result.reasoning, voice: companyInfo.ttsVoice });
-        setAudio(audioResult);
-      } catch (audioError) {
-        console.error("Audio generation failed:", audioError);
-        // Do not show audio error to user, just log it.
-      } finally {
-        setIsGeneratingAudio(false);
-      }
-
     } catch (e) {
       setError("Gagal menghasilkan prediksi. Silakan coba lagi.");
       console.error(e);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGenerateAudio = async () => {
+    if (!prediction) return;
+    
+    setIsGeneratingAudio(true);
+    setAudioError(null);
+    setAudio(null);
+    try {
+      const audioResult = await textToSpeech({ text: prediction.reasoning, voice: companyInfo.ttsVoice });
+      setAudio(audioResult);
+    } catch (e: any) {
+      console.error("Audio generation failed:", e);
+      if (e.message?.includes('429')) {
+          setAudioError("Terlalu banyak permintaan. Coba lagi dalam satu menit.");
+      } else {
+          setAudioError("Gagal membuat audio.");
+      }
+    } finally {
+      setIsGeneratingAudio(false);
     }
   };
 
@@ -175,15 +186,19 @@ export default function AiPredictionTab() {
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <h4 className="font-semibold">Alasan Prediksi:</h4>
-                            {isGeneratingAudio && <Loader2 className="h-4 w-4 animate-spin" />}
-                            {audio && (
-                                <audio controls autoPlay className="h-8">
-                                    <source src={audio.media} type="audio/wav" />
-                                    Browser Anda tidak mendukung elemen audio.
-                                </audio>
-                            )}
+                             <Button onClick={handleGenerateAudio} disabled={isGeneratingAudio} variant="ghost" size="icon">
+                                {isGeneratingAudio ? <Loader2 className="h-5 w-5 animate-spin" /> : <PlayCircle className="h-5 w-5" />}
+                                <span className="sr-only">Putar Audio</span>
+                            </Button>
                         </div>
                         <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
+                        {audioError && <Alert variant="destructive" className="mt-2"><AlertDescription>{audioError}</AlertDescription></Alert>}
+                        {audio && (
+                            <audio controls autoPlay className="w-full h-8 mt-2">
+                                <source src={audio.media} type="audio/wav" />
+                                Browser Anda tidak mendukung elemen audio.
+                            </audio>
+                        )}
                     </div>
                 </div>
             )}
