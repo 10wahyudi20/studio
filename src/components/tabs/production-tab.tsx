@@ -283,7 +283,14 @@ export default function ProductionTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {[...eggProduction.daily].reverse().map((day, index) => (
+                    {[...eggProduction.daily]
+                      .filter(day => {
+                        const dayDate = new Date(day.date);
+                        const now = new Date();
+                        return dayDate.getMonth() === now.getMonth() && dayDate.getFullYear() === now.getFullYear();
+                      })
+                      .reverse()
+                      .map((day, index) => (
                       <TableRow key={index}>
                         <TableCell>{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
                         <TableCell>{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
@@ -372,7 +379,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
-
-    
