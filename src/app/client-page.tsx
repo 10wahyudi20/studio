@@ -17,14 +17,14 @@ import { useAppStore } from "@/hooks/use-app-store";
 
 export default function ClientPage() {
   const loadState = useAppStore(state => state.loadState);
-  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
     loadState();
-    setIsLoaded(true);
+    setIsMounted(true);
   }, [loadState]);
 
-  if (!isLoaded) {
+  if (!isMounted) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-2xl font-semibold text-primary">Memuat CluckSmart...</div>
