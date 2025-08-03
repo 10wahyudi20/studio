@@ -27,7 +27,7 @@ export default function ClientPage() {
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
-        <div className="text-2xl font-semibold text-primary">Loading CluckSmart...</div>
+        <div className="text-2xl font-semibold text-primary">Memuat CluckSmart...</div>
       </div>
     );
   }
