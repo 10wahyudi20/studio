@@ -40,7 +40,7 @@ export default function ClientPage() {
         <Tabs defaultValue="home" className="w-full">
           <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2">
             <div className="px-4 sm:px-6 lg:px-8">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0">
                   <TabsTrigger value="home">Home</TabsTrigger>
                   <TabsTrigger value="population">Populasi Bebek</TabsTrigger>
                   <TabsTrigger value="production">Produksi Telur</TabsTrigger>
