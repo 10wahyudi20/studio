@@ -15,15 +15,16 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 
 const ttsVoices = [
-    { id: 'Algenib', name: 'Female 1' },
-    { id: 'Antares', name: 'Male 1' },
-    { id: 'Arcturus', name: 'Female 2' },
-    { id: 'Capella', name: 'Male 2' },
-    { id: 'Deneb', name: 'Female 3' },
-    { id: 'Fomalhaut', name: 'Male 3' },
-    { id: 'Hadar', name: 'Female 4' },
-    { id: 'Izar', name: 'Male 4' },
+    { id: 'algenib', name: 'Female 1 (Algenib)' },
+    { id: 'rasalgethi', name: 'Female 2 (Rasalgethi)' },
+    { id: 'schedar', name: 'Female 3 (Schedar)' },
+    { id: 'vindemiatrix', name: 'Female 4 (Vindemiatrix)' },
+    { id: 'achernar', name: 'Male 1 (Achernar)' },
+    { id: 'gacrux', name: 'Male 2 (Gacrux)' },
+    { id: 'sadalmelik', name: 'Male 3 (Sadalmelik)' },
+    { id: 'zubenelgenubi', name: 'Male 4 (Zubenelgenubi)' },
 ];
+
 
 export default function SettingsTab() {
   const {

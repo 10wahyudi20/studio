@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
-import { format, getMonth, getYear } from 'date-fns';
+import { format, getMonth, getYear, parse } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 const getInitialState = (): AppState => ({
@@ -11,7 +11,7 @@ const getInitialState = (): AppState => ({
     phone: "Telepon Peternakan Anda",
     email: "email@peternakan.com",
     logo: "",
-    ttsVoice: "Algenib",
+    ttsVoice: "algenib",
   },
   ducks: [],
   eggProduction: {
@@ -37,11 +37,13 @@ const calculateAge = (entryDate: Date): number => {
 
 const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyProduction[] => {
     const monthlyData: { [month: string]: MonthlyProduction } = {};
+    const now = new Date(); // Use a fixed date for the recalculation session
 
     weeklyData.forEach(week => {
-        // This is a placeholder. To be accurate, weekly data needs a date.
-        // For now, we'll group by the current month.
-        const monthKey = format(new Date(), 'MMMM yyyy', { locale: idLocale });
+        // This is still a placeholder as weekly data lacks a specific date.
+        // We'll associate it with the current month and year for simplicity.
+        // A more robust solution would be to add a date to weekly entries.
+        const monthKey = format(now, 'MMMM yyyy', { locale: idLocale });
 
         if (!monthlyData[monthKey]) {
             monthlyData[monthKey] = {
@@ -57,7 +59,30 @@ const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyPr
         monthlyData[monthKey].totalEggs += week.totalEggs;
     });
 
-    return Object.values(monthlyData);
+    // Also process existing monthly data to aggregate correctly
+    const allMonthlyData = Object.values(monthlyData);
+    
+    // This logic needs to be more robust to handle multiple months if weekly data had dates.
+    // For now, it just overwrites with the current month's calculation.
+    const finalMonthlyMap: { [month: string]: MonthlyProduction } = {};
+
+    [...allMonthlyData].forEach(monthEntry => {
+        if (!finalMonthlyMap[monthEntry.month]) {
+            finalMonthlyMap[monthEntry.month] = { ...monthEntry };
+        } else {
+            finalMonthlyMap[monthEntry.month].gradeA += monthEntry.gradeA;
+            finalMonthlyMap[monthEntry.month].gradeB += monthEntry.gradeB;
+            finalMonthlyMap[monthEntry.month].gradeC += monthEntry.gradeC;
+            finalMonthlyMap[monthEntry.month].consumption += monthEntry.consumption;
+            finalMonthlyMap[monthEntry.month].totalEggs += monthEntry.totalEggs;
+        }
+    });
+
+    return Object.values(finalMonthlyMap).sort((a,b) => {
+        const dateA = parse(a.month, 'MMMM yyyy', new Date(), { locale: idLocale });
+        const dateB = parse(b.month, 'MMMM yyyy', new Date(), { locale: idLocale });
+        return dateA.getTime() - dateB.getTime();
+    });
 };
 
 
