@@ -135,12 +135,6 @@ const weeklySchema = z.object({
   consumption: z.coerce.number().min(0),
   priceA: z.coerce.number().min(0),
   priceB: z.coerce.number().min(0),
-  gradeA: z.coerce.number().min(0),
-  gradeB: z.coerce.number().min(0),
-  gradeC: z.coerce.number().min(0),
-  consumption: z.coerce.number().min(0),
-  priceA: z.coerce.number().min(0),
-  priceB: z.coerce.number().min(0),
   priceC: z.coerce.number().min(0),
   priceConsumption: z.coerce.number().min(0),
 });
@@ -151,7 +145,7 @@ const WeeklyDataForm = () => {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
-  const { control, register, handleSubmit } = useForm<WeeklyFormData>({
+  const { control, register, handleSubmit, formState: { errors } } = useForm<WeeklyFormData>({
     resolver: zodResolver(weeklySchema),
     defaultValues: {
       week: getWeekOfMonth(new Date()),
@@ -201,6 +195,7 @@ const WeeklyDataForm = () => {
                  <div className="space-y-2">
                     <Label htmlFor="buyer">Nama Pembeli</Label>
                     <Input id="buyer" {...register("buyer")} />
+                    {errors.buyer && <p className="text-sm text-destructive mt-1">{errors.buyer.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -295,10 +290,11 @@ export default function ProductionTab() {
       acc.gradeB += week.gradeB;
       acc.gradeC += week.gradeC;
       acc.consumption += week.consumption;
+      acc.totalEggs += week.totalEggs;
       acc.totalValue += week.totalValue;
       return acc;
     },
-    { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalValue: 0 }
+    { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0, totalValue: 0 }
   );
 
   return (
@@ -375,6 +371,7 @@ export default function ProductionTab() {
                       <TableHead colSpan={2} className="text-center border-l">Grade B</TableHead>
                       <TableHead colSpan={2} className="text-center border-l">Grade C</TableHead>
                       <TableHead colSpan={2} className="text-center border-l">Konsumsi</TableHead>
+                      <TableHead rowSpan={2} className="align-bottom border-l">Total Telur</TableHead>
                       <TableHead rowSpan={2} className="align-bottom border-l">Total Harga</TableHead>
                     </TableRow>
                     <TableRow>
@@ -397,10 +394,11 @@ export default function ProductionTab() {
                           acc.gradeB += week.gradeB;
                           acc.gradeC += week.gradeC;
                           acc.consumption += week.consumption;
+                          acc.totalEggs += week.totalEggs;
                           acc.totalValue += week.totalValue;
                           return acc;
                         },
-                        { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalValue: 0 }
+                        { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0, totalValue: 0 }
                       );
 
                       return (
@@ -417,6 +415,7 @@ export default function ProductionTab() {
                                   <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
                                   <TableCell className="border-l">{week.consumption}</TableCell>
                                   <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="border-l">{week.totalEggs}</TableCell>
                                   <TableCell className="border-l">Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
                               </TableRow>
                           ))}
@@ -430,6 +429,7 @@ export default function ProductionTab() {
                             <TableCell></TableCell>
                             <TableCell className="border-l">{subtotal.consumption}</TableCell>
                             <TableCell></TableCell>
+                            <TableCell className="border-l">{subtotal.totalEggs}</TableCell>
                             <TableCell className="border-l">Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
                           </TableRow>
                         </React.Fragment>
@@ -445,6 +445,7 @@ export default function ProductionTab() {
                        <TableCell></TableCell>
                       <TableCell className="border-l">{grandTotal.consumption}</TableCell>
                        <TableCell></TableCell>
+                      <TableCell className="border-l">{grandTotal.totalEggs}</TableCell>
                       <TableCell className="border-l">Rp {grandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
                     </TableRow>
                   </TableBody>

@@ -231,6 +231,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...parsedState.eggProduction,
                 daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
+                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, date: new Date(w.date)})),
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)}))
@@ -276,6 +277,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...state.eggProduction,
                 daily: state.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
+                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, date: new Date(w.date)})),
             },
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)}))
