@@ -78,6 +78,7 @@ export const useAppStore = create<AppState & {
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
+  updateDailyProduction: (date: Date, data: DailyProductionInput) => void;
   addWeeklyProduction: (data: WeeklyProductionInput) => void;
   updateWeeklyProduction: (id: number, data: Partial<WeeklyProductionInput>) => void;
   removeWeeklyProduction: (id: number) => void;
@@ -166,6 +167,33 @@ export const useAppStore = create<AppState & {
             isDirty: true,
         };
     });
+  },
+
+  updateDailyProduction: (date, data) => {
+    set(state => {
+        const totalEggs = Object.values(data.perCage).reduce((sum, count) => sum + count, 0);
+        const totalDucks = state.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+        const productivity = totalDucks > 0 ? (totalEggs / totalDucks) * 100 : 0;
+        
+        const updatedDailyRecord: DailyProduction = {
+            date: data.date,
+            totalEggs,
+            productivity,
+            perCage: data.perCage
+        };
+        
+        const updatedDaily = state.eggProduction.daily.map(d => 
+            new Date(d.date).toDateString() === new Date(date).toDateString() ? updatedDailyRecord : d
+        );
+
+        return {
+            eggProduction: {
+                ...state.eggProduction,
+                daily: updatedDaily
+            },
+            isDirty: true,
+        };
+    })
   },
   
   addWeeklyProduction: (data) => {
@@ -331,6 +359,7 @@ export const useAppStore = create<AppState & {
     delete st.removeDuck;
     delete st.resetDuck;
     delete st.addDailyProduction;
+    delete st.updateDailyProduction;
     delete st.addWeeklyProduction;
     delete st.updateWeeklyProduction;
     delete st.removeWeeklyProduction;
@@ -372,5 +401,3 @@ export const useAppStore = create<AppState & {
   },
 
 }));
-
-    

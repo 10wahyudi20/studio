@@ -46,14 +46,17 @@ const dailySchemaGenerator = (ducks: Duck[]) => {
 
 type DailyFormData = z.infer<ReturnType<typeof dailySchemaGenerator>>;
 
-const DailyDataForm = () => {
-    const { addDailyProduction, ducks } = useAppStore();
+const DailyDataForm = ({ production, onSave, children }: { production?: DailyProduction, onSave: (date: Date, data: DailyFormData) => void, children: React.ReactNode }) => {
+    const { ducks } = useAppStore();
     const { toast } = useToast();
     const [open, setOpen] = React.useState(false);
 
     const dailySchema = dailySchemaGenerator(ducks);
 
-    const defaultValues = {
+    const defaultValues = production ? {
+        date: new Date(production.date),
+        perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }), {}),
+    } : {
         date: new Date(),
         perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
     };
@@ -61,25 +64,24 @@ const DailyDataForm = () => {
     const { control, handleSubmit, register, formState: { errors } } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
         defaultValues,
+        // Re-initialize form when `production` prop changes for editing
+        enableReinitialize: true,
     });
 
     const onSubmit = (data: DailyFormData) => {
-        addDailyProduction(data);
+        onSave(production ? new Date(production.date) : data.date, data);
         setOpen(false);
-        toast({ title: "Data Harian Disimpan", description: `Data untuk tanggal ${format(data.date, "dd MMM yyyy")} telah ditambahkan.` });
+        toast({ title: `Data Harian ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk tanggal ${format(data.date, "dd MMM yyyy")} telah ${production ? 'diperbarui' : 'disimpan'}.` });
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Input Data Harian
-                </Button>
+                {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                  <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogHeader><DialogTitle>Input Data Produksi Harian</DialogTitle></DialogHeader>
+                    <DialogHeader><DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Harian</DialogTitle></DialogHeader>
                     
                     <div className="space-y-4 py-4">
                         <Controller
@@ -88,7 +90,7 @@ const DailyDataForm = () => {
                             render={({ field }) => (
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")} disabled={!!production}>
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.value ? format(field.value, "PPP", { locale: id }) : <span>Pilih tanggal</span>}
                                         </Button>
@@ -244,7 +246,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
 };
 
 export default function ProductionTab() {
-  const { ducks, eggProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
+  const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
   const { toast } = useToast();
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -271,6 +273,16 @@ export default function ProductionTab() {
     </Card>
   );
   
+  const handleDailySave = (date: Date, data: DailyFormData) => {
+    // Check if a record for this date already exists
+    const existingRecord = eggProduction.daily.find(d => new Date(d.date).toDateString() === date.toDateString());
+    if (existingRecord) {
+        updateDailyProduction(date, data);
+    } else {
+        addDailyProduction(data);
+    }
+  };
+
   const weeklyDataByWeek = eggProduction.weekly.reduce((acc, current) => {
     const week = current.week;
     if (!acc[week]) {
@@ -314,7 +326,14 @@ export default function ProductionTab() {
                     <TabsTrigger value="weekly">Mingguan</TabsTrigger>
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
-                 <TabsContent value="daily" className="m-0"><DailyDataForm /></TabsContent>
+                 <TabsContent value="daily" className="m-0">
+                    <DailyDataForm onSave={handleDailySave}>
+                         <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Input Data Harian
+                        </Button>
+                    </DailyDataForm>
+                 </TabsContent>
                  <TabsContent value="weekly" className="m-0">
                     <WeeklyDataForm onSave={addWeeklyProduction}>
                         <Button><PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan</Button>
@@ -337,6 +356,7 @@ export default function ProductionTab() {
                           <div className="font-normal text-xs">({duck.quantity} ekor)</div>
                         </TableHead>
                       ))}
+                       <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -354,6 +374,13 @@ export default function ProductionTab() {
                         <TableCell>{day.totalEggs}</TableCell>
                         <TableCell>{day.productivity.toFixed(2)}%</TableCell>
                         {ducks.map(duck => <TableCell key={duck.cage}>{day.perCage[duck.cage] ?? '-'}</TableCell>)}
+                        <TableCell className="text-right">
+                           <DailyDataForm production={day} onSave={handleDailySave}>
+                                <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-600 h-8 w-8">
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+                           </DailyDataForm>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -521,5 +548,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
