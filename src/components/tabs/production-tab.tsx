@@ -283,7 +283,7 @@ export default function ProductionTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {eggProduction.daily.map((day, index) => (
+                    {[...eggProduction.daily].reverse().map((day, index) => (
                       <TableRow key={index}>
                         <TableCell>{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
                         <TableCell>{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
@@ -372,5 +372,7 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
 
     
