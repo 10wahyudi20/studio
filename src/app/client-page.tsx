@@ -38,7 +38,7 @@ export default function ClientPage() {
       <Header />
       <main className="flex-grow">
         <Tabs defaultValue="home" className="w-full">
-          <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-sm -mt-1 pt-1 pb-2">
+          <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2">
             <div className="px-4 sm:px-6 lg:px-8">
                 <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
                   <TabsTrigger value="home">Home</TabsTrigger>
