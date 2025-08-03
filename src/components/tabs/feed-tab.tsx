@@ -17,6 +17,7 @@ import * as z from "zod";
 import { Feed } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const feedSchema = z.object({
   name: z.string().min(1, "Nama pakan tidak boleh kosong"),
@@ -121,13 +122,13 @@ export default function FeedTab() {
   const totalFeedPerDay = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) : 0), 0);
   const averageFeedValue = totalFeedPerDay > 0 ? (feed.reduce((sum, item) => sum + (item.stock > 0 ? ((totalDucks * item.schema / 1000) * item.pricePerKg) : 0), 0) / totalFeedPerDay) : 0;
 
-  const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
+  const StatCard = ({ title, value, icon: Icon, valueClassName }: { title: string, value: string, icon: React.ElementType, valueClassName?: string }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent><div className="text-2xl font-bold">{value}</div></CardContent>
+      <CardContent><div className={cn("text-2xl font-bold", valueClassName)}>{value}</div></CardContent>
     </Card>
   );
 
@@ -135,7 +136,7 @@ export default function FeedTab() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Stok Pakan" value={`${totalStock.toLocaleString('id-ID')} Kg`} icon={Package} />
-        <StatCard title="Total Skema Pakan" value={`${totalSchema.toLocaleString('id-ID')} g`} icon={Inbox} />
+        <StatCard title="Total Skema Pakan" value={`${totalSchema.toLocaleString('id-ID')} g`} icon={Inbox} valueClassName="text-green-700 dark:text-green-400" />
         <StatCard title="Nilai Pakan" value={`Rp ${averageFeedValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}/kg`} icon={Sigma} />
         <StatCard title="Total Pakan/Hari" value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} icon={Wheat} />
       </div>
