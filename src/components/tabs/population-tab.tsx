@@ -49,27 +49,17 @@ const duckSchema = z.object({
 
 type DuckFormData = z.infer<typeof duckSchema>;
 
-const calculateAge = (entryDate: Date): number => {
-    return Math.floor((new Date().getTime() - new Date(entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
-};
-
-const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
-  if (ageMonths <= 5) return 'Bebek Bayah';
-  if (ageMonths <= 12) return 'Bebek Petelur';
-  if (ageMonths <= 18) return 'Bebek Tua';
-  return 'Bebek Afkir';
-};
-
-const DuckFormContent = ({ duck, onSave, setOpen }: { duck?: Duck; onSave: (data: Duck) => void, setOpen: (open: boolean) => void }) => {
+const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any) => void, children: React.ReactNode }) => {
+  const [open, setOpen] = React.useState(false);
   const { ducks } = useAppStore();
   const { toast } = useToast();
-  
+
   const defaultValues = duck
     ? {
         ...duck,
         entryDate: new Date(duck.entryDate),
-        cageSizeLength: duck.cageSize.split("x")[0] ? Number(duck.cageSize.split("x")[0]) : 0,
-        cageSizeWidth: duck.cageSize.split("x")[1] ? Number(duck.cageSize.split("x")[1]) : 0,
+        cageSizeLength: duck.cageSize ? Number(duck.cageSize.split("x")[0]) : 0,
+        cageSizeWidth: duck.cageSize ? Number(duck.cageSize.split("x")[1]) : 0,
       }
     : {
         cage: ducks.length > 0 ? Math.max(...ducks.map(d => d.cage)) + 1 : 1,
@@ -87,107 +77,17 @@ const DuckFormContent = ({ duck, onSave, setOpen }: { duck?: Duck; onSave: (data
   });
 
   const onSubmit = (data: DuckFormData) => {
-    const ageMonths = calculateAge(data.entryDate);
-    const status = calculateDuckStatus(ageMonths);
-    const newDuckData: Duck = {
-      ...data,
-      ageMonths,
-      status,
-      cageSize: `${data.cageSizeLength}x${data.cageSizeWidth}m`,
+    const saveData = {
+        ...data,
+        cageSize: `${data.cageSizeLength}x${data.cageSizeWidth}m`,
     };
-
-    onSave(newDuckData);
+    onSave(saveData);
     setOpen(false);
     toast({
       title: `Kandang ${duck ? 'diperbarui' : 'ditambahkan'}!`,
-      description: `Data untuk kandang ${newDuckData.cage} telah disimpan.`,
+      description: `Data untuk kandang ${data.cage} telah disimpan.`,
     });
   };
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="cage" className="text-right">Kandang</Label>
-            <Input id="cage" {...register("cage", { valueAsNumber: true })} className="col-span-3" readOnly />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
-            <Input id="quantity" type="number" {...register("quantity")} className="col-span-3" />
-        </div>
-         <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="deaths" className="text-right">Kematian</Label>
-            <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Tanggal Masuk</Label>
-             <Controller
-                control={control}
-                name="entryDate"
-                render={({ field }) => (
-                     <Popover>
-                        <PopoverTrigger asChild>
-                            <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-full justify-start text-left font-normal col-span-3",
-                                !field.value && "text-muted-foreground"
-                            )}
-                            >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                            <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
-                )}
-             />
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-             <Label className="text-right">Ukuran Kandang</Label>
-             <div className="col-span-3 grid grid-cols-2 gap-2">
-                <Input id="cageSizeLength" type="number" placeholder="Panjang (m)" {...register("cageSizeLength")} />
-                <Input id="cageSizeWidth" type="number" placeholder="Lebar (m)" {...register("cageSizeWidth")} />
-             </div>
-        </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Sistem Kandang</Label>
-            <Controller
-                control={control}
-                name="cageSystem"
-                render={({ field }) => (
-                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="col-span-3 flex gap-4">
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="baterai" id="baterai" />
-                            <Label htmlFor="baterai">Baterai</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="umbaran" id="umbaran" />
-                            <Label htmlFor="umbaran">Umbaran</Label>
-                        </div>
-                    </RadioGroup>
-                )}
-            />
-        </div>
-        <DialogFooter>
-            <DialogClose asChild>
-                <Button type="button" variant="secondary">Batal</Button>
-            </DialogClose>
-            <Button type="submit">Simpan</Button>
-        </DialogFooter>
-    </form>
-  );
-};
-
-
-const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: Duck) => void, children: React.ReactNode }) => {
-  const [open, setOpen] = React.useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -198,7 +98,83 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: Duck
         <DialogHeader>
           <DialogTitle>{duck ? 'Edit' : 'Tambah'} Inventaris Bebek</DialogTitle>
         </DialogHeader>
-        <DuckFormContent duck={duck} onSave={onSave} setOpen={setOpen} />
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="cage" className="text-right">Kandang</Label>
+                <Input id="cage" {...register("cage", { valueAsNumber: true })} className="col-span-3" readOnly />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
+                <Input id="quantity" type="number" {...register("quantity")} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="deaths" className="text-right">Kematian</Label>
+                <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Tanggal Masuk</Label>
+                <Controller
+                    control={control}
+                    name="entryDate"
+                    render={({ field }) => (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-full justify-start text-left font-normal col-span-3",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                                >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    )}
+                />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Ukuran Kandang</Label>
+                <div className="col-span-3 grid grid-cols-2 gap-2">
+                    <Input id="cageSizeLength" type="number" placeholder="Panjang (m)" {...register("cageSizeLength")} />
+                    <Input id="cageSizeWidth" type="number" placeholder="Lebar (m)" {...register("cageSizeWidth")} />
+                </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Sistem Kandang</Label>
+                <Controller
+                    control={control}
+                    name="cageSystem"
+                    render={({ field }) => (
+                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="col-span-3 flex gap-4">
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="baterai" id="baterai" />
+                                <Label htmlFor="baterai">Baterai</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="umbaran" id="umbaran" />
+                                <Label htmlFor="umbaran">Umbaran</Label>
+                            </div>
+                        </RadioGroup>
+                    )}
+                />
+            </div>
+            <DialogFooter>
+                <DialogClose asChild>
+                    <Button type="button" variant="secondary">Batal</Button>
+                </DialogClose>
+                <Button type="submit">Simpan</Button>
+            </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

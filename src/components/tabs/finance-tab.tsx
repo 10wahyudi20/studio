@@ -30,7 +30,7 @@ const transactionSchema = z.object({
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
 
-const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, onSave: (data: Transaction) => void }) => {
+const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, onSave: (data: any) => void }) => {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   
@@ -47,15 +47,20 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
 
   const onSubmit = (data: TransactionFormData) => {
     const total = data.quantity * data.unitPrice;
-    const newTransaction: Transaction = {
+    const newTransaction = {
       ...data,
-      id: transaction ? transaction.id : Date.now(),
       date: new Date(data.date),
       total,
     };
-    onSave(newTransaction);
+
+    if(transaction) {
+        onSave({ ...newTransaction, id: transaction.id });
+    } else {
+        onSave(newTransaction);
+    }
+    
     setOpen(false);
-    toast({ title: `Transaksi ${transaction ? 'diperbarui' : 'ditambahkan'}!`, description: `Transaksi "${newTransaction.description}" telah disimpan.` });
+    toast({ title: `Transaksi ${transaction ? 'diperbarui' : 'ditambahkan'}!`, description: `Transaksi "${data.description}" telah disimpan.` });
   };
   
   return (

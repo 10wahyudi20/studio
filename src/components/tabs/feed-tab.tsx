@@ -28,7 +28,7 @@ const feedSchema = z.object({
 
 type FeedFormData = z.infer<typeof feedSchema>;
 
-const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: Feed) => void }) => {
+const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }) => {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FeedFormData>({
@@ -38,15 +38,20 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: Feed) => void 
 
   const onSubmit = (data: FeedFormData) => {
     const pricePerKg = data.pricePerBag > 0 ? data.pricePerBag / 50 : 0;
-    const newFeedData: Feed = {
+    const newFeedData = {
         ...data,
-        id: feed ? feed.id : Date.now(),
         lastUpdated: new Date(),
         pricePerKg,
     };
-    onSave(newFeedData);
+    
+    if(feed) {
+      onSave({ ...newFeedData, id: feed.id });
+    } else {
+      onSave(newFeedData);
+    }
+    
     setOpen(false);
-    toast({ title: `Pakan ${feed ? 'diperbarui' : 'ditambahkan'}!`, description: `Data pakan ${newFeedData.name} telah disimpan.` });
+    toast({ title: `Pakan ${feed ? 'diperbarui' : 'ditambahkan'}!`, description: `Data pakan ${data.name} telah disimpan.` });
   };
 
   return (

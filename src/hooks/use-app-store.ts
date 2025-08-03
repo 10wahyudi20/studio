@@ -41,16 +41,16 @@ type DailyProductionInput = {
 export const useAppStore = create<AppState & {
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
-  addDuck: (duck: Omit<Duck, 'ageMonths' | 'status'>) => void;
-  updateDuck: (cage: number, duck: Omit<Duck, 'ageMonths' | 'status'>) => void;
+  addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
+  updateDuck: (cage: number, duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
   addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue' | 'productivity'>) => void;
-  addTransaction: (transaction: Transaction) => void;
+  addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   updateTransaction: (id: number, transaction: Transaction) => void;
   removeTransaction: (id: number) => void;
-  addFeed: (feed: Feed) => void;
+  addFeed: (feed: Omit<Feed, 'id'>) => void;
   updateFeed: (id: number, feed: Feed) => void;
   removeFeed: (id: number) => void;
   saveState: () => void;
@@ -83,7 +83,7 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(updatedDuck.entryDate);
       const status = calculateDuckStatus(ageMonths);
-      const newDuck = { ...updatedDuck, ageMonths, status };
+      const newDuck = { ...updatedDuck, cage, ageMonths, status };
       return {
         ducks: state.ducks.map(d => d.cage === cage ? newDuck : d),
         isDirty: true
@@ -149,7 +149,7 @@ export const useAppStore = create<AppState & {
   },
 
   addTransaction: (transaction) => {
-    set(state => ({ finance: [...state.finance, transaction], isDirty: true }));
+    set(state => ({ finance: [...state.finance, { ...transaction, id: Date.now() }], isDirty: true }));
   },
 
   updateTransaction: (id, updatedTransaction) => {
@@ -167,7 +167,7 @@ export const useAppStore = create<AppState & {
   },
 
   addFeed: (feed) => {
-    set(state => ({ feed: [...state.feed, feed], isDirty: true }));
+    set(state => ({ feed: [...state.feed, { ...feed, id: Date.now() }], isDirty: true }));
   },
 
   updateFeed: (id, updatedFeed) => {
