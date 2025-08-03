@@ -360,8 +360,8 @@ export default function ProductionTab() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {eggProduction.weekly.map((week, index) => (
-                                <TableRow key={index}>
+                            {eggProduction.weekly.map((week) => (
+                                <TableRow key={week.id}>
                                     <TableCell>{week.week}</TableCell>
                                     <TableCell>{week.buyer}</TableCell>
                                     <TableCell>{week.gradeA}</TableCell>
