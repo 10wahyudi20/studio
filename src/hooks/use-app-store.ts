@@ -56,6 +56,10 @@ const calculateAge = (entryDate: Date): number => {
     return Math.floor((new Date().getTime() - new Date(entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
 };
 
+type DailyProductionInput = {
+    date: Date;
+    perCage: { [key: string]: number };
+}
 
 export const useAppStore = create<AppState & {
   setDirty: () => void;
@@ -64,7 +68,8 @@ export const useAppStore = create<AppState & {
   updateDuck: (cage: number, duck: Duck) => void;
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
-  addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue'>) => void;
+  addDailyProduction: (data: DailyProductionInput) => void;
+  addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue' | 'productivity'>) => void;
   addTransaction: (transaction: Transaction) => void;
   updateTransaction: (id: number, transaction: Transaction) => void;
   removeTransaction: (id: number) => void;
@@ -120,12 +125,39 @@ export const useAppStore = create<AppState & {
       isDirty: true
     }))
   },
+
+  addDailyProduction: (data) => {
+    set(state => {
+        const totalEggs = Object.values(data.perCage).reduce((sum, count) => sum + count, 0);
+        const totalDucks = state.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+        const productivity = totalDucks > 0 ? (totalEggs / totalDucks) * 100 : 0;
+        
+        const newDailyRecord: DailyProduction = {
+            date: data.date,
+            totalEggs,
+            productivity,
+            perCage: data.perCage
+        };
+
+        const updatedDaily = [...state.eggProduction.daily, newDailyRecord]
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        return {
+            eggProduction: {
+                ...state.eggProduction,
+                daily: updatedDaily
+            },
+            isDirty: true,
+        };
+    });
+  },
   
   addWeeklyProduction: (data) => {
     set(state => {
         const totalEggs = data.gradeA + data.gradeB + data.gradeC + data.consumption;
         const totalValue = (data.gradeA * data.priceA) + (data.gradeB * data.priceB) + (data.gradeC * data.priceC) + (data.consumption * data.priceConsumption);
-        const productivity = state.ducks.reduce((s, d) => s + d.quantity, 0) > 0 ? (totalEggs / 7 / state.ducks.reduce((s, d) => s + d.quantity, 0) * 100) : 0;
+        const totalDucks = state.ducks.reduce((s, d) => s + d.quantity, 0);
+        const productivity = totalDucks > 0 ? (totalEggs / 7 / totalDucks * 100) : 0;
         const newRecord: WeeklyProduction = {...data, totalEggs, totalValue, productivity};
         return {
             eggProduction: {
@@ -222,3 +254,5 @@ export const useAppStore = create<AppState & {
   },
 
 }));
+
+    

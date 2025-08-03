@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle } from "lucide-react";
+import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -18,6 +18,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DailyProduction, Duck } from "@/lib/types";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { cn } from "@/lib/utils";
+
 
 const getWeekOfMonth = (date: Date) => {
   const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -26,6 +31,98 @@ const getWeekOfMonth = (date: Date) => {
   return Math.ceil(diff / 7);
 };
 
+// Daily Data Form
+const dailySchemaGenerator = (ducks: Duck[]) => {
+  const cageSchema = ducks.reduce((acc, duck) => {
+    return { ...acc, [duck.cage]: z.coerce.number().min(0, "Jumlah tidak boleh negatif") };
+  }, {});
+
+  return z.object({
+    date: z.date({ required_error: "Tanggal harus diisi." }),
+    perCage: z.object(cageSchema),
+  });
+};
+
+type DailyFormData = z.infer<ReturnType<typeof dailySchemaGenerator>>;
+
+const DailyDataForm = () => {
+    const { addDailyProduction, ducks } = useAppStore();
+    const { toast } = useToast();
+    const [open, setOpen] = React.useState(false);
+
+    const dailySchema = dailySchemaGenerator(ducks);
+
+    const defaultValues = {
+        date: new Date(),
+        perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
+    };
+
+    const { control, handleSubmit, register, formState: { errors } } = useForm<DailyFormData>({
+        resolver: zodResolver(dailySchema),
+        defaultValues,
+    });
+
+    const onSubmit = (data: DailyFormData) => {
+        addDailyProduction(data);
+        setOpen(false);
+        toast({ title: "Data Harian Disimpan", description: `Data untuk tanggal ${format(data.date, "dd MMM yyyy")} telah ditambahkan.` });
+    };
+
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Input Data Harian
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader><DialogTitle>Input Data Produksi Harian</DialogTitle></DialogHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <Controller
+                        control={control}
+                        name="date"
+                        render={({ field }) => (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {field.value ? format(field.value, "PPP", { locale: id }) : <span>Pilih tanggal</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                            </Popover>
+                        )}
+                    />
+                     {errors.date && <p className="text-sm text-destructive mt-1">{errors.date.message}</p>}
+
+                    <div className="space-y-2">
+                        <Label>Jumlah Telur per Kandang</Label>
+                        {ducks.map(duck => (
+                            <div key={duck.cage} className="flex items-center justify-between">
+                                <Label htmlFor={`perCage.${duck.cage}`} className="font-normal">Kandang {duck.cage}</Label>
+                                <Input
+                                    id={`perCage.${duck.cage}`}
+                                    type="number"
+                                    className="w-24"
+                                    {...register(`perCage.${duck.cage}`)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
+                        <Button type="submit">Simpan</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+
+// Weekly Data Form
 const weeklySchema = z.object({
   week: z.coerce.number().min(1).max(5),
   gradeA: z.coerce.number().min(0),
@@ -40,11 +137,11 @@ const weeklySchema = z.object({
 type WeeklyFormData = z.infer<typeof weeklySchema>;
 
 const WeeklyDataForm = () => {
-  const { addWeeklyProduction, eggProduction } = useAppStore();
+  const { addWeeklyProduction } = useAppStore();
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
-  const { control, register, handleSubmit, formState: { errors } } = useForm<WeeklyFormData>({
+  const { control, register, handleSubmit } = useForm<WeeklyFormData>({
     resolver: zodResolver(weeklySchema),
     defaultValues: {
       week: getWeekOfMonth(new Date()),
@@ -54,13 +151,7 @@ const WeeklyDataForm = () => {
   });
 
   const onSubmit = (data: WeeklyFormData) => {
-    const totalEggs = data.gradeA + data.gradeB + data.gradeC + data.consumption;
-    const totalValue = (data.gradeA * data.priceA) + (data.gradeB * data.priceB) + (data.gradeC * data.priceC) + (data.consumption * data.priceConsumption);
-    
-    // For now, productivity is mocked. In a real app, you'd calculate this based on ducks and daily records for the week.
-    const productivity = totalEggs > 0 ? 75 : 0; 
-
-    addWeeklyProduction({ ...data, totalEggs, totalValue, productivity });
+    addWeeklyProduction(data);
     setOpen(false);
     toast({ title: "Data Mingguan Disimpan", description: `Data untuk minggu ke-${data.week} telah ditambahkan.` });
   };
@@ -127,7 +218,7 @@ export default function ProductionTab() {
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   const todayProduction = eggProduction.daily.at(-1)?.totalEggs || 0;
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
-  const productivity = totalDucks > 0 ? (todayProduction / totalDucks * 100).toFixed(2) : 0;
+  const productivity = totalDucks > 0 && todayProduction > 0 ? (todayProduction / totalDucks * 100).toFixed(2) : 0;
   const monthProduction = eggProduction.daily
     .filter(d => new Date(d.date).getMonth() === new Date().getMonth())
     .reduce((sum, d) => sum + d.totalEggs, 0);
@@ -165,6 +256,7 @@ export default function ProductionTab() {
                     <TabsTrigger value="weekly">Mingguan</TabsTrigger>
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
+                 <TabsContent value="daily" className="m-0"><DailyDataForm /></TabsContent>
                  <TabsContent value="weekly" className="m-0"><WeeklyDataForm /></TabsContent>
             </div>
             
@@ -192,7 +284,7 @@ export default function ProductionTab() {
                         <TableCell>{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
                         <TableCell>{day.totalEggs}</TableCell>
                         <TableCell>{day.productivity.toFixed(2)}%</TableCell>
-                        {ducks.map(duck => <TableCell key={duck.cage}>{day.perCage[duck.cage] || '-'}</TableCell>)}
+                        {ducks.map(duck => <TableCell key={duck.cage}>{day.perCage[duck.cage] ?? '-'}</TableCell>)}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -275,3 +367,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
