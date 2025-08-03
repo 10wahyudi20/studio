@@ -193,17 +193,41 @@ const WeeklyDataForm = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Jumlah Telur</Label>
-                        <Input type="number" placeholder="Grade A" {...register("gradeA")} />
-                        <Input type="number" placeholder="Grade B" {...register("gradeB")} />
-                        <Input type="number" placeholder="Grade C" {...register("gradeC")} />
-                        <Input type="number" placeholder="Konsumsi" {...register("consumption")} />
+                        <div>
+                          <Label htmlFor="gradeA" className="text-xs text-muted-foreground">Grade A</Label>
+                          <Input id="gradeA" type="number" {...register("gradeA")} />
+                        </div>
+                        <div>
+                          <Label htmlFor="gradeB" className="text-xs text-muted-foreground">Grade B</Label>
+                          <Input id="gradeB" type="number" {...register("gradeB")} />
+                        </div>
+                        <div>
+                          <Label htmlFor="gradeC" className="text-xs text-muted-foreground">Grade C</Label>
+                          <Input id="gradeC" type="number" {...register("gradeC")} />
+                        </div>
+                        <div>
+                          <Label htmlFor="consumption" className="text-xs text-muted-foreground">Konsumsi</Label>
+                          <Input id="consumption" type="number" {...register("consumption")} />
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label>Harga Satuan</Label>
-                        <Input type="number" placeholder="Harga A" {...register("priceA")} />
-                        <Input type="number" placeholder="Harga B" {...register("priceB")} />
-                        <Input type="number" placeholder="Harga C" {...register("priceC")} />
-                        <Input type="number" placeholder="Harga Konsumsi" {...register("priceConsumption")} />
+                         <div>
+                          <Label htmlFor="priceA" className="text-xs text-muted-foreground">Harga Grade A</Label>
+                          <Input id="priceA" type="number" {...register("priceA")} />
+                        </div>
+                        <div>
+                          <Label htmlFor="priceB" className="text-xs text-muted-foreground">Harga Grade B</Label>
+                          <Input id="priceB" type="number" {...register("priceB")} />
+                        </div>
+                        <div>
+                          <Label htmlFor="priceC" className="text-xs text-muted-foreground">Harga Grade C</Label>
+                          <Input id="priceC" type="number" {...register("priceC")} />
+                        </div>
+                        <div>
+                          <Label htmlFor="priceConsumption" className="text-xs text-muted-foreground">Harga Konsumsi</Label>
+                          <Input id="priceConsumption" type="number" {...register("priceConsumption")} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -225,7 +249,11 @@ export default function ProductionTab() {
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
   const productivity = totalDucks > 0 && todayProduction > 0 ? (todayProduction / totalDucks * 100).toFixed(2) : 0;
   const monthProduction = eggProduction.daily
-    .filter(d => new Date(d.date).getMonth() === new Date().getMonth())
+    .filter(d => {
+        const dDate = new Date(d.date);
+        const now = new Date();
+        return dDate.getMonth() === now.getMonth() && dDate.getFullYear() === now.getFullYear();
+    })
     .reduce((sum, d) => sum + d.totalEggs, 0);
   
   const StatCard = ({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) => (
