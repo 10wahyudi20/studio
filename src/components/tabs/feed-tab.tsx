@@ -21,9 +21,9 @@ import { useToast } from "@/hooks/use-toast";
 const feedSchema = z.object({
   name: z.string().min(1, "Nama pakan tidak boleh kosong"),
   supplier: z.string().min(1, "Supplier tidak boleh kosong"),
-  stock: z.coerce.number().min(0),
-  pricePerBag: z.coerce.number().min(0),
-  schema: z.coerce.number().min(0),
+  stock: z.coerce.number().min(0, "Stok harus angka positif"),
+  pricePerBag: z.coerce.number().min(0, "Harga harus angka positif"),
+  schema: z.coerce.number().min(0, "Skema harus angka positif"),
 });
 
 type FeedFormData = z.infer<typeof feedSchema>;
@@ -72,15 +72,35 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
       <DialogContent className="sm:max-w-md">
         <DialogHeader><DialogTitle>{feed ? 'Edit' : 'Tambah'} Pakan</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input placeholder="Nama Pakan" {...register("name")} />
-          <Input placeholder="Supplier" {...register("supplier")} />
-          <Input type="number" placeholder="Stok (Kg)" {...register("stock")} />
-          <Input type="number" placeholder="Harga / 50Kg" {...register("pricePerBag")} />
-          <div>
-            <Label>Harga / Kg</Label>
-            <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly />
+          <div className="space-y-2">
+            <Label htmlFor="name">Nama Pakan</Label>
+            <Input id="name" {...register("name")} />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
-          <Input type="number" placeholder="Skema Pakan (gram)" {...register("schema")} />
+          <div className="space-y-2">
+            <Label htmlFor="supplier">Supplier</Label>
+            <Input id="supplier" {...register("supplier")} />
+            {errors.supplier && <p className="text-sm text-destructive">{errors.supplier.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="stock">Stok (Kg)</Label>
+            <Input id="stock" type="number" {...register("stock")} />
+            {errors.stock && <p className="text-sm text-destructive">{errors.stock.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pricePerBag">Harga / 50Kg</Label>
+            <Input id="pricePerBag" type="number" {...register("pricePerBag")} />
+            {errors.pricePerBag && <p className="text-sm text-destructive">{errors.pricePerBag.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label>Harga / Kg</Label>
+            <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted"/>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="schema">Skema Pakan (gram)</Label>
+            <Input id="schema" type="number" {...register("schema")} />
+            {errors.schema && <p className="text-sm text-destructive">{errors.schema.message}</p>}
+          </div>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
             <Button type="submit">Simpan</Button>
