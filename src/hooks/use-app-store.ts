@@ -41,10 +41,10 @@ type DailyProductionInput = {
 export const useAppStore = create<AppState & {
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
-  addDuck: (duck: Omit<Duck, 'cage' | 'ageMonths' | 'status'>) => void;
-  updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status'>>) => void;
-  removeDuck: (cage: number) => void;
-  resetDuck: (cage: number) => void;
+  addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
+  updateDuck: (id: number, duck: Partial<Omit<Duck, 'id' | 'ageMonths' | 'status'>>) => void;
+  removeDuck: (id: number) => void;
+  resetDuck: (id: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
   addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue' | 'productivity'>) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
@@ -74,16 +74,15 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(duck.entryDate);
       const status = calculateDuckStatus(ageMonths);
-      const cage = state.ducks.length > 0 ? Math.max(...state.ducks.map(d => d.cage)) + 1 : 1;
-      const newDuck = { ...duck, cage, ageMonths, status };
+      const newDuck = { ...duck, id: Date.now(), ageMonths, status };
       return { ducks: [...state.ducks, newDuck], isDirty: true };
     });
   },
 
-  updateDuck: (cage, updatedDuck) => {
+  updateDuck: (id, updatedDuck) => {
     set(state => ({
       ducks: state.ducks.map(d => {
-        if (d.cage === cage) {
+        if (d.id === id) {
           const newEntryDate = updatedDuck.entryDate || d.entryDate;
           const ageMonths = calculateAge(newEntryDate);
           const status = calculateDuckStatus(ageMonths);
@@ -95,16 +94,16 @@ export const useAppStore = create<AppState & {
     }));
   },
 
-  removeDuck: (cage) => {
+  removeDuck: (id) => {
     set(state => ({
-      ducks: state.ducks.filter(d => d.cage !== cage),
+      ducks: state.ducks.filter(d => d.id !== id),
       isDirty: true
     }));
   },
 
-  resetDuck: (cage) => {
+  resetDuck: (id) => {
     set(state => ({
-      ducks: state.ducks.map(d => d.cage === cage ? { ...d, quantity: 0, deaths: 0 } : d),
+      ducks: state.ducks.map(d => d.id === id ? { ...d, quantity: 0, deaths: 0 } : d),
       isDirty: true
     }))
   },
@@ -237,3 +236,5 @@ export const useAppStore = create<AppState & {
   },
 
 }));
+
+    
