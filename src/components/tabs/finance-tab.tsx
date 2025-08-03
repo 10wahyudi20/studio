@@ -134,7 +134,7 @@ export default function FinanceTab() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Pembukuan Pemasukan (Debit) & Pengeluaran (Kredit)</CardTitle>
+          <CardTitle>Pembukuan</CardTitle>
           <TransactionForm onSave={addTransaction} />
         </CardHeader>
         <CardContent>
