@@ -21,7 +21,7 @@ const ttsVoices = [
     { id: 'vindemiatrix', name: 'Female 4 (Vindemiatrix)' },
     { id: 'achernar', name: 'Male 1 (Achernar)' },
     { id: 'gacrux', name: 'Male 2 (Gacrux)' },
-    { id: 'sadalmelik', name: 'Male 3 (Sadalmelik)' },
+    { id: 'sadaltager', name: 'Male 3 (Sadaltager)' },
     { id: 'zubenelgenubi', name: 'Male 4 (Zubenelgenubi)' },
 ];
 
