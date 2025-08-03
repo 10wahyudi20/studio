@@ -65,8 +65,8 @@ export default function AiPredictionTab() {
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-6">
-      <Card className="md:col-span-2">
+    <div className="grid lg:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle>Prediksi Produksi Telur</CardTitle>
           <CardDescription>
@@ -76,12 +76,12 @@ export default function AiPredictionTab() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="duckQuantity">Jumlah Bebek</Label>
                 <Input id="duckQuantity" type="number" {...register("duckQuantity")} />
                 {errors.duckQuantity && <p className="text-sm text-destructive mt-1">{errors.duckQuantity.message}</p>}
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="duckAgeMonths">Rata-rata Usia Bebek (Bulan)</Label>
                 <Input id="duckAgeMonths" type="number" {...register("duckAgeMonths")} />
                  {errors.duckAgeMonths && <p className="text-sm text-destructive mt-1">{errors.duckAgeMonths.message}</p>}
@@ -89,7 +89,7 @@ export default function AiPredictionTab() {
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-               <div>
+               <div className="space-y-2">
                 <Label>Kondisi Bebek</Label>
                 <Controller name="duckCondition" control={control} render={({ field }) => (
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -102,7 +102,7 @@ export default function AiPredictionTab() {
                     </Select>
                 )} />
               </div>
-               <div>
+               <div className="space-y-2">
                 <Label>Kualitas Pakan</Label>
                  <Controller name="feedQuality" control={control} render={({ field }) => (
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -116,9 +116,9 @@ export default function AiPredictionTab() {
                 )} />
               </div>
             </div>
-             <div>
+             <div className="space-y-2">
                 <Label htmlFor="housingInformation">Informasi Kandang & Lingkungan</Label>
-                <Textarea id="housingInformation" {...register("housingInformation")} />
+                <Textarea id="housingInformation" {...register("housingInformation")} rows={4} />
                 {errors.housingInformation && <p className="text-sm text-destructive mt-1">{errors.housingInformation.message}</p>}
             </div>
           </CardContent>
@@ -131,7 +131,7 @@ export default function AiPredictionTab() {
         </form>
       </Card>
 
-      <div className="md:col-span-1 space-y-6">
+      <div className="lg:col-span-1 space-y-6">
         <Card className="sticky top-24">
            <CardHeader>
             <CardTitle>Hasil Prediksi AI</CardTitle>
