@@ -145,11 +145,14 @@ export default function SettingsTab() {
           <CardDescription>Ubah detail perusahaan dan preferensi aplikasi.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            {logoPreview && <Image src={logoPreview} alt="Logo" width={64} height={64} className="rounded-full bg-muted object-cover" data-ai-hint="duck logo" />}
-            <div className="w-full">
-              <Label htmlFor="logo">Ganti Logo</Label>
-              <Input id="logo" type="file" accept="image/*" onChange={handleLogoChange} />
+          <div className="space-y-2">
+            <Label>Logo Perusahaan</Label>
+            <div className="flex items-center gap-4">
+              <Image src={logoPreview || "https://placehold.co/64x64.png"} alt="Logo" width={64} height={64} className="rounded-full bg-muted object-cover" data-ai-hint="duck logo" />
+              <div className="w-full">
+                <Label htmlFor="logo" className="sr-only">Ganti Logo</Label>
+                <Input id="logo" type="file" accept="image/*" onChange={handleLogoChange} />
+              </div>
             </div>
           </div>
           <div>
