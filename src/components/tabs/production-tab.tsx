@@ -128,6 +128,7 @@ const DailyDataForm = () => {
 // Weekly Data Form
 const weeklySchema = z.object({
   week: z.coerce.number().min(1).max(5),
+  buyer: z.string().nonempty("Nama pembeli harus diisi"),
   gradeA: z.coerce.number().min(0),
   gradeB: z.coerce.number().min(0),
   gradeC: z.coerce.number().min(0),
@@ -148,6 +149,7 @@ const WeeklyDataForm = () => {
     resolver: zodResolver(weeklySchema),
     defaultValues: {
       week: getWeekOfMonth(new Date()),
+      buyer: "",
       gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0,
       priceA: 0, priceB: 0, priceC: 0, priceConsumption: 0,
     }
@@ -189,6 +191,10 @@ const WeeklyDataForm = () => {
                         </Select>
                     )}
                     />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="buyer">Nama Pembeli</Label>
+                    <Input id="buyer" {...register("buyer")} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -337,7 +343,7 @@ export default function ProductionTab() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead rowSpan={2}>Minggu</TableHead>
-                                <TableHead rowSpan={2}>Produktifitas</TableHead>
+                                <TableHead rowSpan={2}>Pembeli</TableHead>
                                 <TableHead colSpan={4} className="text-center">Jumlah Telur</TableHead>
                                 <TableHead colSpan={4} className="text-center">Harga</TableHead>
                                 <TableHead rowSpan={2}>Total Harga</TableHead>
@@ -357,7 +363,7 @@ export default function ProductionTab() {
                             {eggProduction.weekly.map((week, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{week.week}</TableCell>
-                                    <TableCell>{week.productivity.toFixed(2)}%</TableCell>
+                                    <TableCell>{week.buyer}</TableCell>
                                     <TableCell>{week.gradeA}</TableCell>
                                     <TableCell>{week.gradeB}</TableCell>
                                     <TableCell>{week.gradeC}</TableCell>

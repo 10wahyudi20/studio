@@ -46,7 +46,7 @@ export const useAppStore = create<AppState & {
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
-  addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue' | 'productivity'>) => void;
+  addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue'>) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
   updateTransaction: (id: number, transaction: Partial<Omit<Transaction, 'id'>>) => void;
   removeTransaction: (id: number) => void;
@@ -138,9 +138,7 @@ export const useAppStore = create<AppState & {
     set(state => {
         const totalEggs = data.gradeA + data.gradeB + data.gradeC + data.consumption;
         const totalValue = (data.gradeA * data.priceA) + (data.gradeB * data.priceB) + (data.gradeC * data.priceC) + (data.consumption * data.priceConsumption);
-        const totalDucks = state.ducks.reduce((s, d) => s + d.quantity, 0);
-        const productivity = totalDucks > 0 ? (totalEggs / 7 / totalDucks * 100) : 0;
-        const newRecord: WeeklyProduction = {...data, totalEggs, totalValue, productivity};
+        const newRecord: WeeklyProduction = {...data, totalEggs, totalValue};
         
         const existingRecordIndex = state.eggProduction.weekly.findIndex(w => w.week === data.week);
         let updatedWeekly;
@@ -297,5 +295,3 @@ export const useAppStore = create<AppState & {
   },
 
 }));
-
-    

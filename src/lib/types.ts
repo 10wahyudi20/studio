@@ -27,7 +27,7 @@ export interface DailyProduction {
 
 export interface WeeklyProduction {
     week: number;
-    productivity: number;
+    buyer: string;
     gradeA: number;
     gradeB: number;
     gradeC: number;
@@ -44,7 +44,8 @@ export interface MonthlyProduction {
     month: string;
     gradeA: number;
     gradeB: number;
-c    consumption: number;
+    gradeC: number;
+    consumption: number;
     totalEggs: number;
 }
 
@@ -83,5 +84,3 @@ export interface AppState {
     finance: Transaction[];
     isDirty: boolean;
 }
-
-    
