@@ -79,22 +79,41 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
       <DialogContent className="sm:max-w-md">
         <DialogHeader><DialogTitle>{transaction ? 'Edit' : 'Input'} Data Keuangan</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Input type="date" {...register("date")} />
-          <Textarea placeholder="Uraian Transaksi" {...register("description")} />
-          <div className="grid grid-cols-2 gap-4">
-            <Input type="number" placeholder="Jumlah" {...register("quantity")} />
-            <Input type="number" placeholder="Harga Satuan" {...register("unitPrice")} />
-          </div>
-          <p className="text-sm font-medium">Total: Rp {(watch("quantity") * watch("unitPrice") || 0).toLocaleString('id-ID')}</p>
-          <Controller
-            control={control} name="type"
-            render={({ field }) => (
-                <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4">
-                    <Label>Jenis:</Label>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="debit" id="debit" /><Label htmlFor="debit">Pemasukan (Debit)</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="credit" id="credit" /><Label htmlFor="credit">Pengeluaran (Kredit)</Label></div>
-                </RadioGroup>
-            )} />
+            <div className="space-y-2">
+                <Label htmlFor="date">Tanggal</Label>
+                <Input id="date" type="date" {...register("date")} />
+                {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="description">Uraian Transaksi</Label>
+                <Textarea id="description" placeholder="cth: Penjualan telur minggu ke-1" {...register("description")} />
+                {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="quantity">Jumlah</Label>
+                    <Input id="quantity" type="number" placeholder="cth: 100" {...register("quantity")} />
+                    {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="unitPrice">Harga Satuan</Label>
+                    <Input id="unitPrice" type="number" placeholder="cth: 2500" {...register("unitPrice")} />
+                    {errors.unitPrice && <p className="text-sm text-destructive">{errors.unitPrice.message}</p>}
+                </div>
+            </div>
+            <p className="text-sm font-medium">Total: Rp {(watch("quantity") * watch("unitPrice") || 0).toLocaleString('id-ID')}</p>
+            <div className="space-y-2">
+                <Label>Jenis Transaksi</Label>
+                <Controller
+                    control={control} name="type"
+                    render={({ field }) => (
+                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4 pt-1">
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="debit" id="debit" /><Label htmlFor="debit" className="font-normal">Pemasukan (Debit)</Label></div>
+                            <div className="flex items-center space-x-2"><RadioGroupItem value="credit" id="credit" /><Label htmlFor="credit" className="font-normal">Pengeluaran (Kredit)</Label></div>
+                        </RadioGroup>
+                    )} 
+                />
+            </div>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
             <Button type="submit">Simpan</Button>
