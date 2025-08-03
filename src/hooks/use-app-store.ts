@@ -42,16 +42,16 @@ export const useAppStore = create<AppState & {
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
-  updateDuck: (id: number, duck: Partial<Omit<Duck, 'id' | 'ageMonths' | 'status'>>) => void;
-  removeDuck: (id: number) => void;
-  resetDuck: (id: number) => void;
+  updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status'>>) => void;
+  removeDuck: (cage: number) => void;
+  resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
   addWeeklyProduction: (data: Omit<WeeklyProduction, 'totalEggs' | 'totalValue' | 'productivity'>) => void;
   addTransaction: (transaction: Omit<Transaction, 'id'>) => void;
-  updateTransaction: (id: number, transaction: Transaction) => void;
+  updateTransaction: (id: number, transaction: Partial<Omit<Transaction, 'id'>>) => void;
   removeTransaction: (id: number) => void;
-  addFeed: (feed: Omit<Feed, 'id'>) => void;
-  updateFeed: (id: number, feed: Feed) => void;
+  addFeed: (feed: Omit<Feed, 'id' | 'pricePerKg'>) => void;
+  updateFeed: (id: number, feed: Partial<Omit<Feed, 'id'>>) => void;
   removeFeed: (id: number) => void;
   saveState: () => void;
   loadState: () => void;
@@ -74,19 +74,19 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(duck.entryDate);
       const status = calculateDuckStatus(ageMonths);
-      const newDuck = { ...duck, id: Date.now(), ageMonths, status };
+      const newDuck = { ...duck, ageMonths, status };
       return { ducks: [...state.ducks, newDuck], isDirty: true };
     });
   },
 
-  updateDuck: (id, updatedDuck) => {
+  updateDuck: (cage, updatedDuck) => {
     set(state => ({
       ducks: state.ducks.map(d => {
-        if (d.id === id) {
+        if (d.cage === cage) {
           const newEntryDate = updatedDuck.entryDate || d.entryDate;
           const ageMonths = calculateAge(newEntryDate);
           const status = calculateDuckStatus(ageMonths);
-          return { ...d, ...updatedDuck, ageMonths, status };
+          return { ...d, ...updatedDuck, entryDate: newEntryDate, ageMonths, status };
         }
         return d;
       }),
@@ -94,16 +94,16 @@ export const useAppStore = create<AppState & {
     }));
   },
 
-  removeDuck: (id) => {
+  removeDuck: (cage) => {
     set(state => ({
-      ducks: state.ducks.filter(d => d.id !== id),
+      ducks: state.ducks.filter(d => d.cage !== cage),
       isDirty: true
     }));
   },
 
-  resetDuck: (id) => {
+  resetDuck: (cage) => {
     set(state => ({
-      ducks: state.ducks.map(d => d.id === id ? { ...d, quantity: 0, deaths: 0 } : d),
+      ducks: state.ducks.map(d => d.cage === cage ? { ...d, quantity: 0, deaths: 0 } : d),
       isDirty: true
     }))
   },
@@ -141,10 +141,20 @@ export const useAppStore = create<AppState & {
         const totalDucks = state.ducks.reduce((s, d) => s + d.quantity, 0);
         const productivity = totalDucks > 0 ? (totalEggs / 7 / totalDucks * 100) : 0;
         const newRecord: WeeklyProduction = {...data, totalEggs, totalValue, productivity};
+        
+        const existingRecordIndex = state.eggProduction.weekly.findIndex(w => w.week === data.week);
+        let updatedWeekly;
+        if (existingRecordIndex > -1) {
+            updatedWeekly = [...state.eggProduction.weekly];
+            updatedWeekly[existingRecordIndex] = newRecord;
+        } else {
+            updatedWeekly = [...state.eggProduction.weekly, newRecord];
+        }
+
         return {
             eggProduction: {
                 ...state.eggProduction,
-                weekly: [...state.eggProduction.weekly, newRecord]
+                weekly: updatedWeekly
             },
             isDirty: true,
         };
@@ -157,7 +167,13 @@ export const useAppStore = create<AppState & {
 
   updateTransaction: (id, updatedTransaction) => {
     set(state => ({
-      finance: state.finance.map(t => t.id === id ? updatedTransaction : t),
+      finance: state.finance.map(t => {
+        if (t.id === id) {
+          const newTotal = (updatedTransaction.quantity ?? t.quantity) * (updatedTransaction.unitPrice ?? t.unitPrice);
+          return { ...t, ...updatedTransaction, total: newTotal };
+        }
+        return t;
+      }),
       isDirty: true
     }));
   },
@@ -170,12 +186,27 @@ export const useAppStore = create<AppState & {
   },
 
   addFeed: (feed) => {
-    set(state => ({ feed: [...state.feed, { ...feed, id: Date.now() }], isDirty: true }));
+    set(state => ({ 
+        feed: [...state.feed, { 
+            ...feed, 
+            id: Date.now(), 
+            lastUpdated: new Date(),
+            pricePerKg: feed.pricePerBag > 0 ? feed.pricePerBag / 50 : 0
+        }], 
+        isDirty: true 
+    }));
   },
 
   updateFeed: (id, updatedFeed) => {
     set(state => ({
-      feed: state.feed.map(f => f.id === id ? updatedFeed : f),
+      feed: state.feed.map(f => {
+        if (f.id === id) {
+          const pricePerBag = updatedFeed.pricePerBag ?? f.pricePerBag;
+          const pricePerKg = pricePerBag > 0 ? pricePerBag / 50 : 0;
+          return { ...f, ...updatedFeed, pricePerKg, lastUpdated: new Date() };
+        }
+        return f;
+      }),
       isDirty: true
     }));
   },
@@ -190,7 +221,6 @@ export const useAppStore = create<AppState & {
   saveState: () => {
     try {
         const stateToSave = get().getFullState();
-        // Convert Date objects to ISO strings
         const serializedState = JSON.stringify(stateToSave);
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
@@ -204,16 +234,15 @@ export const useAppStore = create<AppState & {
       const savedState = localStorage.getItem('clucksmart-state');
       if (savedState) {
         const parsedState = JSON.parse(savedState);
-        // Convert ISO strings back to Date objects
         const revivedState = {
             ...parsedState,
-            ducks: parsedState.ducks.map((d: Duck) => ({...d, entryDate: new Date(d.entryDate)})),
+            ducks: parsedState.ducks.map((d: any) => ({...d, entryDate: new Date(d.entryDate)})),
             eggProduction: {
                 ...parsedState.eggProduction,
-                daily: parsedState.eggProduction.daily.map((d: DailyProduction) => ({...d, date: new Date(d.date)})),
+                daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
             },
-            feed: parsedState.feed.map((f: Feed) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
-            finance: parsedState.finance.map((t: Transaction) => ({...t, date: new Date(t.date)}))
+            feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
+            finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)}))
         };
         set(revivedState);
       }
@@ -224,11 +253,43 @@ export const useAppStore = create<AppState & {
   
   getFullState: () => {
     const { isDirty, ...state } = get();
-    return state;
+    // Exclude functions before returning state
+    const st: any = state;
+    delete st.setDirty;
+    delete st.updateCompanyInfo;
+    delete st.addDuck;
+    delete st.updateDuck;
+    delete st.removeDuck;
+    delete st.resetDuck;
+    delete st.addDailyProduction;
+    delete st.addWeeklyProduction;
+    delete st.addTransaction;
+    delete st.updateTransaction;
+    delete st.removeTransaction;
+    delete st.addFeed;
+    delete st.updateFeed;
+    delete st.removeFeed;
+    delete st.saveState;
+    delete st.loadState;
+    delete st.getFullState;
+    delete st.loadFullState;
+    delete st.resetState;
+    delete st.getInitialState;
+    return st as Omit<AppState, 'isDirty'>;
   },
 
   loadFullState: (state) => {
-      set({...state, isDirty: true});
+      const revivedState = {
+            ...state,
+            ducks: state.ducks.map((d: any) => ({...d, entryDate: new Date(d.entryDate)})),
+            eggProduction: {
+                ...state.eggProduction,
+                daily: state.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
+            },
+            feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
+            finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)}))
+        };
+      set({...revivedState, isDirty: true});
   },
 
   resetState: () => {

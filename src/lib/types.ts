@@ -44,8 +44,7 @@ export interface MonthlyProduction {
     month: string;
     gradeA: number;
     gradeB: number;
-    gradeC: number;
-    consumption: number;
+c    consumption: number;
     totalEggs: number;
 }
 
@@ -84,3 +83,5 @@ export interface AppState {
     finance: Transaction[];
     isDirty: boolean;
 }
+
+    
