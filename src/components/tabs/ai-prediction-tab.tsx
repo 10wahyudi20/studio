@@ -81,9 +81,9 @@ export default function AiPredictionTab() {
     } catch (e: any) {
       console.error("Audio generation failed:", e);
       if (e.message?.includes('429')) {
-          setAudioError("Terlalu banyak permintaan. Coba lagi dalam satu menit.");
+          setAudioError("Terlalu banyak permintaan (Kuota API habis). Coba lagi dalam beberapa saat.");
       } else {
-          setAudioError("Gagal membuat audio.");
+          setAudioError("Gagal membuat audio. Silakan coba lagi.");
       }
     } finally {
       setIsGeneratingAudio(false);
