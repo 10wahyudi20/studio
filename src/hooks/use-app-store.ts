@@ -5,43 +5,20 @@ import { format } from 'date-fns';
 
 const getInitialState = (): AppState => ({
   companyInfo: {
-    name: "Peternakan Bebek Jaya",
-    address: "Jl. Raya Bebek No. 123, Desa Makmur, Indonesia",
-    phone: "0812-3456-7890",
-    email: "info@peternakanbebekjaya.com",
+    name: "Nama Peternakan Anda",
+    address: "Alamat Peternakan Anda",
+    phone: "Telepon Peternakan Anda",
+    email: "email@peternakan.com",
     logo: "",
   },
-  ducks: [
-    { cage: 1, quantity: 100, deaths: 2, entryDate: new Date('2023-11-01'), ageMonths: 8, status: 'Bebek Petelur', cageSize: '10x5m', cageSystem: 'baterai' },
-    { cage: 2, quantity: 120, deaths: 1, entryDate: new Date('2024-03-15'), ageMonths: 4, status: 'Bebek Bayah', cageSize: '12x5m', cageSystem: 'umbaran' },
-  ],
+  ducks: [],
   eggProduction: {
-    daily: Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (6 - i));
-        const totalEggs = Math.floor(60 + Math.random() * 20);
-        return {
-            date,
-            totalEggs,
-            productivity: 75 + Math.random() * 10,
-            perCage: { 1: Math.floor(totalEggs * 0.45), 2: Math.floor(totalEggs * 0.55) }
-        };
-    }),
-    weekly: [
-        { week: 1, productivity: 82.5, gradeA: 450, gradeB: 120, gradeC: 30, consumption: 25, priceA: 2500, priceB: 2300, priceC: 2000, priceConsumption: 1800, totalEggs: 625, totalValue: 1533500 },
-    ],
-    monthly: [
-        { month: 'Juni 2024', gradeA: 1800, gradeB: 480, gradeC: 120, consumption: 100, totalEggs: 2500 },
-    ]
+    daily: [],
+    weekly: [],
+    monthly: [],
   },
-  feed: [
-    { id: 1, name: 'Konsentrat A', supplier: 'PT Pakan Sejahtera', lastUpdated: new Date(), stock: 500, pricePerBag: 350000, pricePerKg: 7000, schema: 120 },
-    { id: 2, name: 'Jagung Giling', supplier: 'Lokal Jaya', lastUpdated: new Date(), stock: 1200, pricePerBag: 250000, pricePerKg: 5000, schema: 80 },
-  ],
-  finance: [
-    { id: 1, date: new Date(), description: "Penjualan Telur Grade A", quantity: 450, unitPrice: 2500, total: 1125000, type: 'debit' },
-    { id: 2, date: new Date(), description: "Pembelian Pakan Konsentrat", quantity: 10, unitPrice: 350000, total: 3500000, type: 'credit' },
-  ],
+  feed: [],
+  finance: [],
   isDirty: false,
 });
 
@@ -64,8 +41,8 @@ type DailyProductionInput = {
 export const useAppStore = create<AppState & {
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
-  addDuck: (duck: Duck) => void;
-  updateDuck: (cage: number, duck: Duck) => void;
+  addDuck: (duck: Omit<Duck, 'ageMonths' | 'status'>) => void;
+  updateDuck: (cage: number, duck: Omit<Duck, 'ageMonths' | 'status'>) => void;
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
@@ -97,7 +74,8 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(duck.entryDate);
       const status = calculateDuckStatus(ageMonths);
-      return { ducks: [...state.ducks, { ...duck, ageMonths, status }], isDirty: true };
+      const newDuck = { ...duck, ageMonths, status };
+      return { ducks: [...state.ducks, newDuck], isDirty: true };
     });
   },
 
@@ -105,8 +83,9 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(updatedDuck.entryDate);
       const status = calculateDuckStatus(ageMonths);
+      const newDuck = { ...updatedDuck, ageMonths, status };
       return {
-        ducks: state.ducks.map(d => d.cage === cage ? { ...updatedDuck, ageMonths, status } : d),
+        ducks: state.ducks.map(d => d.cage === cage ? newDuck : d),
         isDirty: true
       };
     });
@@ -254,5 +233,3 @@ export const useAppStore = create<AppState & {
   },
 
 }));
-
-    
