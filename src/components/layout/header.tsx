@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -170,6 +171,12 @@ export default function Header() {
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-min p-0 bg-transparent border-0">
+                    <DialogHeader className="sr-only">
+                        <DialogTitle>Kalkulator</DialogTitle>
+                        <DialogDescription>
+                            Kalkulator sederhana untuk perhitungan cepat.
+                        </DialogDescription>
+                    </DialogHeader>
                     <SimpleCalculator />
                 </DialogContent>
             </Dialog>
