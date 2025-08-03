@@ -148,7 +148,7 @@ export default function SettingsTab() {
           <div className="space-y-2">
             <Label>Logo Perusahaan</Label>
             <div className="flex items-center gap-4">
-              <Image src={logoPreview || "https://placehold.co/64x64.png"} alt="Logo" width={64} height={64} className="rounded-full bg-muted object-cover" data-ai-hint="duck logo" />
+              <Image src={logoPreview || "https://placehold.co/64x64.png"} alt="Logo" width={64} height={64} className="rounded-lg bg-muted object-cover" data-ai-hint="duck logo" />
               <div className="w-full">
                 <Label htmlFor="logo" className="sr-only">Ganti Logo</Label>
                 <Input id="logo" type="file" accept="image/*" onChange={handleLogoChange} />
@@ -245,3 +245,5 @@ export default function SettingsTab() {
     </div>
   );
 }
+
+    
