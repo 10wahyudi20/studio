@@ -49,6 +49,17 @@ const duckSchema = z.object({
 
 type DuckFormData = z.infer<typeof duckSchema>;
 
+const calculateAge = (entryDate: Date): number => {
+    return Math.floor((new Date().getTime() - new Date(entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+};
+
+const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
+  if (ageMonths <= 5) return 'Bebek Bayah';
+  if (ageMonths <= 12) return 'Bebek Petelur';
+  if (ageMonths <= 18) return 'Bebek Tua';
+  return 'Bebek Afkir';
+};
+
 const DuckFormContent = ({ duck, onSave, setOpen }: { duck?: Duck; onSave: (data: Duck) => void, setOpen: (open: boolean) => void }) => {
   const { ducks } = useAppStore();
   const { toast } = useToast();
@@ -76,10 +87,12 @@ const DuckFormContent = ({ duck, onSave, setOpen }: { duck?: Duck; onSave: (data
   });
 
   const onSubmit = (data: DuckFormData) => {
+    const ageMonths = calculateAge(data.entryDate);
+    const status = calculateDuckStatus(ageMonths);
     const newDuckData: Duck = {
       ...data,
-      ageMonths: Math.floor((new Date().getTime() - new Date(data.entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44)),
-      status: 'Bebek Bayah',
+      ageMonths,
+      status,
       cageSize: `${data.cageSizeLength}x${data.cageSizeWidth}m`,
     };
 
@@ -95,7 +108,7 @@ const DuckFormContent = ({ duck, onSave, setOpen }: { duck?: Duck; onSave: (data
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
         <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="cage" className="text-right">Kandang</Label>
-            <Input id="cage" {...register("cage")} className="col-span-3" readOnly />
+            <Input id="cage" {...register("cage", { valueAsNumber: true })} className="col-span-3" readOnly />
         </div>
         <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
