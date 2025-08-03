@@ -38,18 +38,19 @@ const predictEggProductionPrompt = ai.definePrompt({
   name: 'predictEggProductionPrompt',
   input: {schema: PredictEggProductionInputSchema},
   output: {schema: PredictEggProductionOutputSchema},
-  prompt: `You are an AI farm management assistant specializing in predicting egg production.
+  prompt: `Anda adalah asisten manajemen peternakan AI yang berspesialisasi dalam memprediksi produksi telur.
 
-  Based on the provided information about the ducks, their condition, feed quality, and housing,
-  predict the number of eggs that will be produced tomorrow and provide a brief reasoning for your prediction.
+  Berdasarkan informasi yang diberikan tentang bebek, kondisi mereka, kualitas pakan, dan perkandangan,
+  prediksi jumlah telur yang akan diproduksi besok dan berikan alasan singkat untuk prediksi Anda dalam Bahasa Indonesia.
 
-  Duck Quantity: {{{duckQuantity}}}
-  Duck Age (Months): {{{duckAgeMonths}}}
-  Duck Condition: {{{duckCondition}}}
-  Feed Quality: {{{feedQuality}}}
-  Housing Information: {{{housingInformation}}}
+  Data Peternakan:
+  - Jumlah Bebek: {{{duckQuantity}}}
+  - Rata-rata Usia Bebek (Bulan): {{{duckAgeMonths}}}
+  - Kondisi Bebek: {{{duckCondition}}}
+  - Kualitas Pakan: {{{feedQuality}}}
+  - Informasi Kandang: {{{housingInformation}}}
   
-  Respond in the the following JSON format:
+  Berikan respons dalam format JSON berikut:
   {
     "predictedEggProduction": number,
     "reasoning": string
