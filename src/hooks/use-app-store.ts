@@ -41,8 +41,8 @@ type DailyProductionInput = {
 export const useAppStore = create<AppState & {
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
-  addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
-  updateDuck: (cage: number, duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
+  addDuck: (duck: Omit<Duck, 'cage' | 'ageMonths' | 'status'>) => void;
+  updateDuck: (cage: number, duck: Omit<Duck, 'cage' | 'ageMonths' | 'status'>) => void;
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
@@ -74,7 +74,8 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(duck.entryDate);
       const status = calculateDuckStatus(ageMonths);
-      const newDuck = { ...duck, ageMonths, status };
+      const cage = state.ducks.length > 0 ? Math.max(...state.ducks.map(d => d.cage)) + 1 : 1;
+      const newDuck = { ...duck, cage, ageMonths, status };
       return { ducks: [...state.ducks, newDuck], isDirty: true };
     });
   },
