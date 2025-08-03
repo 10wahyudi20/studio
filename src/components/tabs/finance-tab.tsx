@@ -41,7 +41,7 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
       description: "",
       quantity: 0,
       unitPrice: 0,
-      type: "credit",
+      type: "debit",
     },
   });
 
@@ -153,7 +153,7 @@ export default function FinanceTab() {
   );
 
   const TransactionRow = ({ t }: { t: Transaction }) => (
-    <TableRow key={t.id} className={t.type === 'debit' ? 'bg-green-100/50 dark:bg-green-900/20' : 'bg-red-100/50 dark:bg-red-900/20'}>
+    <TableRow key={t.id}>
       <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
       <TableCell>{t.description}</TableCell>
       <TableCell>{t.quantity}</TableCell>
@@ -207,28 +207,30 @@ export default function FinanceTab() {
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                <TableRow className="bg-green-100 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/30">
-                  <TableCell colSpan={6} className="font-bold text-green-700 dark:text-green-400">
-                    PEMASUKAN (DEBIT)
-                  </TableCell>
-                </TableRow>
-                {debitTransactions.map((t) => <TransactionRow key={t.id} t={t} />)}
-                {debitTransactions.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pemasukan.</TableCell></TableRow>
-                )}
-              </TableBody>
-              <TableBody>
-                <TableRow className="bg-red-100 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30">
-                  <TableCell colSpan={6} className="font-bold text-red-700 dark:text-red-400">
-                    PENGELUARAN (KREDIT)
-                  </TableCell>
-                </TableRow>
-                {creditTransactions.map((t) => <TransactionRow key={t.id} t={t} />)}
-                {creditTransactions.length === 0 && (
-                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pengeluaran.</TableCell></TableRow>
-                )}
-              </TableBody>
+                <TableBody>
+                  <TableRow className="bg-green-100 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/30">
+                    <TableCell colSpan={6} className="font-bold text-green-700 dark:text-green-400">
+                      PEMASUKAN (DEBIT)
+                    </TableCell>
+                  </TableRow>
+                  {debitTransactions.length === 0 ? (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pemasukan.</TableCell></TableRow>
+                  ) : (
+                    debitTransactions.map((t) => <TransactionRow key={t.id} t={t} />)
+                  )}
+                </TableBody>
+                <TableBody>
+                  <TableRow className="bg-red-100 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30">
+                    <TableCell colSpan={6} className="font-bold text-red-700 dark:text-red-400">
+                      PENGELUARAN (KREDIT)
+                    </TableCell>
+                  </TableRow>
+                  {creditTransactions.length === 0 ? (
+                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pengeluaran.</TableCell></TableRow>
+                  ) : (
+                    creditTransactions.map((t) => <TransactionRow key={t.id} t={t} />)
+                  )}
+                </TableBody>
             </Table>
           </div>
         </CardContent>
@@ -236,3 +238,5 @@ export default function FinanceTab() {
     </div>
   );
 }
+
+    
