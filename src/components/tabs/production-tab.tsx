@@ -504,11 +504,11 @@ export default function ProductionTab() {
                            {eggProduction.monthly.map((month, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{month.month}</TableCell>
-                                    <TableCell>{month.gradeA}</TableCell>
-                                    <TableCell>{month.gradeB}</TableCell>
-                                    <TableCell>{month.gradeC}</TableCell>
-                                    <TableCell>{month.consumption}</TableCell>
-                                    <TableCell>{month.totalEggs}</TableCell>
+                                    <TableCell>{month.gradeA.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell>{month.gradeB.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell>{month.gradeC.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell>{month.consumption.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell>{month.totalEggs.toLocaleString('id-ID')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

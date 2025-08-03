@@ -1,7 +1,8 @@
 
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
-import { format } from 'date-fns';
+import { format, getMonth, getYear } from 'date-fns';
+import { id as idLocale } from 'date-fns/locale';
 
 const getInitialState = (): AppState => ({
   companyInfo: {
@@ -32,6 +33,35 @@ const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
 const calculateAge = (entryDate: Date): number => {
     return Math.floor((new Date().getTime() - new Date(entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
 };
+
+const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyProduction[] => {
+    if (!weeklyData || weeklyData.length === 0) return [];
+    
+    // For now, we'll assume all weekly data is for the current month and year.
+    // A more complex implementation could handle historical data if dates were added to weekly entries.
+    const currentMonthData = weeklyData.reduce((acc, week) => {
+        acc.gradeA += week.gradeA;
+        acc.gradeB += week.gradeB;
+        acc.gradeC += week.gradeC;
+        acc.consumption += week.consumption;
+        acc.totalEggs += week.totalEggs;
+        return acc;
+    }, {
+        gradeA: 0,
+        gradeB: 0,
+        gradeC: 0,
+        consumption: 0,
+        totalEggs: 0,
+    });
+
+    const monthName = format(new Date(), 'MMMM yyyy', { locale: idLocale });
+
+    return [{
+        month: monthName,
+        ...currentMonthData
+    }];
+};
+
 
 type DailyProductionInput = {
     date: Date;
@@ -145,11 +175,13 @@ export const useAppStore = create<AppState & {
         const newRecord: WeeklyProduction = {...data, id: Date.now(), totalEggs, totalValue};
         
         const updatedWeekly = [...state.eggProduction.weekly, newRecord];
+        const updatedMonthly = recalculateMonthlyProduction(updatedWeekly);
 
         return {
             eggProduction: {
                 ...state.eggProduction,
-                weekly: updatedWeekly
+                weekly: updatedWeekly,
+                monthly: updatedMonthly,
             },
             isDirty: true,
         };
@@ -167,10 +199,12 @@ export const useAppStore = create<AppState & {
             }
             return prod;
         });
+        const updatedMonthly = recalculateMonthlyProduction(updatedWeekly);
         return {
             eggProduction: {
                 ...state.eggProduction,
-                weekly: updatedWeekly
+                weekly: updatedWeekly,
+                monthly: updatedMonthly,
             },
             isDirty: true,
         };
@@ -178,13 +212,18 @@ export const useAppStore = create<AppState & {
   },
 
   removeWeeklyProduction: (id) => {
-      set(state => ({
-          eggProduction: {
-              ...state.eggProduction,
-              weekly: state.eggProduction.weekly.filter(prod => prod.id !== id),
-          },
-          isDirty: true,
-      }));
+      set(state => {
+          const updatedWeekly = state.eggProduction.weekly.filter(prod => prod.id !== id);
+          const updatedMonthly = recalculateMonthlyProduction(updatedWeekly);
+          return {
+              eggProduction: {
+                  ...state.eggProduction,
+                  weekly: updatedWeekly,
+                  monthly: updatedMonthly,
+              },
+              isDirty: true,
+          }
+      });
   },
 
   addTransaction: (transaction) => {
@@ -267,10 +306,13 @@ export const useAppStore = create<AppState & {
                 ...parsedState.eggProduction,
                 daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
                 weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now() })),
+                monthly: parsedState.eggProduction.monthly || [],
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)}))
         };
+        // Recalculate monthly production on load to ensure consistency
+        revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
         set(revivedState);
       }
     } catch (error) {
@@ -315,10 +357,13 @@ export const useAppStore = create<AppState & {
                 ...state.eggProduction,
                 daily: state.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
                  weekly: state.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now() })),
+                 monthly: state.eggProduction.monthly || [],
             },
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)}))
         };
+      // Recalculate monthly production on load to ensure consistency
+      revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
       set({...revivedState, isDirty: true});
   },
 
