@@ -91,8 +91,8 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
             render={({ field }) => (
                 <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4">
                     <Label>Jenis:</Label>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="credit" id="credit" /><Label htmlFor="credit">Pengeluaran (Kredit)</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="debit" id="debit" /><Label htmlFor="debit">Pemasukan (Debit)</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="credit" id="credit" /><Label htmlFor="credit">Pengeluaran (Kredit)</Label></div>
                 </RadioGroup>
             )} />
           <DialogFooter>
@@ -115,12 +115,44 @@ export default function FinanceTab() {
   const monthlyExpense = finance.filter(t => new Date(t.date).getMonth() === currentMonth && t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
   const netProfit = monthlyIncome - monthlyExpense;
   const profitMargin = monthlyIncome > 0 ? (netProfit / monthlyIncome * 100).toFixed(2) : 0;
+  
+  const debitTransactions = finance.filter(t => t.type === 'debit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const creditTransactions = finance.filter(t => t.type === 'credit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 
   const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{title}</CardTitle><Icon className="h-4 w-4 text-muted-foreground" /></CardHeader>
       <CardContent><div className="text-2xl font-bold">{value}</div></CardContent>
     </Card>
+  );
+
+  const TransactionRow = ({ t }: { t: Transaction }) => (
+    <TableRow key={t.id}>
+      <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
+      <TableCell>{t.description}</TableCell>
+      <TableCell>{t.quantity}</TableCell>
+      <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
+      <TableCell>Rp {t.total.toLocaleString('id-ID')}</TableCell>
+      <TableCell className="text-right">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <TransactionForm transaction={t} onSave={(updated) => updateTransaction(t.id, updated)} />
+            <AlertDialog>
+              <AlertDialogTrigger asChild><DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600"><Trash2 className="mr-2 h-4 w-4" /><span>Hapus</span></DropdownMenuItem></AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader><AlertDialogTitle>Yakin ingin menghapus transaksi ini?</AlertDialogTitle><AlertDialogDescription>"{t.description}" akan dihapus permanen.</AlertDialogDescription></AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => { removeTransaction(t.id); toast({ variant: 'destructive', title: 'Transaksi Dihapus!' }) }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
+    </TableRow>
   );
 
   return (
@@ -146,40 +178,31 @@ export default function FinanceTab() {
                   <TableHead>Uraian</TableHead>
                   <TableHead>Jumlah</TableHead>
                   <TableHead>Harga Satuan</TableHead>
-                  <TableHead>Total (Debit)</TableHead>
-                  <TableHead>Total (Kredit)</TableHead>
+                  <TableHead>Total</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {finance.map((t) => (
-                  <TableRow key={t.id}>
-                    <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
-                    <TableCell>{t.description}</TableCell>
-                    <TableCell>{t.quantity}</TableCell>
-                    <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
-                    <TableCell className="text-green-500">{t.type === 'debit' ? `Rp ${t.total.toLocaleString('id-ID')}` : '-'}</TableCell>
-                    <TableCell className="text-red-500">{t.type === 'credit' ? `Rp ${t.total.toLocaleString('id-ID')}` : '-'}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <TransactionForm transaction={t} onSave={(updated) => updateTransaction(t.id, updated)} />
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild><DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600"><Trash2 className="mr-2 h-4 w-4" /><span>Hapus</span></DropdownMenuItem></AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader><AlertDialogTitle>Yakin ingin menghapus transaksi ini?</AlertDialogTitle><AlertDialogDescription>"{t.description}" akan dihapus permanen.</AlertDialogDescription></AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => { removeTransaction(t.id); toast({ variant: 'destructive', title: 'Transaksi Dihapus!' }) }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                <TableRow className="bg-green-100 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/30">
+                  <TableCell colSpan={6} className="font-bold text-green-700 dark:text-green-400">
+                    PEMASUKAN (DEBIT)
+                  </TableCell>
+                </TableRow>
+                {debitTransactions.map((t) => <TransactionRow key={t.id} t={t} />)}
+                {debitTransactions.length === 0 && (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pemasukan.</TableCell></TableRow>
+                )}
+              </TableBody>
+              <TableBody>
+                <TableRow className="bg-red-100 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30">
+                  <TableCell colSpan={6} className="font-bold text-red-700 dark:text-red-400">
+                    PENGELUARAN (KREDIT)
+                  </TableCell>
+                </TableRow>
+                {creditTransactions.map((t) => <TransactionRow key={t.id} t={t} />)}
+                {creditTransactions.length === 0 && (
+                  <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pengeluaran.</TableCell></TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
