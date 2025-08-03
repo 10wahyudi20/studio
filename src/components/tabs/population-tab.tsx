@@ -49,14 +49,14 @@ const duckSchema = z.object({
 
 type DuckFormData = z.infer<typeof duckSchema>;
 
-const DuckForm = ({ duck, onSave }: { duck?: Duck; onSave: (data: Duck) => void }) => {
-  const { addDuck, updateDuck, ducks } = useAppStore();
+const DuckFormContent = ({ duck, onSave, setOpen }: { duck?: Duck; onSave: (data: Duck) => void, setOpen: (open: boolean) => void }) => {
+  const { ducks } = useAppStore();
   const { toast } = useToast();
-  const [open, setOpen] = React.useState(false);
   
   const defaultValues = duck
     ? {
         ...duck,
+        entryDate: new Date(duck.entryDate),
         cageSizeLength: duck.cageSize.split("x")[0] ? Number(duck.cageSize.split("x")[0]) : 0,
         cageSizeWidth: duck.cageSize.split("x")[1] ? Number(duck.cageSize.split("x")[1]) : 0,
       }
@@ -79,7 +79,7 @@ const DuckForm = ({ duck, onSave }: { duck?: Duck; onSave: (data: Duck) => void 
     const newDuckData: Duck = {
       ...data,
       ageMonths: Math.floor((new Date().getTime() - new Date(data.entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44)),
-      status: 'Bebek Bayah', // This will be recalculated in the store
+      status: 'Bebek Bayah',
       cageSize: `${data.cageSizeLength}x${data.cageSizeWidth}m`,
     };
 
@@ -92,101 +92,100 @@ const DuckForm = ({ duck, onSave }: { duck?: Duck; onSave: (data: Duck) => void 
   };
 
   return (
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
+        <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="cage" className="text-right">Kandang</Label>
+            <Input id="cage" {...register("cage")} className="col-span-3" readOnly />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
+            <Input id="quantity" type="number" {...register("quantity")} className="col-span-3" />
+        </div>
+         <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="deaths" className="text-right">Kematian</Label>
+            <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Tanggal Masuk</Label>
+             <Controller
+                control={control}
+                name="entryDate"
+                render={({ field }) => (
+                     <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full justify-start text-left font-normal col-span-3",
+                                !field.value && "text-muted-foreground"
+                            )}
+                            >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+                )}
+             />
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+             <Label className="text-right">Ukuran Kandang</Label>
+             <div className="col-span-3 grid grid-cols-2 gap-2">
+                <Input id="cageSizeLength" type="number" placeholder="Panjang (m)" {...register("cageSizeLength")} />
+                <Input id="cageSizeWidth" type="number" placeholder="Lebar (m)" {...register("cageSizeWidth")} />
+             </div>
+        </div>
+        <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Sistem Kandang</Label>
+            <Controller
+                control={control}
+                name="cageSystem"
+                render={({ field }) => (
+                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="col-span-3 flex gap-4">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="baterai" id="baterai" />
+                            <Label htmlFor="baterai">Baterai</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="umbaran" id="umbaran" />
+                            <Label htmlFor="umbaran">Umbaran</Label>
+                        </div>
+                    </RadioGroup>
+                )}
+            />
+        </div>
+        <DialogFooter>
+            <DialogClose asChild>
+                <Button type="button" variant="secondary">Batal</Button>
+            </DialogClose>
+            <Button type="submit">Simpan</Button>
+        </DialogFooter>
+    </form>
+  );
+};
+
+
+const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: Duck) => void, children: React.ReactNode }) => {
+  const [open, setOpen] = React.useState(false);
+
+  return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {duck ? (
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <Edit className="mr-2 h-4 w-4 text-green-500" />
-            <span className="text-green-500">Edit</span>
-          </DropdownMenuItem>
-        ) : (
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Tambah Bebek
-          </Button>
-        )}
+        {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>{duck ? 'Edit' : 'Tambah'} Inventaris Bebek</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="cage" className="text-right">Kandang</Label>
-                <Input id="cage" {...register("cage")} className="col-span-3" readOnly />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
-                <Input id="quantity" type="number" {...register("quantity")} className="col-span-3" />
-            </div>
-             <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="deaths" className="text-right">Kematian</Label>
-                <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Tanggal Masuk</Label>
-                 <Controller
-                    control={control}
-                    name="entryDate"
-                    render={({ field }) => (
-                         <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-normal col-span-3",
-                                    !field.value && "text-muted-foreground"
-                                )}
-                                >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    )}
-                 />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-                 <Label className="text-right">Ukuran Kandang</Label>
-                 <div className="col-span-3 grid grid-cols-2 gap-2">
-                    <Input id="cageSizeLength" type="number" placeholder="Panjang" {...register("cageSizeLength")} />
-                    <Input id="cageSizeWidth" type="number" placeholder="Lebar" {...register("cageSizeWidth")} />
-                 </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Sistem Kandang</Label>
-                <Controller
-                    control={control}
-                    name="cageSystem"
-                    render={({ field }) => (
-                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="col-span-3 flex gap-4">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="baterai" id="baterai" />
-                                <Label htmlFor="baterai">Baterai</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="umbaran" id="umbaran" />
-                                <Label htmlFor="umbaran">Umbaran</Label>
-                            </div>
-                        </RadioGroup>
-                    )}
-                />
-            </div>
-            <DialogFooter>
-                <DialogClose asChild>
-                    <Button type="button" variant="secondary">Batal</Button>
-                </DialogClose>
-                <Button type="submit">Simpan</Button>
-            </DialogFooter>
-        </form>
+        <DuckFormContent duck={duck} onSave={onSave} setOpen={setOpen} />
       </DialogContent>
     </Dialog>
   );
@@ -230,7 +229,12 @@ export default function PopulationTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Inventaris Bebek</CardTitle>
-          <DuckForm onSave={addDuck} />
+          <DuckForm onSave={addDuck}>
+            <Button>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Tambah Bebek
+            </Button>
+          </DuckForm>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -268,7 +272,12 @@ export default function PopulationTab() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                           <DuckForm duck={duck} onSave={(updatedDuck) => updateDuck(duck.cage, updatedDuck)} />
+                           <DuckForm duck={duck} onSave={(updatedDuck) => updateDuck(duck.cage, updatedDuck)}>
+                             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                               <Edit className="mr-2 h-4 w-4 text-green-500" />
+                               <span className="text-green-500">Edit</span>
+                             </DropdownMenuItem>
+                           </DuckForm>
                            <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-yellow-500 focus:text-yellow-600">
