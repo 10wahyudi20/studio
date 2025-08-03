@@ -61,13 +61,13 @@ const DuckForm = ({ duck, onSave }: { duck?: Duck; onSave: (data: Duck) => void 
         cageSizeWidth: duck.cageSize.split("x")[1] ? Number(duck.cageSize.split("x")[1]) : 0,
       }
     : {
-        cage: (ducks[ducks.length-1]?.cage || 0) + 1,
+        cage: ducks.length > 0 ? Math.max(...ducks.map(d => d.cage)) + 1 : 1,
         quantity: 0,
         deaths: 0,
         entryDate: new Date(),
         cageSizeLength: 0,
         cageSizeWidth: 0,
-        cageSystem: "baterai" as "baterai" | "umbaran",
+        cageSystem: "umbaran" as "baterai" | "umbaran",
     };
     
   const { register, handleSubmit, control, formState: { errors } } = useForm<DuckFormData>({
