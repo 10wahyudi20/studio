@@ -65,8 +65,8 @@ export default function AiPredictionTab() {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-2">
+    <div className="grid lg:grid-cols-2 gap-6">
+      <Card>
         <CardHeader>
           <CardTitle>Prediksi Produksi Telur</CardTitle>
           <CardDescription>
@@ -131,7 +131,7 @@ export default function AiPredictionTab() {
         </form>
       </Card>
 
-      <div className="lg:col-span-1 space-y-6">
+      <div className="space-y-6">
         <Card className="sticky top-24">
            <CardHeader>
             <CardTitle>Hasil Prediksi AI</CardTitle>
