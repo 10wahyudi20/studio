@@ -5,6 +5,7 @@ export interface CompanyInfo {
     phone: string;
     email: string;
     logo: string;
+    ttsVoice: string;
 }
 
 export interface Duck {

@@ -11,6 +11,7 @@ const getInitialState = (): AppState => ({
     phone: "Telepon Peternakan Anda",
     email: "email@peternakan.com",
     logo: "",
+    ttsVoice: "Algenib",
   },
   ducks: [],
   eggProduction: {
@@ -35,31 +36,28 @@ const calculateAge = (entryDate: Date): number => {
 };
 
 const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyProduction[] => {
-    if (!weeklyData || weeklyData.length === 0) return [];
-    
-    // For now, we'll assume all weekly data is for the current month and year.
-    // A more complex implementation could handle historical data if dates were added to weekly entries.
-    const currentMonthData = weeklyData.reduce((acc, week) => {
-        acc.gradeA += week.gradeA;
-        acc.gradeB += week.gradeB;
-        acc.gradeC += week.gradeC;
-        acc.consumption += week.consumption;
-        acc.totalEggs += week.totalEggs;
-        return acc;
-    }, {
-        gradeA: 0,
-        gradeB: 0,
-        gradeC: 0,
-        consumption: 0,
-        totalEggs: 0,
+    const monthlyData: { [month: string]: MonthlyProduction } = {};
+
+    weeklyData.forEach(week => {
+        // This is a placeholder. To be accurate, weekly data needs a date.
+        // For now, we'll group by the current month.
+        const monthKey = format(new Date(), 'MMMM yyyy', { locale: idLocale });
+
+        if (!monthlyData[monthKey]) {
+            monthlyData[monthKey] = {
+                month: monthKey,
+                gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0
+            };
+        }
+
+        monthlyData[monthKey].gradeA += week.gradeA;
+        monthlyData[monthKey].gradeB += week.gradeB;
+        monthlyData[monthKey].gradeC += week.gradeC;
+        monthlyData[monthKey].consumption += week.consumption;
+        monthlyData[monthKey].totalEggs += week.totalEggs;
     });
 
-    const monthName = format(new Date(), 'MMMM yyyy', { locale: idLocale });
-
-    return [{
-        month: monthName,
-        ...currentMonthData
-    }];
+    return Object.values(monthlyData);
 };
 
 
@@ -328,7 +326,12 @@ export const useAppStore = create<AppState & {
       if (savedState) {
         const parsedState = JSON.parse(savedState);
         const revivedState = {
+            ...getInitialState(), // Start with defaults
             ...parsedState,
+            companyInfo: {
+              ...getInitialState().companyInfo,
+              ...parsedState.companyInfo,
+            },
             ducks: parsedState.ducks.map((d: any) => ({...d, entryDate: new Date(d.entryDate)})),
             eggProduction: {
                 ...parsedState.eggProduction,

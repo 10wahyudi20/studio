@@ -10,7 +10,20 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Upload, Download, Cloud, Trash2 } from "lucide-react";
+import { Upload, Download, Cloud, Trash2, Volume2, Loader2 } from "lucide-react";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
+
+const ttsVoices = [
+    { id: 'Algenib', name: 'Female 1' },
+    { id: 'Antares', name: 'Male 1' },
+    { id: 'Arcturus', name: 'Female 2' },
+    { id: 'Capella', name: 'Male 2' },
+    { id: 'Deneb', name: 'Female 3' },
+    { id: 'Fomalhaut', name: 'Male 3' },
+    { id: 'Hadar', name: 'Female 4' },
+    { id: 'Izar', name: 'Male 4' },
+];
 
 export default function SettingsTab() {
   const {
@@ -24,10 +37,32 @@ export default function SettingsTab() {
   
   const [info, setInfo] = React.useState(companyInfo);
   const [logoPreview, setLogoPreview] = React.useState<string | null>(companyInfo.logo);
+  const [audioPreview, setAudioPreview] = React.useState<TextToSpeechOutput | null>(null);
+  const [isPreviewing, setIsPreviewing] = React.useState(false);
+
   const { toast } = useToast();
 
   const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInfo({ ...info, [e.target.name]: e.target.value });
+  };
+  
+  const handleVoiceChange = (voice: string) => {
+    setInfo({ ...info, ttsVoice: voice });
+  };
+
+  const handlePreviewVoice = async () => {
+      if (!info.ttsVoice) return;
+      setIsPreviewing(true);
+      setAudioPreview(null);
+      try {
+          const result = await textToSpeech({ text: "Ini adalah pratinjau suara yang dipilih.", voice: info.ttsVoice });
+          setAudioPreview(result);
+      } catch (error) {
+          console.error("Gagal membuat pratinjau suara:", error);
+          toast({ variant: "destructive", title: "Gagal", description: "Tidak dapat membuat pratinjau suara." });
+      } finally {
+          setIsPreviewing(false);
+      }
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,11 +100,12 @@ export default function SettingsTab() {
           const state = JSON.parse(event.target?.result as string);
           loadFullState(state);
           // Manually update local state after store hydration
-          setInfo(state.companyInfo);
-          setLogoPreview(state.companyInfo.logo);
+          setInfo(useAppStore.getState().companyInfo);
+          setLogoPreview(useAppStore.getState().companyInfo.logo);
           toast({ title: "Data Diimpor", description: "Aplikasi telah dimuat dengan data Anda." });
         } catch (error) {
-          toast({ variant: "destructive", title: "Gagal Impor", description: "File JSON tidak valid." });
+          console.error("Import error:", error);
+          toast({ variant: "destructive", title: "Gagal Impor", description: "File JSON tidak valid atau rusak." });
         }
       };
       reader.readAsText(e.target.files[0]);
@@ -85,12 +121,18 @@ export default function SettingsTab() {
     toast({ variant: "destructive", title: "Reset Berhasil", description: "Semua data telah dikosongkan." });
   }
 
+  // Effect to update local state when global state changes (e.g., after import)
+  React.useEffect(() => {
+    setInfo(companyInfo);
+    setLogoPreview(companyInfo.logo);
+  }, [companyInfo]);
+
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Informasi Perusahaan</CardTitle>
-          <CardDescription>Ubah detail perusahaan yang ditampilkan di header.</CardDescription>
+          <CardTitle>Pengaturan Umum</CardTitle>
+          <CardDescription>Ubah detail perusahaan dan preferensi aplikasi.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
@@ -116,7 +158,32 @@ export default function SettingsTab() {
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" value={info.email} onChange={handleInfoChange} />
           </div>
-          <Button onClick={handleSaveInfo}>Simpan Informasi</Button>
+          
+          <div className="space-y-2 pt-4 border-t">
+              <Label>Suara Text-to-Speech</Label>
+              <div className="flex items-center gap-2">
+                  <Select value={info.ttsVoice} onValueChange={handleVoiceChange}>
+                      <SelectTrigger>
+                          <SelectValue placeholder="Pilih suara..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                          {ttsVoices.map(voice => (
+                              <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>
+                          ))}
+                      </SelectContent>
+                  </Select>
+                  <Button variant="outline" size="icon" onClick={handlePreviewVoice} disabled={isPreviewing}>
+                      {isPreviewing ? <Loader2 className="animate-spin" /> : <Volume2 />}
+                  </Button>
+              </div>
+              {audioPreview && (
+                  <audio controls autoPlay className="w-full h-10 mt-2">
+                      <source src={audioPreview.media} type="audio/wav" />
+                  </audio>
+              )}
+          </div>
+
+          <Button onClick={handleSaveInfo}>Simpan Pengaturan</Button>
         </CardContent>
       </Card>
 

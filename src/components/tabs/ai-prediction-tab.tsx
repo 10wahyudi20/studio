@@ -29,7 +29,7 @@ const predictionSchema = z.object({
 type PredictionFormData = z.infer<typeof predictionSchema>;
 
 export default function AiPredictionTab() {
-  const { ducks, eggProduction } = useAppStore();
+  const { ducks, companyInfo } = useAppStore();
   const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(null);
   const [audio, setAudio] = React.useState<TextToSpeechOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -62,7 +62,7 @@ export default function AiPredictionTab() {
       
       setIsGeneratingAudio(true);
       try {
-        const audioResult = await textToSpeech(result.reasoning);
+        const audioResult = await textToSpeech({ text: result.reasoning, voice: companyInfo.ttsVoice });
         setAudio(audioResult);
       } catch (audioError) {
         console.error("Audio generation failed:", audioError);
