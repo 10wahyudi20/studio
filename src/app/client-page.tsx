@@ -15,6 +15,7 @@ import AiPredictionTab from "@/components/tabs/ai-prediction-tab";
 import SettingsTab from "@/components/tabs/settings-tab";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Toaster } from "@/components/ui/toaster";
+import { Separator } from "@/components/ui/separator";
 
 export default function ClientPage() {
   const loadState = useAppStore(state => state.loadState);
@@ -38,7 +39,7 @@ export default function ClientPage() {
       <Header />
       <main className="flex-grow">
         <Tabs defaultValue="home" className="w-full">
-          <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2">
+          <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2 bg-background/80 backdrop-blur-sm">
             <div className="px-4 sm:px-6 lg:px-8">
                 <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0">
                   <TabsTrigger value="home">Home</TabsTrigger>
@@ -51,6 +52,7 @@ export default function ClientPage() {
                   <TabsTrigger value="settings">Pengaturan</TabsTrigger>
                 </TabsList>
             </div>
+            <Separator className="mt-2" />
           </div>
           <div className="mt-4 px-4 sm:px-6 lg:px-8 pb-8">
               <TabsContent value="home"><HomeTab /></TabsContent>
