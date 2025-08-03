@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -144,7 +145,11 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
       <div className="container flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
-            <DuckIcon className="h-10 w-10 text-primary" data-ai-hint="duck logo"/>
+            {companyInfo.logo ? (
+                <Image src={companyInfo.logo} alt="Company Logo" width={40} height={40} className="h-10 w-10 rounded-lg object-cover bg-muted" data-ai-hint="company logo"/>
+            ) : (
+                <DuckIcon className="h-10 w-10 text-primary" data-ai-hint="duck logo"/>
+            )}
             <div className="text-center sm:text-left">
                 <h1 className="text-xl font-bold text-primary font-headline">
                     {companyInfo.name}
