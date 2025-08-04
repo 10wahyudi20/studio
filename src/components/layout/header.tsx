@@ -248,7 +248,7 @@ export default function Header() {
             <Dialog>
                 <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                        <Calculator className="h-5 w-5 text-blue-500" />
+                        <Calculator className="h-5 w-5 text-black dark:text-yellow-500" />
                         <span className="sr-only">Kalkulator</span>
                     </Button>
                 </DialogTrigger>
