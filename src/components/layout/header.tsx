@@ -58,8 +58,22 @@ const SimpleCalculator = () => {
         setWaitingForSecondOperand(false);
     };
 
+    const deleteLast = () => {
+        if (waitingForSecondOperand) return;
+        if (display.length > 1) {
+            setDisplay(display.slice(0, -1));
+        } else {
+            setDisplay("0");
+        }
+    };
+
     const performOperation = (nextOperator: string) => {
         const inputValue = parseFloat(display);
+
+        if (operator && waitingForSecondOperand) {
+            setOperator(nextOperator);
+            return;
+        }
 
         if (firstOperand === null) {
             setFirstOperand(inputValue);
@@ -104,6 +118,8 @@ const SimpleCalculator = () => {
         if (/\d/.test(btn)) inputDigit(btn);
         else if (btn === ".") inputDecimal();
         else if (btn === "=") handleEquals();
+        else if (btn === "DEL") deleteLast();
+        else if (btn === "AC") clearDisplay();
         else performOperation(btn);
     };
 
@@ -113,13 +129,17 @@ const SimpleCalculator = () => {
                 {display}
             </div>
             <div className="grid grid-cols-4 gap-2">
-                <Button onClick={clearDisplay} className="col-span-4 bg-destructive hover:bg-destructive/90">AC</Button>
+                <Button onClick={() => handleButtonClick('AC')} className="col-span-2 bg-destructive hover:bg-destructive/90">AC</Button>
+                <Button onClick={() => handleButtonClick('DEL')} className="col-span-2" variant="outline">DEL</Button>
                 {buttons.map(btn => (
                     <Button
                         key={btn}
                         onClick={() => handleButtonClick(btn)}
                         variant={/\d|\./.test(btn) ? "secondary" : "default"}
-                        className={btn === "=" ? "bg-accent hover:bg-accent/90" : ""}
+                        className={cn(
+                            btn === "=" ? "bg-accent hover:bg-accent/90" : "",
+                            btn.length > 1 ? "text-xs" : ""
+                        )}
                     >
                         {btn}
                     </Button>
