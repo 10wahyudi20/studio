@@ -362,8 +362,8 @@ export default function ProductionTab() {
                     <TableRow>
                       <TableHead>Tanggal</TableHead>
                       <TableHead>Hari</TableHead>
-                      <TableHead>Jumlah Telur</TableHead>
-                      <TableHead>Produktifitas</TableHead>
+                      <TableHead className="text-center">Jumlah Telur</TableHead>
+                      <TableHead className="text-center">Produktifitas</TableHead>
                       {ducks.map(duck => (
                         <TableHead key={duck.cage} className="text-center">
                           <div className="flex flex-col items-center justify-center h-full">
@@ -372,6 +372,7 @@ export default function ProductionTab() {
                           </div>
                         </TableHead>
                       ))}
+                      <TableHead className="text-center">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -405,9 +406,14 @@ export default function ProductionTab() {
                                 </TableCell>
                             );
                         })}
-                        <DailyDataForm production={day} onSave={handleDailySave}>
-                            <button id={`edit-daily-${day.date.toISOString()}`} className="hidden" />
-                        </DailyDataForm>
+                        <TableCell className="align-middle text-center">
+                            <DailyDataForm production={day} onSave={handleDailySave}>
+                                <button id={`edit-daily-${day.date.toISOString()}`} className="hidden" />
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <Edit className="h-4 w-4 text-green-500"/>
+                                </Button>
+                            </DailyDataForm>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
