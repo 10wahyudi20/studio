@@ -24,7 +24,7 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function LoginPage() {
-  const { login, companyInfo, loadState } = useAppStore();
+  const { login, companyInfo, loadState, isAuthenticated } = useAppStore();
   const router = useRouter();
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -36,8 +36,19 @@ export default function LoginPage() {
   // Load state on component mount to get credentials
   useEffect(() => {
     loadState();
-    setIsMounted(true);
   }, [loadState]);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isAuthenticated, router]);
+
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +64,7 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
   
-  if (!isMounted) {
+  if (!isMounted || isAuthenticated) {
      return (
         <div className="flex items-center justify-center h-screen bg-background">
             <div className="text-2xl font-semibold text-primary">Memuat...</div>
@@ -73,7 +84,7 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-background/80 backdrop-blur-sm">
+      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/20 backdrop-blur-lg border border-white/30 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                 <DuckIcon className="h-16 w-16 text-primary" />
