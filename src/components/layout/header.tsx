@@ -175,7 +175,7 @@ const SimpleCalculator = () => {
 
     return (
         <div className="p-4 bg-background rounded-lg shadow-lg w-64">
-            <div className="bg-muted text-right text-3xl font-code p-4 rounded-md mb-4 overflow-x-auto">
+            <div className="bg-muted text-right text-3xl font-code p-4 rounded-md mb-4 overflow-x-auto text-foreground">
                 {formatDisplay(display)}
             </div>
             <div className="grid grid-cols-4 gap-2">
@@ -248,7 +248,7 @@ export default function Header() {
             <Dialog>
                 <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                        <Calculator className="h-5 w-5" />
+                        <Calculator className="h-5 w-5 text-blue-500" />
                         <span className="sr-only">Kalkulator</span>
                     </Button>
                 </DialogTrigger>
@@ -275,5 +275,7 @@ export default function Header() {
     </header>
   );
 }
+
+    
 
     
