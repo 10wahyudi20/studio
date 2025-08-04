@@ -64,7 +64,7 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
   
-  if (!isMounted || isAuthenticated) {
+  if (!isMounted) {
      return (
         <div className="flex items-center justify-center h-screen bg-background">
             <div className="text-2xl font-semibold text-primary">Memuat...</div>
@@ -72,9 +72,16 @@ export default function LoginPage() {
     );
   }
 
+  // This check prevents rendering on the server if not authenticated, avoiding hydration mismatch for background image
+  if (isAuthenticated) {
+    return null;
+  }
+
   const backgroundStyle = companyInfo.loginBackground 
   ? { backgroundImage: `url(${companyInfo.loginBackground})` }
   : {};
+
+  const inputStyles = "bg-transparent border-white/30 placeholder:text-gray-300 dark:placeholder:text-gray-400 focus:ring-accent";
 
   return (
     <div 
@@ -102,6 +109,7 @@ export default function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 placeholder="Username Anda"
+                className={inputStyles}
               />
             </div>
             <div className="space-y-2">
@@ -114,8 +122,9 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Password Anda"
+                    className={inputStyles}
                 />
-                 <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
+                 <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8 text-white/70 hover:text-white" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     <span className="sr-only">{showPassword ? "Sembunyikan" : "Tampilkan"} password</span>
                 </Button>
