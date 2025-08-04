@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileDown, Loader2 } from "lucide-react";
+import { FileDown, Loader2, Eye } from "lucide-react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
@@ -23,6 +23,8 @@ export default function ReportsTab() {
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [selectedMonth, setSelectedMonth] = useState(String(currentMonth));
   const [isLoading, setIsLoading] = useState(false);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+
 
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
   const months = [
@@ -34,126 +36,133 @@ export default function ReportsTab() {
 
   const handleGenerateReport = () => {
     setIsLoading(true);
+    setPdfPreviewUrl(null);
     
-    const year = parseInt(selectedYear, 10);
-    const month = parseInt(selectedMonth, 10);
+    setTimeout(() => {
+        const year = parseInt(selectedYear, 10);
+        const month = parseInt(selectedMonth, 10);
 
-    // Filter data for the selected month and year
-    const dailyProdData = eggProduction.daily.filter(d => {
-        const date = new Date(d.date);
-        return date.getFullYear() === year && date.getMonth() + 1 === month;
-    });
-
-    const financeData = finance.filter(t => {
-        const date = new Date(t.date);
-        return date.getFullYear() === year && date.getMonth() + 1 === month;
-    });
-
-    if (dailyProdData.length === 0 && financeData.length === 0) {
-        toast({
-            variant: "destructive",
-            title: "Data Tidak Ditemukan",
-            description: `Tidak ada data produksi atau keuangan untuk ${months.find(m => m.value === month)?.name} ${year}.`
+        // Filter data for the selected month and year
+        const dailyProdData = eggProduction.daily.filter(d => {
+            const date = new Date(d.date);
+            return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
-        setIsLoading(false);
-        return;
-    }
 
-    try {
-        const doc = new jsPDF();
-        const monthName = months.find(m => m.value === month)?.name || '';
-
-        // --- HEADER ---
-        doc.setFontSize(20);
-        doc.text(`Laporan Bulanan - ${companyInfo.name}`, 14, 22);
-        doc.setFontSize(11);
-        doc.text(`Periode: ${monthName} ${year}`, 14, 30);
-        doc.setFontSize(9);
-        doc.text(`${companyInfo.address} | ${companyInfo.phone} | ${companyInfo.email}`, 14, 35);
-
-        let finalY = 45;
-
-        // --- RINGKASAN ---
-        const totalDucks = ducks.reduce((sum, d) => sum + d.quantity, 0);
-        const totalEggsMonth = dailyProdData.reduce((sum, d) => sum + d.totalEggs, 0);
-        const income = financeData.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
-        const expense = financeData.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
-
-        autoTable(doc, {
-            startY: finalY,
-            head: [['Ringkasan Umum']],
-            body: [
-                ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} Ekor`],
-                ['Total Produksi Telur', `${totalEggsMonth.toLocaleString('id-ID')} Butir`],
-                ['Total Pemasukan', `Rp ${income.toLocaleString('id-ID')}`],
-                ['Total Pengeluaran', `Rp ${expense.toLocaleString('id-ID')}`],
-                ['Laba / Rugi Bersih', `Rp ${(income - expense).toLocaleString('id-ID')}`],
-            ],
-            theme: 'grid',
-            headStyles: { fillColor: [66, 165, 245] }
+        const financeData = finance.filter(t => {
+            const date = new Date(t.date);
+            return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
-        finalY = (doc as any).lastAutoTable.finalY + 10;
-        
-        // --- DETAIL PRODUKSI HARIAN ---
-        if(dailyProdData.length > 0) {
-             autoTable(doc, {
-                startY: finalY,
-                head: [['Tanggal', 'Jumlah Telur (Butir)', 'Produktifitas (%)']],
-                body: dailyProdData.map(d => [
-                    format(new Date(d.date), 'dd-MM-yyyy'),
-                    d.totalEggs.toLocaleString('id-ID'),
-                    `${d.productivity.toFixed(2)} %`
-                ]),
-                theme: 'striped',
-                headStyles: { fillColor: [33, 150, 243] },
-                didDrawPage: (data) => { finalY = data.cursor?.y || finalY; }
+
+        if (dailyProdData.length === 0 && financeData.length === 0) {
+            toast({
+                variant: "destructive",
+                title: "Data Tidak Ditemukan",
+                description: `Tidak ada data produksi atau keuangan untuk ${months.find(m => m.value === month)?.name} ${year}.`
             });
-            finalY = (doc as any).lastAutoTable.finalY + 10;
+            setIsLoading(false);
+            return;
         }
 
-        // --- DETAIL KEUANGAN ---
-        if(financeData.length > 0) {
+        try {
+            const doc = new jsPDF();
+            const monthName = months.find(m => m.value === month)?.name || '';
+
+            // --- HEADER ---
+            doc.setFontSize(20);
+            doc.text(`Laporan Bulanan - ${companyInfo.name}`, 14, 22);
+            doc.setFontSize(11);
+            doc.text(`Periode: ${monthName} ${year}`, 14, 30);
+            doc.setFontSize(9);
+            doc.text(`${companyInfo.address} | ${companyInfo.phone} | ${companyInfo.email}`, 14, 35);
+
+            let finalY = 45;
+
+            // --- RINGKASAN ---
+            const totalDucks = ducks.reduce((sum, d) => sum + d.quantity, 0);
+            const totalEggsMonth = dailyProdData.reduce((sum, d) => sum + d.totalEggs, 0);
+            const income = financeData.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
+            const expense = financeData.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+
             autoTable(doc, {
                 startY: finalY,
-                head: [['Tanggal', 'Uraian', 'Jenis', 'Total (Rp)']],
-                body: financeData.map(t => [
-                    format(new Date(t.date), 'dd-MM-yyyy'),
-                    t.description,
-                    t.type === 'debit' ? 'Pemasukan' : 'Pengeluaran',
-                    t.total.toLocaleString('id-ID')
-                ]),
-                theme: 'striped',
-                headStyles: { fillColor: [33, 150, 243] },
-                didDrawPage: (data) => { finalY = data.cursor?.y || finalY; }
-            });
-            finalY = (doc as any).lastAutoTable.finalY + 10;
-        }
-        
-        // --- STOK PAKAN ---
-         if(feed.length > 0) {
-            autoTable(doc, {
-                startY: finalY,
-                head: [['Stok Pakan (Laporan Dibuat)']],
-                body: feed.map(f => [
-                    `${f.name} (${f.supplier})`,
-                    `${f.stock.toLocaleString('id-ID')} Kg`
-                ]),
+                head: [['Ringkasan Umum']],
+                body: [
+                    ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} Ekor`],
+                    ['Total Produksi Telur', `${totalEggsMonth.toLocaleString('id-ID')} Butir`],
+                    ['Total Pemasukan', `Rp ${income.toLocaleString('id-ID')}`],
+                    ['Total Pengeluaran', `Rp ${expense.toLocaleString('id-ID')}`],
+                    ['Laba / Rugi Bersih', `Rp ${(income - expense).toLocaleString('id-ID')}`],
+                ],
                 theme: 'grid',
-                headStyles: { fillColor: [129, 199, 132] },
-                 didDrawPage: (data) => { finalY = data.cursor?.y || finalY; }
+                headStyles: { fillColor: [66, 165, 245] }
             });
             finalY = (doc as any).lastAutoTable.finalY + 10;
+            
+            // --- DETAIL PRODUKSI HARIAN ---
+            if(dailyProdData.length > 0) {
+                 autoTable(doc, {
+                    startY: finalY,
+                    head: [['Tanggal', 'Jumlah Telur (Butir)', 'Produktifitas (%)']],
+                    body: dailyProdData.map(d => [
+                        format(new Date(d.date), 'dd-MM-yyyy'),
+                        d.totalEggs.toLocaleString('id-ID'),
+                        `${d.productivity.toFixed(2)} %`
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [33, 150, 243] },
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                });
+                finalY = (doc as any).lastAutoTable.finalY + 10;
+            }
+
+            // --- DETAIL KEUANGAN ---
+            if(financeData.length > 0) {
+                autoTable(doc, {
+                    startY: finalY,
+                    head: [['Tanggal', 'Uraian', 'Jenis', 'Total (Rp)']],
+                    body: financeData.map(t => [
+                        format(new Date(t.date), 'dd-MM-yyyy'),
+                        t.description,
+                        t.type === 'debit' ? 'Pemasukan' : 'Pengeluaran',
+                        t.total.toLocaleString('id-ID')
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [33, 150, 243] },
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                });
+                finalY = (doc as any).lastAutoTable.finalY + 10;
+            }
+            
+            // --- STOK PAKAN ---
+             if(feed.length > 0) {
+                autoTable(doc, {
+                    startY: finalY,
+                    head: [['Stok Pakan (Saat Laporan Dibuat)']],
+                    body: [
+                        ...feed.map(f => [
+                            `${f.name} (${f.supplier})`,
+                            `${f.stock.toLocaleString('id-ID')} Kg`
+                        ]),
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [129, 199, 132] },
+                     didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                });
+                finalY = (doc as any).lastAutoTable.finalY + 10;
+            }
+            
+            const pdfDataUri = doc.output('datauristring');
+            setPdfPreviewUrl(pdfDataUri);
+
+            toast({ title: "Pratinjau Laporan Dibuat!", description: "Laporan kini ditampilkan di bawah." });
+
+        } catch (error) {
+            console.error("Failed to generate PDF", error);
+            toast({ variant: "destructive", title: "Gagal Membuat Laporan", description: "Terjadi kesalahan saat membuat file PDF." });
+        } finally {
+            setIsLoading(false);
         }
-
-        doc.save(`Laporan_CluckSmart_${monthName}_${year}.pdf`);
-        toast({ title: "Laporan Dibuat!", description: "File PDF telah berhasil diunduh." });
-
-    } catch (error) {
-        console.error("Failed to generate PDF", error);
-        toast({ variant: "destructive", title: "Gagal Membuat Laporan", description: "Terjadi kesalahan saat membuat file PDF." });
-    } finally {
-        setIsLoading(false);
-    }
+    }, 500); // Add a small delay for better UX
   };
 
   return (
@@ -196,16 +205,37 @@ export default function ReportsTab() {
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <FileDown className="mr-2 h-4 w-4" />
+              <Eye className="mr-2 h-4 w-4" />
             )}
-            Buat & Unduh Laporan
+            Tampilkan Pratinjau
           </Button>
         </CardContent>
       </Card>
       
-      <div className="text-center text-muted-foreground p-4 border-2 border-dashed rounded-lg">
-        <p>Laporan yang dihasilkan akan mencakup ringkasan umum, detail produksi harian, rincian keuangan, dan snapshot stok pakan untuk periode yang dipilih.</p>
-      </div>
+      {isLoading && (
+         <div className="text-center p-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+            <p className="mt-2 text-muted-foreground">Membuat pratinjau laporan...</p>
+        </div>
+      )}
+
+      {pdfPreviewUrl && (
+        <Card>
+            <CardHeader>
+                <CardTitle>Pratinjau Laporan</CardTitle>
+                <CardDescription>
+                    Periksa laporan di bawah ini. Anda dapat mengunduh atau mencetaknya dari kontrol pratinjau.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <iframe
+                    src={pdfPreviewUrl}
+                    className="w-full h-[700px] border rounded-md"
+                    title="Pratinjau Laporan"
+                ></iframe>
+            </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
