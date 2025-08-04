@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,10 +31,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load state on component mount to get credentials
-  React.useEffect(() => {
+  useEffect(() => {
     loadState();
+    setIsMounted(true);
   }, [loadState]);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -50,6 +52,14 @@ export default function LoginPage() {
       }
     }, 500); // Simulate network delay
   };
+  
+  if (!isMounted) {
+     return (
+        <div className="flex items-center justify-center h-screen bg-background">
+            <div className="text-2xl font-semibold text-primary">Memuat...</div>
+        </div>
+    );
+  }
 
   const backgroundStyle = companyInfo.loginBackground 
   ? { backgroundImage: `url(${companyInfo.loginBackground})` }
