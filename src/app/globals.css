@@ -81,4 +81,22 @@ body {
       opacity: 0.3;
     }
   }
+
+  .animated-rainbow-text {
+    animation: rainbow 5s linear infinite;
+    background-image: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 100%;
+  }
+
+  @keyframes rainbow {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: -200% 50%;
+    }
+  }
 }

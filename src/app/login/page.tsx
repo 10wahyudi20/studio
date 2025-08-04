@@ -44,10 +44,10 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isMounted && isAuthenticated) {
       router.replace("/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isMounted, router]);
 
 
   const handleLogin = (e: React.FormEvent) => {
@@ -64,6 +64,7 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
   
+  // Wait until mount is complete to avoid hydration mismatch
   if (!isMounted) {
      return (
         <div className="flex items-center justify-center h-screen bg-background">
@@ -91,12 +92,12 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/20 backdrop-blur-lg border border-white/30 dark:border-slate-500/30">
+      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/20 backdrop-blur-md border border-white/30 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                 <DuckIcon className="h-16 w-16 text-primary" />
             </div>
-          <CardTitle>CluckSmart</CardTitle>
+          <CardTitle className="animated-rainbow-text">LOGIN</CardTitle>
           <CardDescription>Silakan masuk untuk melanjutkan ke dasbor Anda</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
