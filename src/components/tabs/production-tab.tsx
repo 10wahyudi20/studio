@@ -365,9 +365,11 @@ export default function ProductionTab() {
                       <TableHead>Jumlah Telur</TableHead>
                       <TableHead>Produktifitas</TableHead>
                       {ducks.map(duck => (
-                        <TableHead key={duck.cage} className="align-middle text-center">
-                          <div>Kdg {duck.cage}</div>
-                          <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                        <TableHead key={duck.cage} className="text-center">
+                          <div className="flex flex-col items-center justify-center h-full">
+                            <div>Kdg {duck.cage}</div>
+                            <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                          </div>
                         </TableHead>
                       ))}
                        <TableHead className="text-right">Aksi</TableHead>
@@ -383,17 +385,17 @@ export default function ProductionTab() {
                       .reverse()
                       .map((day, index) => (
                       <TableRow key={index}>
-                        <TableCell>{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
-                        <TableCell>{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
-                        <TableCell>{day.totalEggs}</TableCell>
-                        <TableCell>{day.productivity.toFixed(2)}%</TableCell>
+                        <TableCell className="align-middle">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell className="align-middle">{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
+                        <TableCell className="align-middle">{day.totalEggs}</TableCell>
+                        <TableCell className="align-middle">{day.productivity.toFixed(2)}%</TableCell>
                         {ducks.map(duck => {
                             const production = day.perCage[duck.cage];
                             const productivity = duck.quantity > 0 && production != null
                                 ? (production / duck.quantity * 100)
                                 : 0;
                             return (
-                                <TableCell key={duck.cage} className="p-0 text-center">
+                                <TableCell key={duck.cage} className="p-0 text-center align-middle">
                                     <div className="p-4">{production ?? '-'}</div>
                                     <div className={cn("text-xs py-0.5", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
@@ -401,7 +403,7 @@ export default function ProductionTab() {
                                 </TableCell>
                             );
                         })}
-                        <TableCell className="text-right">
+                        <TableCell className="text-right align-middle">
                            <DailyDataForm production={day} onSave={handleDailySave}>
                                 <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-600 h-8 w-8">
                                     <Edit className="h-4 w-4" />
