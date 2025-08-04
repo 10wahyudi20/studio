@@ -65,7 +65,7 @@ export default function LoginPage() {
         toast({ variant: "destructive", title: "Login Gagal", description: "Username atau password salah." });
         setIsLoading(false);
         setHasLoginError(true);
-        setTimeout(() => setHasLoginError(false), 4000);
+        setTimeout(() => setHasLoginError(false), 7000);
       }
     }, 500); // Simulate network delay
   };
@@ -98,7 +98,7 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/30 dark:bg-black/40 backdrop-blur-xl border-white/20 dark:border-slate-500/30">
+      <Card className="w-full max-w-sm bg-white/10 dark:bg-black/20 backdrop-blur-lg border-white/20 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                  {companyInfo.logo ? (

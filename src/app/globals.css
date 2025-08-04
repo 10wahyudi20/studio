@@ -49,7 +49,7 @@ body {
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 207 90% 61%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -101,7 +101,7 @@ body {
   }
 
   .animate-shake-red {
-    animation: shake-red 0.5s ease-in-out, blink-red 1s 4;
+    animation: shake-red 0.5s ease-in-out, blink-red 1s 7;
   }
 
   @keyframes shake-red {
