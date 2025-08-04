@@ -262,7 +262,7 @@ export default function ProductionTab() {
     .reduce((sum, d) => sum + d.totalEggs, 0);
   
   const getProductivityColor = (p: number) => {
-    if (p >= 100) return 'bg-blue-400 text-black';
+    if (p > 100) return 'bg-blue-400 text-black';
     if (p >= 90) return 'bg-blue-800 text-white';
     if (p >= 80) return 'bg-green-500 text-black';
     if (p >= 70) return 'bg-green-800 text-white';
@@ -360,10 +360,10 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Hari</TableHead>
-                      <TableHead className="text-center">Jumlah Telur</TableHead>
-                      <TableHead className="text-center">Produktifitas</TableHead>
+                      <TableHead className="align-middle">Tanggal</TableHead>
+                      <TableHead className="align-middle">Hari</TableHead>
+                      <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
+                      <TableHead className="text-center align-middle">Produktifitas</TableHead>
                       {ducks.map(duck => (
                         <TableHead key={duck.cage} className="text-center">
                           <div className="flex flex-col items-center justify-center h-full">
@@ -372,7 +372,7 @@ export default function ProductionTab() {
                           </div>
                         </TableHead>
                       ))}
-                      <TableHead className="text-center">Aksi</TableHead>
+                      <TableHead className="text-center align-middle">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -385,7 +385,7 @@ export default function ProductionTab() {
                       .reverse()
                       .map((day, index) => (
                       <TableRow key={index} onDoubleClick={() => {
-                          const formTrigger = document.getElementById(`edit-daily-${day.date.toISOString()}`);
+                          const formTrigger = document.getElementById(`edit-daily-btn-${day.date.toISOString()}`);
                           formTrigger?.click();
                       }}>
                         <TableCell className="align-middle">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
@@ -400,18 +400,20 @@ export default function ProductionTab() {
                             return (
                                 <TableCell key={duck.cage} className="p-0 text-center align-middle">
                                     <div className="py-4">{production ?? '-'}</div>
-                                    <div className={cn("text-xs py-0.5", getProductivityColor(productivity))}>
+                                    <div className={cn("text-xs py-0.5 w-full", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
                                     </div>
                                 </TableCell>
                             );
                         })}
-                        <TableCell className="align-middle text-center">
+                        <TableCell className="text-center align-middle">
                             <DailyDataForm production={day} onSave={handleDailySave}>
-                                <button id={`edit-daily-${day.date.toISOString()}`} className="hidden" />
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Edit className="h-4 w-4 text-green-500"/>
-                                </Button>
+                                <div>
+                                    <button id={`edit-daily-trigger-${day.date.toISOString()}`} className="hidden" />
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" id={`edit-daily-btn-${day.date.toISOString()}`}>
+                                        <Edit className="h-4 w-4 text-green-500"/>
+                                    </Button>
+                                </div>
                             </DailyDataForm>
                         </TableCell>
                       </TableRow>
@@ -581,3 +583,4 @@ export default function ProductionTab() {
     </div>
   );
 }
+
