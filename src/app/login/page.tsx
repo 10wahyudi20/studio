@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -92,10 +93,14 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/30 dark:border-slate-500/30">
+      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/30 backdrop-blur-lg border border-white/30 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
-                <DuckIcon className="h-16 w-16 text-primary" />
+                 {companyInfo.logo ? (
+                    <Image src={companyInfo.logo} alt="Company Logo" width={64} height={64} className="h-16 w-16 rounded-lg object-cover" data-ai-hint="company logo"/>
+                ) : (
+                    <DuckIcon className="h-16 w-16 text-primary" data-ai-hint="duck logo"/>
+                )}
             </div>
           <CardTitle className="animated-rainbow-text">Login</CardTitle>
           <CardDescription>Silakan masuk untuk melanjutkan ke dasbor Anda</CardDescription>
