@@ -34,6 +34,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [hasLoginError, setHasLoginError] = useState(false);
 
   // Load state on component mount to get credentials
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function LoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setHasLoginError(false);
     setTimeout(() => {
       if (login(username, password)) {
         toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
@@ -62,6 +64,8 @@ export default function LoginPage() {
       } else {
         toast({ variant: "destructive", title: "Login Gagal", description: "Username atau password salah." });
         setIsLoading(false);
+        setHasLoginError(true);
+        setTimeout(() => setHasLoginError(false), 4000);
       }
     }, 500); // Simulate network delay
   };
@@ -94,7 +98,7 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/30 backdrop-blur-lg border border-white/30 dark:border-slate-500/30">
+      <Card className="w-full max-w-sm bg-white/30 dark:bg-black/40 backdrop-blur-xl border-white/20 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                  {companyInfo.logo ? (
@@ -139,7 +143,7 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className={cn("w-full", hasLoginError && "animate-shake-red")} disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Masuk
             </Button>

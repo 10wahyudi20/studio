@@ -99,4 +99,21 @@ body {
       background-position: -200% 50%;
     }
   }
+
+  .animate-shake-red {
+    animation: shake-red 0.5s ease-in-out, blink-red 1s 4;
+  }
+
+  @keyframes shake-red {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+
+  @keyframes blink-red {
+    50% {
+      background-color: hsl(var(--destructive));
+      border-color: hsl(var(--destructive));
+    }
+  }
 }
