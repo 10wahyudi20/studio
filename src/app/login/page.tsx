@@ -92,12 +92,12 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/20 backdrop-blur-md border border-white/30 dark:border-slate-500/30">
+      <Card className="w-full max-w-sm bg-white/10 dark:bg-black/20 backdrop-blur-xl border border-white/30 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                 <DuckIcon className="h-16 w-16 text-primary" />
             </div>
-          <CardTitle className="animated-rainbow-text">LOGIN</CardTitle>
+          <CardTitle className="animated-rainbow-text">Login</CardTitle>
           <CardDescription>Silakan masuk untuk melanjutkan ke dasbor Anda</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
