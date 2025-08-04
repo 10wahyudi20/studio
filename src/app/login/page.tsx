@@ -8,10 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Wifi } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -88,7 +89,7 @@ export default function LoginPage() {
   return (
     <div 
       className={cn(
-          "flex items-center justify-center min-h-screen bg-background p-4",
+          "relative flex items-center justify-center min-h-screen bg-background p-4",
           companyInfo.loginBackground && "bg-cover bg-center"
       )}
       style={backgroundStyle}
@@ -145,6 +146,21 @@ export default function LoginPage() {
           </CardFooter>
         </form>
       </Card>
+      <div className="fixed bottom-4 right-4">
+        <TooltipProvider>
+            <Tooltip>
+            <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <Wifi className="h-5 w-5 text-green-500" />
+                    <span className="sr-only">Online</span>
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Status: Online</p>
+            </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 }
