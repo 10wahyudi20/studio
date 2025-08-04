@@ -44,8 +44,17 @@ const SimpleCalculator = () => {
         const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         return decimalPart !== undefined ? `${formattedInteger},${decimalPart}` : formattedInteger;
     };
+
+    const formattedDisplayValue = formatDisplay(display);
+    const displayFontSizeClass = () => {
+        const len = formattedDisplayValue.length;
+        if (len > 16) return 'text-xl';
+        if (len > 9) return 'text-2xl';
+        return 'text-3xl';
+    }
     
     const inputDigit = (digit: string) => {
+        if (display.replace(/[.,]/g, '').length >= 15 && !waitingForSecondOperand) return;
         if (waitingForSecondOperand) {
             setDisplay(digit);
             setWaitingForSecondOperand(false);
@@ -84,7 +93,7 @@ const SimpleCalculator = () => {
 
     const performOperation = (nextOperator: string) => {
         const inputValue = parseFloat(display.replace(/\./g, '').replace(',', '.'));
-        const formattedDisplay = formatDisplay(display.replace(',', '.'));
+        const formattedDisplayForHistory = formatDisplay(display.replace(',', '.'));
 
         if (operator && waitingForSecondOperand) {
             setOperator(nextOperator);
@@ -94,13 +103,13 @@ const SimpleCalculator = () => {
 
         if (firstOperand === null) {
             setFirstOperand(inputValue);
-            setHistory(`${formattedDisplay} ${nextOperator} `);
+            setHistory(`${formattedDisplayForHistory} ${nextOperator} `);
         } else if (operator) {
             const result = calculate(firstOperand, inputValue, operator);
             const resultString = String(result).replace('.', ',');
             setDisplay(resultString);
             setFirstOperand(result);
-            setHistory(prev => `${prev}${formattedDisplay} ${nextOperator} `);
+            setHistory(prev => `${prev}${formattedDisplayForHistory} ${nextOperator} `);
         }
 
         setWaitingForSecondOperand(true);
@@ -123,9 +132,9 @@ const SimpleCalculator = () => {
             const inputValue = parseFloat(display.replace(/\./g, '').replace(',', '.'));
             const result = calculate(firstOperand, inputValue, operator);
             const resultString = String(result).replace('.', ',');
-            const formattedDisplay = formatDisplay(display.replace(',', '.'));
+            const formattedDisplayForHistory = formatDisplay(display.replace(',', '.'));
             
-            setHistory(prev => `${prev}${formattedDisplay} =`);
+            setHistory(prev => `${prev}${formattedDisplayForHistory} =`);
             setDisplay(resultString);
             setFirstOperand(null);
             setOperator(null);
@@ -168,27 +177,27 @@ const SimpleCalculator = () => {
     }, [display, firstOperand, operator, waitingForSecondOperand]);
 
     const buttons = [
-        "AC", "DEL", "%", "/",
-        "7", "8", "9", "*",
-        "4", "5", "6", "-",
-        "1", "2", "3", "+",
-        "0", ",", "="
-      ];
-  
-      const getButtonClass = (btn: string) => {
-          if (btn === "AC") return "bg-destructive hover:bg-destructive/90";
-          if (btn === "0") return "col-span-2";
-          if (["/", "*", "-", "+", "="].includes(btn)) return "bg-accent hover:bg-accent/90";
-          if (["DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90";
-          return "bg-secondary hover:bg-secondary/80";
-      };
+      "AC", "DEL", "%", "/",
+      "7", "8", "9", "*",
+      "4", "5", "6", "-",
+      "1", "2", "3", "+",
+      "0", ",", "="
+    ];
+
+    const getButtonClass = (btn: string) => {
+        if (btn === "AC") return "bg-destructive hover:bg-destructive/90";
+        if (btn === "0") return "col-span-2";
+        if (["/", "*", "-", "+", "="].includes(btn)) return "bg-accent hover:bg-accent/90";
+        if (["DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90";
+        return "bg-secondary hover:bg-secondary/80";
+    };
 
     return (
         <div className="p-4 bg-background rounded-lg shadow-lg w-64">
             <div className="bg-muted text-right p-4 rounded-md mb-4 text-foreground">
                  <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
-                 <div className="text-3xl font-code overflow-x-auto">
-                    {formatDisplay(display)}
+                 <div className={cn("font-code overflow-x-auto", displayFontSizeClass())}>
+                    {formattedDisplayValue}
                  </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
