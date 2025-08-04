@@ -151,19 +151,28 @@ const SimpleCalculator = () => {
     }, [display, firstOperand, operator, waitingForSecondOperand]);
 
     const buttons = [
-        "7", "8", "9", "/",
-        "4", "5", "6", "*",
-        "1", "2", "3", "-",
-        "0", ".", "=", "+"
-    ];
-    
-    const formatDisplay = (value: string) => {
-        if (value === "Infinity" || value === "-Infinity") return "Error";
-        const [integerPart, decimalPart] = value.split(',');
-        const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        return decimalPart !== undefined ? `${formattedInteger},${decimalPart}` : formattedInteger;
-    };
-
+        "AC", "DEL", "%", "/",
+        "7", "8", "9", "*",
+        "4", "5", "6", "-",
+        "1", "2", "3", "+",
+        "0", ".", "="
+      ];
+      
+      const formatDisplay = (value: string) => {
+          if (value === "Infinity" || value === "-Infinity") return "Error";
+          const [integerPart, decimalPart] = value.split(',');
+          const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          return decimalPart !== undefined ? `${formattedInteger},${decimalPart}` : formattedInteger;
+      };
+  
+      const getButtonClass = (btn: string) => {
+          if (btn === "AC") return "col-span-2 bg-destructive hover:bg-destructive/90";
+          if (btn === "0") return "col-span-2";
+          if (/[/*\-+]/.test(btn)) return "bg-accent hover:bg-accent/90";
+          if (btn === "=") return "bg-primary hover:bg-primary/90";
+          if (["AC", "DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90";
+          return "bg-secondary hover:bg-secondary/80";
+      };
 
     return (
         <div className="p-4 bg-background rounded-lg shadow-lg w-64">
@@ -171,18 +180,11 @@ const SimpleCalculator = () => {
                 {formatDisplay(display)}
             </div>
             <div className="grid grid-cols-4 gap-2">
-                <Button onClick={() => handleButtonClick('AC')} className="col-span-2 bg-destructive hover:bg-destructive/90">AC</Button>
-                <Button onClick={() => handleButtonClick('DEL')} variant="outline">DEL</Button>
-                {buttons.map(btn => (
+                 {buttons.map(btn => (
                     <Button
                         key={btn}
                         onClick={() => handleButtonClick(btn)}
-                        variant={/\d|\./.test(btn) ? "secondary" : "default"}
-                        className={cn(
-                            btn === "=" ? "bg-accent hover:bg-accent/90" : "",
-                            btn.length > 1 ? "text-xs" : "",
-                            btn === "/" || btn === "*" || btn === "-" || btn === "+" ? "" : ""
-                        )}
+                        className={cn(getButtonClass(btn))}
                     >
                         {btn}
                     </Button>
