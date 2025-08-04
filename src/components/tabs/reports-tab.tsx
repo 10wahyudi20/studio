@@ -45,10 +45,11 @@ export default function ReportsTab() {
 
   const handleGenerateReport = () => {
     setIsLoading(true);
+    // Revoke any existing URL before creating a new one
     if (pdfPreviewUrl) {
       URL.revokeObjectURL(pdfPreviewUrl);
-      setPdfPreviewUrl(null);
     }
+    setPdfPreviewUrl(null);
     
     setTimeout(() => {
         const year = parseInt(selectedYear, 10);
