@@ -261,6 +261,20 @@ export default function ProductionTab() {
     })
     .reduce((sum, d) => sum + d.totalEggs, 0);
   
+  const getProductivityColor = (p: number) => {
+    if (p >= 100) return 'bg-blue-400 text-black';
+    if (p >= 90) return 'bg-blue-800 text-white';
+    if (p >= 80) return 'bg-green-500 text-black';
+    if (p >= 70) return 'bg-green-800 text-white';
+    if (p >= 60) return 'bg-yellow-400 text-black';
+    if (p >= 50) return 'bg-yellow-600 text-black';
+    if (p >= 40) return 'bg-red-500 text-black';
+    if (p >= 30) return 'bg-red-800 text-white';
+    if (p >= 20) return 'bg-gray-800 text-white';
+    if (p > 0) return 'bg-black text-white';
+    return '';
+  };
+
   const StatCard = ({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) => (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -353,7 +367,7 @@ export default function ProductionTab() {
                       {ducks.map(duck => (
                         <TableHead key={duck.cage}>
                           Kdg {duck.cage}
-                          <div className="font-normal text-xs">({duck.quantity} ekor)</div>
+                          <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
                         </TableHead>
                       ))}
                        <TableHead className="text-right">Aksi</TableHead>
@@ -376,12 +390,14 @@ export default function ProductionTab() {
                         {ducks.map(duck => {
                             const production = day.perCage[duck.cage];
                             const productivity = duck.quantity > 0 && production != null
-                                ? (production / duck.quantity * 100).toFixed(1)
-                                : '0.0';
+                                ? (production / duck.quantity * 100)
+                                : 0;
                             return (
-                                <TableCell key={duck.cage}>
-                                    <div>{production ?? '-'}</div>
-                                    <div className="text-xs text-muted-foreground">{productivity}%</div>
+                                <TableCell key={duck.cage} className="p-0 text-center">
+                                    <div className="p-4">{production ?? '-'}</div>
+                                    <div className={cn("text-xs py-0.5", getProductivityColor(productivity))}>
+                                      {productivity.toFixed(1)}%
+                                    </div>
                                 </TableCell>
                             );
                         })}
@@ -559,5 +575,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
