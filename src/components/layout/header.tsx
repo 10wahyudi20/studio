@@ -92,7 +92,7 @@ const SimpleCalculator = () => {
             case "+": return first + second;
             case "-": return first - second;
             case "*": return first * second;
-            case "/": return first / second;
+            case "/": return second !== 0 ? first / second : Infinity;
             default: return second;
         }
     };
@@ -106,14 +106,7 @@ const SimpleCalculator = () => {
             setWaitingForSecondOperand(false);
         }
     };
-
-    const buttons = [
-        "7", "8", "9", "/",
-        "4", "5", "6", "*",
-        "1", "2", "3", "-",
-        "0", ".", "=", "+"
-    ];
-
+    
     const handleButtonClick = (btn: string) => {
         if (/\d/.test(btn)) inputDigit(btn);
         else if (btn === ".") inputDecimal();
@@ -123,6 +116,38 @@ const SimpleCalculator = () => {
         else performOperation(btn);
     };
 
+    React.useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const { key } = event;
+            if (/\d/.test(key)) {
+                handleButtonClick(key);
+            } else if (key === '.') {
+                handleButtonClick('.');
+            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                handleButtonClick(key);
+            } else if (key === 'Enter' || key === '=') {
+                handleButtonClick('=');
+            } else if (key === 'Backspace') {
+                handleButtonClick('DEL');
+            } else if (key === 'Escape') {
+                handleButtonClick('AC');
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [display, firstOperand, operator, waitingForSecondOperand]); // Add dependencies
+
+    const buttons = [
+        "7", "8", "9", "/",
+        "4", "5", "6", "*",
+        "1", "2", "3", "-",
+        "0", ".", "=", "+"
+    ];
+
+
     return (
         <div className="p-4 bg-background rounded-lg shadow-lg w-64">
             <div className="bg-muted text-right text-3xl font-code p-4 rounded-md mb-4 overflow-x-auto">
@@ -130,7 +155,7 @@ const SimpleCalculator = () => {
             </div>
             <div className="grid grid-cols-4 gap-2">
                 <Button onClick={() => handleButtonClick('AC')} className="col-span-2 bg-destructive hover:bg-destructive/90">AC</Button>
-                <Button onClick={() => handleButtonClick('DEL')} className="col-span-2" variant="outline">DEL</Button>
+                <Button onClick={() => handleButtonClick('DEL')} variant="outline">DEL</Button>
                 {buttons.map(btn => (
                     <Button
                         key={btn}
@@ -138,12 +163,26 @@ const SimpleCalculator = () => {
                         variant={/\d|\./.test(btn) ? "secondary" : "default"}
                         className={cn(
                             btn === "=" ? "bg-accent hover:bg-accent/90" : "",
-                            btn.length > 1 ? "text-xs" : ""
+                            btn.length > 1 ? "text-xs" : "",
+                            btn === "/" || btn === "*" || btn === "-" || btn === "+" ? "col-start-4" : ""
                         )}
                     >
                         {btn}
                     </Button>
-                ))}
+                )).reduce((acc, btn, i) => {
+                    if ((i + 1) % 4 === 0 && i !== 0) {
+                        const row = acc.splice(-3);
+                        acc.push(
+                            <React.Fragment key={`row-${i}`}>
+                                {row}
+                                {btn}
+                            </React.Fragment>
+                        );
+                    } else {
+                        acc.push(btn);
+                    }
+                    return acc;
+                }, [] as React.ReactNode[])}
             </div>
         </div>
     );
@@ -197,7 +236,7 @@ export default function Header() {
                         <span className="sr-only">Kalkulator</span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-min p-0 bg-transparent border-0">
+                <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none">
                     <DialogHeader className="sr-only">
                         <DialogTitle>Kalkulator</DialogTitle>
                         <DialogDescription>
@@ -220,5 +259,3 @@ export default function Header() {
     </header>
   );
 }
-
-    
