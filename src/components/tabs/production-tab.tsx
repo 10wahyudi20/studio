@@ -370,7 +370,6 @@ export default function ProductionTab() {
                           </div>
                         </TableHead>
                       ))}
-                       <TableHead className="text-center align-middle">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -398,19 +397,12 @@ export default function ProductionTab() {
                             return (
                                 <TableCell key={duck.cage} className="p-0 text-center align-middle">
                                     <div className="py-4">{production ?? '-'}</div>
-                                    <div className={cn("text-xs py-0.5 w-1/2 mx-auto", getProductivityColor(productivity))}>
+                                    <div className={cn("text-xs py-0.5 w-1/2 mx-auto rounded-sm", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
                                     </div>
                                 </TableCell>
                             );
                         })}
-                        <TableCell className="align-middle text-center">
-                             <DailyDataForm production={day} onSave={handleDailySave}>
-                                <Button variant="ghost" size="icon" id={`edit-daily-trigger-${day.date.toISOString()}`}>
-                                    <Edit className="h-4 w-4" />
-                                 </Button>
-                            </DailyDataForm>
-                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
