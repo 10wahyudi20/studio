@@ -65,7 +65,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
         resolver: zodResolver(dailySchema),
         defaultValues,
         // Re-initialize form when `production` prop changes for editing
-        enableReinitialize: true,
+        // enableReinitialize: true,
     });
 
     const onSubmit = (data: DailyFormData) => {
@@ -77,7 +77,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                 {children}
+                {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                  <form onSubmit={handleSubmit(onSubmit)}>
@@ -372,6 +372,7 @@ export default function ProductionTab() {
                           </div>
                         </TableHead>
                       ))}
+                       <TableHead className="text-center align-middle">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -405,9 +406,13 @@ export default function ProductionTab() {
                                 </TableCell>
                             );
                         })}
-                        <DailyDataForm production={day} onSave={handleDailySave}>
-                            <div id={`edit-daily-trigger-${day.date.toISOString()}`} className="hidden"></div>
-                        </DailyDataForm>
+                        <TableCell className="align-middle text-center">
+                            <DailyDataForm production={day} onSave={handleDailySave}>
+                                 <Button variant="ghost" size="icon" id={`edit-daily-trigger-${day.date.toISOString()}`}>
+                                    <Edit className="h-4 w-4" />
+                                 </Button>
+                            </DailyDataForm>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -576,4 +581,4 @@ export default function ProductionTab() {
   );
 }
 
-
+    
