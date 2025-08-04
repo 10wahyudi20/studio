@@ -381,7 +381,7 @@ export default function ProductionTab() {
                             return (
                                 <TableCell key={duck.cage}>
                                     <div>{production ?? '-'}</div>
-                                    <div className="text-xs text-muted-foreground">({productivity}%)</div>
+                                    <div className="text-xs text-muted-foreground">{productivity}%</div>
                                 </TableCell>
                             );
                         })}
