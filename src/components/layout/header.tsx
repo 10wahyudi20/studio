@@ -1,7 +1,7 @@
 
 "use client";
 import React from "react";
-import { BrainCircuit, Calculator, LogOut, Moon, Save, Sun, Wifi } from "lucide-react";
+import { BrainCircuit, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -205,7 +205,7 @@ export default function Header() {
       <div className="container flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-4">
             {companyInfo.logo ? (
-                <Image src={companyInfo.logo} alt="Company Logo" width={40} height={40} className="h-10 w-10 rounded-lg object-cover" data-ai-hint="company logo"/>
+                <Image src={companyInfo.logo} alt="Company Logo" width={40} height={40} className="h-10 w-10 rounded-lg object-cover bg-transparent border-none" data-ai-hint="company logo"/>
             ) : (
                 <DuckIcon className="h-10 w-10 text-primary" data-ai-hint="duck logo"/>
             )}
@@ -218,9 +218,10 @@ export default function Header() {
             <p className="text-xs text-muted-foreground hidden md:block">
                 {companyInfo.address}
             </p>
-            <p className="text-xs text-muted-foreground hidden md:block">
-                {companyInfo.phone} | {companyInfo.email}
-            </p>
+            <div className="text-xs text-muted-foreground hidden md:flex items-center justify-center gap-4">
+                <span className="flex items-center gap-1"><Phone className="h-3 w-3" /> {companyInfo.phone}</span>
+                <span className="flex items-center gap-1"><Mail className="h-3 w-3" /> {companyInfo.email}</span>
+            </div>
         </div>
 
         <div className="flex items-center gap-2">
