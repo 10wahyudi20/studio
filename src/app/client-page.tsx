@@ -16,7 +16,7 @@ import SettingsTab from "@/components/tabs/settings-tab";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
-import { Home, Users, Egg, Wheat, DollarSign, FileText, BrainCircuit, Settings } from "lucide-react";
+import { Home, Users, Egg, Wheat, DollarSign, FileText, Sparkles, Settings } from "lucide-react";
 
 export default function ClientPage() {
   const loadState = useAppStore(state => state.loadState);
@@ -56,7 +56,7 @@ export default function ClientPage() {
                   <NavLink value="feed" icon={Wheat} label="Pakan" />
                   <NavLink value="finance" icon={DollarSign} label="Keuangan" />
                   <NavLink value="reports" icon={FileText} label="Laporan" />
-                  <NavLink value="ai" icon={BrainCircuit} label="Prediksi AI" />
+                  <NavLink value="ai" icon={Sparkles} label="Prediksi AI" />
                   <NavLink value="settings" icon={Settings} label="Pengaturan" />
                 </TabsList>
             </div>
