@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -50,9 +51,19 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
 
+  const backgroundStyle = companyInfo.loginBackground 
+  ? { backgroundImage: `url(${companyInfo.loginBackground})` }
+  : {};
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <Card className="w-full max-w-sm">
+    <div 
+      className={cn(
+          "flex items-center justify-center min-h-screen bg-background p-4",
+          companyInfo.loginBackground && "bg-cover bg-center"
+      )}
+      style={backgroundStyle}
+    >
+      <Card className="w-full max-w-sm bg-background/80 backdrop-blur-sm">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                 <DuckIcon className="h-16 w-16 text-primary" />

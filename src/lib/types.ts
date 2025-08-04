@@ -8,6 +8,7 @@ export interface CompanyInfo {
     ttsVoice: string;
     username?: string;
     password?: string;
+    loginBackground?: string;
 }
 
 export interface Duck {

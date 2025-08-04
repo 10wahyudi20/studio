@@ -14,6 +14,7 @@ import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff } from "
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "../ui/separator";
 
 const ttsVoices = [
     { id: 'algenib', name: 'Female 1 (Algenib)' },
@@ -39,6 +40,7 @@ export default function SettingsTab() {
   
   const [info, setInfo] = React.useState(companyInfo);
   const [logoPreview, setLogoPreview] = React.useState<string | null>(companyInfo.logo);
+  const [backgroundPreview, setBackgroundPreview] = React.useState<string | null>(companyInfo.loginBackground || null);
   const [audioPreview, setAudioPreview] = React.useState<TextToSpeechOutput | null>(null);
   const [isPreviewing, setIsPreviewing] = React.useState(false);
   const [audioError, setAudioError] = React.useState<string | null>(null);
@@ -89,6 +91,18 @@ export default function SettingsTab() {
     }
   };
 
+  const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setBackgroundPreview(result);
+        setInfo({ ...info, loginBackground: result });
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+
   const handleSaveInfo = () => {
     updateCompanyInfo(info);
     toast({ title: "Informasi Perusahaan Disimpan", description: "Data di header telah diperbarui." });
@@ -112,8 +126,10 @@ export default function SettingsTab() {
           const state = JSON.parse(event.target?.result as string);
           loadFullState(state);
           // Manually update local state after store hydration
-          setInfo(useAppStore.getState().companyInfo);
-          setLogoPreview(useAppStore.getState().companyInfo.logo);
+          const newCompanyInfo = useAppStore.getState().companyInfo;
+          setInfo(newCompanyInfo);
+          setLogoPreview(newCompanyInfo.logo);
+          setBackgroundPreview(newCompanyInfo.loginBackground || null);
           toast({ title: "Data Diimpor", description: "Aplikasi telah dimuat dengan data Anda." });
         } catch (error) {
           console.error("Import error:", error);
@@ -130,6 +146,7 @@ export default function SettingsTab() {
     const newInitialState = useAppStore.getState().getInitialState();
     setInfo(newInitialState.companyInfo);
     setLogoPreview(newInitialState.companyInfo.logo);
+    setBackgroundPreview(newInitialState.companyInfo.loginBackground || null);
     toast({ variant: "destructive", title: "Reset Berhasil", description: "Semua data telah dikosongkan." });
   }
 
@@ -137,6 +154,7 @@ export default function SettingsTab() {
   React.useEffect(() => {
     setInfo(companyInfo);
     setLogoPreview(companyInfo.logo);
+    setBackgroundPreview(companyInfo.loginBackground || null);
   }, [companyInfo]);
 
   return (
@@ -190,6 +208,17 @@ export default function SettingsTab() {
                 </div>
               </div>
            </div>
+
+          <div className="space-y-2 pt-4 border-t">
+            <Label>Latar Belakang Halaman Login</Label>
+             <div className="flex items-center gap-4">
+                <Image src={backgroundPreview || "https://placehold.co/128x64.png"} alt="Login Background Preview" width={128} height={64} className="rounded-lg bg-muted object-cover" data-ai-hint="farm landscape" />
+                <div className="w-full">
+                    <Label htmlFor="loginBackground" className="sr-only">Ganti Latar Belakang</Label>
+                    <Input id="loginBackground" type="file" accept="image/*" onChange={handleBackgroundChange} />
+                </div>
+            </div>
+          </div>
           
           <div className="space-y-2 pt-4 border-t">
               <Label>Suara Text-to-Speech</Label>

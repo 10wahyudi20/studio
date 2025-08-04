@@ -13,7 +13,8 @@ const getInitialState = (): AppState => ({
     logo: "",
     ttsVoice: "algenib",
     username: "admin",
-    password: "password"
+    password: "password",
+    loginBackground: "",
   },
   ducks: [],
   eggProduction: {
