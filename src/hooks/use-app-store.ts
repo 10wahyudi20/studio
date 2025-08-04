@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
-import { format, getMonth, getYear, parse } from 'date-fns';
+import { format, getMonth, getYear, parse, startOfDay } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 const getInitialState = (): AppState => ({
@@ -22,6 +22,7 @@ const getInitialState = (): AppState => ({
   feed: [],
   finance: [],
   isDirty: false,
+  lastStockUpdate: null,
 });
 
 const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
@@ -350,7 +351,7 @@ export const useAppStore = create<AppState & {
       const savedState = localStorage.getItem('clucksmart-state');
       if (savedState) {
         const parsedState = JSON.parse(savedState);
-        const revivedState = {
+        const revivedState: AppState = {
             ...getInitialState(), // Start with defaults
             ...parsedState,
             companyInfo: {
@@ -365,10 +366,46 @@ export const useAppStore = create<AppState & {
                 monthly: parsedState.eggProduction.monthly || [],
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
-            finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)}))
+            finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)})),
+            lastStockUpdate: parsedState.lastStockUpdate || null,
         };
+        
         // Recalculate monthly production on load to ensure consistency
         revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
+        
+        // --- Automatic Daily Stock Reduction ---
+        const today = startOfDay(new Date());
+        const lastUpdate = revivedState.lastStockUpdate ? startOfDay(new Date(revivedState.lastStockUpdate)) : null;
+
+        if (lastUpdate && lastUpdate < today) {
+            const totalDucks = revivedState.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+            if (totalDucks > 0) {
+                const totalFeedPerDayKg = revivedState.feed.reduce((sum, item) => {
+                    const consumptionPerFeed = (totalDucks * item.schema) / 1000; // in kg
+                    return sum + consumptionPerFeed;
+                }, 0);
+
+                if (totalFeedPerDayKg > 0) {
+                    const totalOriginalStock = revivedState.feed.reduce((sum, item) => sum + item.stock, 0);
+                    
+                    if (totalOriginalStock > 0) {
+                         revivedState.feed = revivedState.feed.map(item => {
+                            // Reduce stock based on its proportion to the total stock
+                            const proportion = item.stock / totalOriginalStock;
+                            const reduction = totalFeedPerDayKg * proportion;
+                            const newStock = Math.max(0, item.stock - reduction);
+                            return { ...item, stock: newStock };
+                        });
+                        revivedState.isDirty = true;
+                    }
+                }
+            }
+            revivedState.lastStockUpdate = today.toISOString();
+        } else if (!lastUpdate) {
+            revivedState.lastStockUpdate = today.toISOString();
+        }
+        // --- End of Stock Reduction Logic ---
+
         set(revivedState);
       }
     } catch (error) {
