@@ -75,7 +75,21 @@ export default function HomeTab() {
         <StatCard title="Total Bebek" value={totalDucks.toLocaleString('id-ID')} icon={Egg} />
         <StatCard title="Produksi Hari Ini" value={todayProduction.toLocaleString('id-ID')} icon={BarChart} />
         <StatCard title="Produksi Bulan Ini" value={monthProduction.toLocaleString('id-ID')} icon={PieChart} />
-        <StatCard title="Stok Pakan (Kg)" value={feedStock.toLocaleString('id-ID')} icon={Package} />
+        <StatCard 
+            title="Stok Pakan (Kg)" 
+            value={feedStock.toLocaleString('id-ID')} 
+            icon={Package} 
+            footer={
+                <div className="w-full pt-2 text-xs">
+                    {feed.map(item => (
+                        <div key={item.id} className="flex justify-between">
+                            <span>{item.name}:</span>
+                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
+                        </div>
+                    ))}
+                </div>
+            }
+        />
         <StatCard 
             title="Biaya Pakan/Hari" 
             value={`Rp ${dailyFeedCost.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
