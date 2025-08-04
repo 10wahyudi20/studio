@@ -33,19 +33,19 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
 
   useEffect(() => {
     loadState();
-    setIsMounted(true);
+    setIsClient(true);
   }, [loadState]);
 
   useEffect(() => {
-    if (isMounted && isAuthenticated) {
+    if (isClient && isAuthenticated) {
       router.replace("/");
     }
-  }, [isAuthenticated, isMounted, router]);
+  }, [isAuthenticated, isClient, router]);
 
 
   const handleLogin = (e: React.FormEvent) => {
@@ -65,7 +65,7 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
   
-  if (!isMounted || isAuthenticated) {
+  if (!isClient || isAuthenticated) {
      return (
         <div className="flex items-center justify-center h-screen bg-background">
             <div className="text-2xl font-semibold text-primary">Memuat...</div>
@@ -157,3 +157,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
