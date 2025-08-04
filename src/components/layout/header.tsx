@@ -212,7 +212,7 @@ export default function Header() {
         </div>
 
         <div className="absolute left-1/2 -translate-x-1/2 text-center">
-            <h1 className="text-xl font-bold text-blue-800 dark:text-blue-300 font-headline">
+            <h1 className="text-xl font-bold text-blue-800 dark:text-white font-headline">
                 {companyInfo.name}
             </h1>
             <p className="text-xs text-muted-foreground hidden md:block">
