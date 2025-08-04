@@ -181,7 +181,7 @@ const SimpleCalculator = () => {
                         className={cn(
                             btn === "=" ? "bg-accent hover:bg-accent/90" : "",
                             btn.length > 1 ? "text-xs" : "",
-                            btn === "/" || btn === "*" || btn === "-" || btn === "+" ? "col-start-4" : ""
+                            btn === "/" || btn === "*" || btn === "-" || btn === "+" ? "" : ""
                         )}
                     >
                         {btn}
