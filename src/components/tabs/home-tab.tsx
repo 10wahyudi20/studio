@@ -2,12 +2,13 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, PieChart, Egg, Package, DollarSign, Wallet } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 const COLORS = ["#64B5F6", "#81C784", "#FFB74D", "#E57373", "#BA68C8", "#7986CB"];
 
@@ -24,7 +25,10 @@ export default function HomeTab() {
     .reduce((sum, day) => sum + day.totalEggs, 0);
   
   const feedStock = feed.reduce((sum, item) => sum + item.stock, 0);
-  const dailyFeedCost = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) * item.pricePerKg : 0), 0);
+  
+  const dailyFeedConsumptionKg = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) : 0), 0);
+  const dailyFeedCost = feed.reduce((sum, item) => sum + (item.stock > 0 ? (dailyFeedConsumptionKg * item.pricePerKg) : 0), 0);
+  const averageFeedCostPerKg = dailyFeedConsumptionKg > 0 ? dailyFeedCost / dailyFeedConsumptionKg : 0;
   
   const monthlyIncome = finance
     .filter(t => new Date(t.date).getMonth() === currentMonth && t.type === 'debit')
@@ -47,16 +51,21 @@ export default function HomeTab() {
     { name: 'Afkir', value: ducks.filter(d => d.status === 'Bebek Afkir').reduce((s, d) => s + d.quantity, 0) },
   ];
 
-  const StatCard = ({ title, value, icon: Icon, description }: { title: string, value: string, icon: React.ElementType, description?: string }) => (
-    <Card>
+  const StatCard = ({ title, value, icon: Icon, description, footer }: { title: string, value: string, icon: React.ElementType, description?: string, footer?: React.ReactNode }) => (
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <div className="text-2xl font-bold">{value}</div>
         {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </CardContent>
+      {footer && (
+          <CardFooter className="text-xs text-muted-foreground pt-0 pb-4 border-t mt-auto mx-6">
+              {footer}
+          </CardFooter>
+      )}
     </Card>
   );
 
@@ -67,7 +76,23 @@ export default function HomeTab() {
         <StatCard title="Produksi Hari Ini" value={todayProduction.toLocaleString('id-ID')} icon={BarChart} />
         <StatCard title="Produksi Bulan Ini" value={monthProduction.toLocaleString('id-ID')} icon={PieChart} />
         <StatCard title="Stok Pakan (Kg)" value={feedStock.toLocaleString('id-ID')} icon={Package} />
-        <StatCard title="Biaya Pakan/Hari" value={`Rp ${dailyFeedCost.toLocaleString('id-ID')}`} icon={DollarSign} />
+        <StatCard 
+            title="Biaya Pakan/Hari" 
+            value={`Rp ${dailyFeedCost.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
+            icon={DollarSign}
+            footer={
+                <div className="w-full pt-2">
+                    <div className="flex justify-between">
+                        <span>Konsumsi:</span>
+                        <span>{dailyFeedConsumptionKg.toLocaleString('id-ID', {minimumFractionDigits: 1, maximumFractionDigits: 1})} Kg</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Biaya/Kg:</span>
+                        <span>Rp {averageFeedCostPerKg.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                    </div>
+                </div>
+            }
+        />
         <StatCard title="Laba Bersih Bulan Ini" value={`Rp ${netProfit.toLocaleString('id-ID')}`} icon={Wallet} />
       </div>
 
