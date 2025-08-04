@@ -169,7 +169,7 @@ const SimpleCalculator = () => {
           if (btn === "AC") return "bg-destructive hover:bg-destructive/90";
           if (btn === "0") return "col-span-2";
           if (["/", "*", "-", "+", "="].includes(btn)) return "bg-accent hover:bg-accent/90";
-          if (["AC", "DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90";
+          if (["DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90";
           return "bg-secondary hover:bg-secondary/80";
       };
 
@@ -183,7 +183,7 @@ const SimpleCalculator = () => {
                     <Button
                         key={btn}
                         onClick={() => handleButtonClick(btn)}
-                        className={cn("text-xl font-bold h-14", getButtonClass(btn))}
+                        className={cn("text-xl font-bold h-14 text-foreground", getButtonClass(btn))}
                     >
                         {btn}
                     </Button>
