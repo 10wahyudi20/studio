@@ -33,10 +33,18 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 // Simple Calculator Component
 const SimpleCalculator = () => {
     const [display, setDisplay] = React.useState("0");
+    const [history, setHistory] = React.useState("");
     const [firstOperand, setFirstOperand] = React.useState<number | null>(null);
     const [operator, setOperator] = React.useState<string | null>(null);
     const [waitingForSecondOperand, setWaitingForSecondOperand] = React.useState(false);
 
+    const formatDisplay = (value: string) => {
+        if (value === "Infinity" || value === "-Infinity") return "Error";
+        const [integerPart, decimalPart] = value.split(',');
+        const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return decimalPart !== undefined ? `${formattedInteger},${decimalPart}` : formattedInteger;
+    };
+    
     const inputDigit = (digit: string) => {
         if (waitingForSecondOperand) {
             setDisplay(digit);
@@ -48,17 +56,18 @@ const SimpleCalculator = () => {
 
     const inputDecimal = () => {
         if (waitingForSecondOperand) {
-            setDisplay("0.");
+            setDisplay("0,");
             setWaitingForSecondOperand(false);
             return;
         }
-        if (!display.includes(".")) {
-            setDisplay(display + ".");
+        if (!display.includes(",")) {
+            setDisplay(display + ",");
         }
     };
 
     const clearDisplay = () => {
         setDisplay("0");
+        setHistory("");
         setFirstOperand(null);
         setOperator(null);
         setWaitingForSecondOperand(false);
@@ -75,19 +84,23 @@ const SimpleCalculator = () => {
 
     const performOperation = (nextOperator: string) => {
         const inputValue = parseFloat(display.replace(/\./g, '').replace(',', '.'));
+        const formattedDisplay = formatDisplay(display.replace(',', '.'));
 
         if (operator && waitingForSecondOperand) {
             setOperator(nextOperator);
+            setHistory(prev => prev.slice(0, -2) + ` ${nextOperator} `);
             return;
         }
 
         if (firstOperand === null) {
             setFirstOperand(inputValue);
+            setHistory(`${formattedDisplay} ${nextOperator} `);
         } else if (operator) {
             const result = calculate(firstOperand, inputValue, operator);
-            const resultString = String(result);
-            setDisplay(resultString.includes('.') ? resultString.replace('.', ',') : resultString);
+            const resultString = String(result).replace('.', ',');
+            setDisplay(resultString);
             setFirstOperand(result);
+            setHistory(prev => `${prev}${formattedDisplay} ${nextOperator} `);
         }
 
         setWaitingForSecondOperand(true);
@@ -100,6 +113,7 @@ const SimpleCalculator = () => {
             case "-": return first - second;
             case "*": return first * second;
             case "/": return second !== 0 ? first / second : Infinity;
+            case "%": return first * (second / 100);
             default: return second;
         }
     };
@@ -108,17 +122,20 @@ const SimpleCalculator = () => {
         if (operator && firstOperand !== null) {
             const inputValue = parseFloat(display.replace(/\./g, '').replace(',', '.'));
             const result = calculate(firstOperand, inputValue, operator);
-            const resultString = String(result);
-            setDisplay(resultString.includes('.') ? resultString.replace('.', ',') : resultString);
+            const resultString = String(result).replace('.', ',');
+            const formattedDisplay = formatDisplay(display.replace(',', '.'));
+            
+            setHistory(prev => `${prev}${formattedDisplay} =`);
+            setDisplay(resultString);
             setFirstOperand(null);
             setOperator(null);
-            setWaitingForSecondOperand(false);
+            setWaitingForSecondOperand(true); // Allow starting new calculation
         }
     };
     
     const handleButtonClick = (btn: string) => {
         if (/\d/.test(btn)) inputDigit(btn);
-        else if (btn === ".") inputDecimal();
+        else if (btn === ",") inputDecimal();
         else if (btn === "=") handleEquals();
         else if (btn === "DEL") deleteLast();
         else if (btn === "AC") clearDisplay();
@@ -131,8 +148,8 @@ const SimpleCalculator = () => {
             if (/\d/.test(key)) {
                 handleButtonClick(key);
             } else if (key === '.' || key === ',') {
-                handleButtonClick('.');
-            } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+                handleButtonClick(',');
+            } else if (['+', '-', '*', '/', '%'].includes(key)) {
                 handleButtonClick(key);
             } else if (key === 'Enter' || key === '=') {
                 event.preventDefault();
@@ -155,15 +172,8 @@ const SimpleCalculator = () => {
         "7", "8", "9", "*",
         "4", "5", "6", "-",
         "1", "2", "3", "+",
-        "0", ".", "="
+        "0", ",", "="
       ];
-      
-      const formatDisplay = (value: string) => {
-          if (value === "Infinity" || value === "-Infinity") return "Error";
-          const [integerPart, decimalPart] = value.split(',');
-          const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-          return decimalPart !== undefined ? `${formattedInteger},${decimalPart}` : formattedInteger;
-      };
   
       const getButtonClass = (btn: string) => {
           if (btn === "AC") return "bg-destructive hover:bg-destructive/90";
@@ -175,8 +185,11 @@ const SimpleCalculator = () => {
 
     return (
         <div className="p-4 bg-background rounded-lg shadow-lg w-64">
-            <div className="bg-muted text-right text-3xl font-code p-4 rounded-md mb-4 overflow-x-auto text-foreground">
-                {formatDisplay(display)}
+            <div className="bg-muted text-right p-4 rounded-md mb-4 text-foreground">
+                 <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
+                 <div className="text-3xl font-code overflow-x-auto">
+                    {formatDisplay(display)}
+                 </div>
             </div>
             <div className="grid grid-cols-4 gap-2">
                  {buttons.map(btn => (
@@ -275,7 +288,3 @@ export default function Header() {
     </header>
   );
 }
-
-    
-
-    
