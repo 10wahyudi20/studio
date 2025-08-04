@@ -36,16 +36,11 @@ export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
 
-  // Load state on component mount to get credentials
   useEffect(() => {
     loadState();
+    setIsMounted(true);
   }, [loadState]);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Redirect if already authenticated
   useEffect(() => {
     if (isMounted && isAuthenticated) {
       router.replace("/");
@@ -70,18 +65,12 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
   
-  // Wait until mount is complete to avoid hydration mismatch
-  if (!isMounted) {
+  if (!isMounted || isAuthenticated) {
      return (
         <div className="flex items-center justify-center h-screen bg-background">
             <div className="text-2xl font-semibold text-primary">Memuat...</div>
         </div>
     );
-  }
-
-  // This check prevents rendering on the server if not authenticated, avoiding hydration mismatch for background image
-  if (isAuthenticated) {
-    return null;
   }
 
   const backgroundStyle = companyInfo.loginBackground 
@@ -98,7 +87,7 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/10 dark:bg-black/20 backdrop-blur-lg border-white/20 dark:border-slate-500/30">
+      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/30 backdrop-blur-md border-white/20 dark:border-slate-500/30">
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                  {companyInfo.logo ? (
