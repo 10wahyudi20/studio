@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Upload, Download, Cloud, Trash2, Volume2, Loader2 } from "lucide-react";
+import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -42,6 +42,8 @@ export default function SettingsTab() {
   const [audioPreview, setAudioPreview] = React.useState<TextToSpeechOutput | null>(null);
   const [isPreviewing, setIsPreviewing] = React.useState(false);
   const [audioError, setAudioError] = React.useState<string | null>(null);
+  const [showPassword, setShowPassword] = React.useState(false);
+
 
   const { toast } = useToast();
 
@@ -171,6 +173,23 @@ export default function SettingsTab() {
             <Label htmlFor="email">Email</Label>
             <Input id="email" name="email" value={info.email} onChange={handleInfoChange} />
           </div>
+
+           <div className="space-y-4 pt-4 border-t">
+               <div>
+                <Label htmlFor="username">Username</Label>
+                <Input id="username" name="username" value={info.username || ''} onChange={handleInfoChange} />
+              </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                    <Input id="password" name="password" type={showPassword ? "text" : "password"} value={info.password || ''} onChange={handleInfoChange} />
+                    <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">{showPassword ? "Sembunyikan" : "Tampilkan"} password</span>
+                    </Button>
+                </div>
+              </div>
+           </div>
           
           <div className="space-y-2 pt-4 border-t">
               <Label>Suara Text-to-Speech</Label>
@@ -245,5 +264,3 @@ export default function SettingsTab() {
     </div>
   );
 }
-
-    

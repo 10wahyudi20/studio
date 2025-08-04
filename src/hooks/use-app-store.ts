@@ -12,6 +12,8 @@ const getInitialState = (): AppState => ({
     email: "email@peternakan.com",
     logo: "",
     ttsVoice: "algenib",
+    username: "admin",
+    password: "password"
   },
   ducks: [],
   eggProduction: {

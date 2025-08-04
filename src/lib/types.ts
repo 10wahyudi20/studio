@@ -6,6 +6,8 @@ export interface CompanyInfo {
     email: string;
     logo: string;
     ttsVoice: string;
+    username?: string;
+    password?: string;
 }
 
 export interface Duck {
