@@ -64,8 +64,6 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
     const { control, handleSubmit, register, formState: { errors } } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
         defaultValues,
-        // Re-initialize form when `production` prop changes for editing
-        // enableReinitialize: true,
     });
 
     const onSubmit = (data: DailyFormData) => {
@@ -400,15 +398,15 @@ export default function ProductionTab() {
                             return (
                                 <TableCell key={duck.cage} className="p-0 text-center align-middle">
                                     <div className="py-4">{production ?? '-'}</div>
-                                    <div className={cn("text-xs py-0.5 w-full", getProductivityColor(productivity))}>
+                                    <div className={cn("text-xs py-0.5 w-1/2 mx-auto", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
                                     </div>
                                 </TableCell>
                             );
                         })}
                         <TableCell className="align-middle text-center">
-                            <DailyDataForm production={day} onSave={handleDailySave}>
-                                 <Button variant="ghost" size="icon" id={`edit-daily-trigger-${day.date.toISOString()}`}>
+                             <DailyDataForm production={day} onSave={handleDailySave}>
+                                <Button variant="ghost" size="icon" id={`edit-daily-trigger-${day.date.toISOString()}`}>
                                     <Edit className="h-4 w-4" />
                                  </Button>
                             </DailyDataForm>
