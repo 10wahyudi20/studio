@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,9 +34,21 @@ export default function ReportsTab() {
     { value: 10, name: "Oktober" }, { value: 11, name: "November" }, { value: 12, name: "Desember" }
   ];
 
+  // Clean up the object URL when the component unmounts or when a new URL is created
+  useEffect(() => {
+    return () => {
+      if (pdfPreviewUrl) {
+        URL.revokeObjectURL(pdfPreviewUrl);
+      }
+    };
+  }, [pdfPreviewUrl]);
+
   const handleGenerateReport = () => {
     setIsLoading(true);
-    setPdfPreviewUrl(null);
+    if (pdfPreviewUrl) {
+      URL.revokeObjectURL(pdfPreviewUrl);
+      setPdfPreviewUrl(null);
+    }
     
     setTimeout(() => {
         const year = parseInt(selectedYear, 10);
@@ -151,8 +163,10 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
             
-            const pdfDataUri = doc.output('datauristring');
-            setPdfPreviewUrl(pdfDataUri);
+            const pdfBlob = doc.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            setPdfPreviewUrl(blobUrl);
+
 
             toast({ title: "Pratinjau Laporan Dibuat!", description: "Laporan kini ditampilkan di bawah." });
 
@@ -239,3 +253,5 @@ export default function ReportsTab() {
     </div>
   );
 }
+
+    
