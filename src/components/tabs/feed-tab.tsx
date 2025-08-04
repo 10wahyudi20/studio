@@ -3,7 +3,7 @@
 
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle, Edit, Trash2, Package, Inbox, Sigma, Wheat } from "lucide-react";
@@ -122,20 +122,39 @@ export default function FeedTab() {
   const totalFeedPerDay = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) : 0), 0);
   const averageFeedValue = totalFeedPerDay > 0 ? (feed.reduce((sum, item) => sum + (item.stock > 0 ? ((totalDucks * item.schema / 1000) * item.pricePerKg) : 0), 0) / totalFeedPerDay) : 0;
 
-  const StatCard = ({ title, value, icon: Icon, valueClassName }: { title: string, value: string, icon: React.ElementType, valueClassName?: string }) => (
-    <Card>
+  const StatCard = ({ title, value, icon: Icon, valueClassName, footer }: { title: string, value: string, icon: React.ElementType, valueClassName?: string, footer?: React.ReactNode }) => (
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent><div className={cn("text-2xl font-bold", valueClassName)}>{value}</div></CardContent>
+      <CardContent className="flex-grow"><div className={cn("text-2xl font-bold", valueClassName)}>{value}</div></CardContent>
+       {footer && (
+          <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
+              {footer}
+          </CardFooter>
+      )}
     </Card>
   );
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Stok Pakan" value={`${totalStock.toLocaleString('id-ID')} Kg`} icon={Package} />
+        <StatCard 
+            title="Total Stok Pakan" 
+            value={`${totalStock.toLocaleString('id-ID')} Kg`} 
+            icon={Package} 
+            footer={
+                 <div className="w-full pt-2 text-xs">
+                    {feed.map(item => (
+                        <div key={item.id} className="flex justify-between">
+                            <span>{item.name}:</span>
+                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
+                        </div>
+                    ))}
+                </div>
+            }
+        />
         <StatCard title="Total Skema Pakan" value={`${totalSchema.toLocaleString('id-ID')} g`} icon={Inbox} valueClassName="text-green-700 dark:text-green-400" />
         <StatCard title="Nilai Pakan" value={`Rp ${averageFeedValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}/kg`} icon={Sigma} />
         <StatCard title="Total Pakan/Hari" value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} icon={Wheat} />
