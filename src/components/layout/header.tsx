@@ -186,20 +186,7 @@ const SimpleCalculator = () => {
                     >
                         {btn}
                     </Button>
-                )).reduce((acc, btn, i) => {
-                    if ((i + 1) % 4 === 0 && i !== 0) {
-                        const row = acc.splice(-3);
-                        acc.push(
-                            <React.Fragment key={`row-${i}`}>
-                                {row}
-                                {btn}
-                            </React.Fragment>
-                        );
-                    } else {
-                        acc.push(btn);
-                    }
-                    return acc;
-                }, [] as React.ReactNode[])}
+                ))}
             </div>
         </div>
     );
