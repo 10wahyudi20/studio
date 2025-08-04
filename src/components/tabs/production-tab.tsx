@@ -366,8 +366,10 @@ export default function ProductionTab() {
                       <TableHead>Produktifitas</TableHead>
                       {ducks.map(duck => (
                         <TableHead key={duck.cage}>
-                          Kdg {duck.cage}
-                          <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                          <div className="flex flex-col">
+                            <span>Kdg {duck.cage}</span>
+                            <span className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</span>
+                          </div>
                         </TableHead>
                       ))}
                        <TableHead className="text-right">Aksi</TableHead>
@@ -395,7 +397,7 @@ export default function ProductionTab() {
                             return (
                                 <TableCell key={duck.cage} className="p-0 text-center">
                                     <div className="p-4">{production ?? '-'}</div>
-                                    <div className={cn("text-xs py-0.5", getProductivityColor(productivity))}>
+                                    <div className={cn("text-xs py-0.5 w-full", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
                                     </div>
                                 </TableCell>
@@ -575,3 +577,4 @@ export default function ProductionTab() {
     </div>
   );
 }
+
