@@ -187,7 +187,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
             <ModeToggle />
             <Button size="icon" variant="ghost" onClick={handleSave}>
-                <Save className={cn("h-5 w-5 text-primary", isDirty && "text-accent blinking-save")} />
+                <Save className={cn("h-5 w-5", isDirty && "text-accent blinking-save")} />
                 <span className="sr-only">Simpan Data</span>
             </Button>
             <Dialog>
@@ -212,7 +212,7 @@ export default function Header() {
                 <span className="sr-only">Online</span>
             </Button>
             <Button size="icon" variant="ghost">
-                <LogOut className="h-5 w-5 text-red-500" />
+                <LogOut className="h-5 w-5" />
                 <span className="sr-only">Logout</span>
             </Button>
         </div>
