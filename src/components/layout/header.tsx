@@ -1,7 +1,7 @@
 
 "use client";
 import React from "react";
-import { BrainCircuit, Calculator, Moon, Save, Sun, Wifi } from "lucide-react";
+import { BrainCircuit, Calculator, LogOut, Moon, Save, Sun, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -210,6 +210,10 @@ export default function Header() {
             <Button size="icon" variant="ghost" className="cursor-default">
                 <Wifi className="h-5 w-5 text-green-500" />
                 <span className="sr-only">Online</span>
+            </Button>
+            <Button size="icon" variant="ghost">
+                <LogOut className="h-5 w-5 text-red-500" />
+                <span className="sr-only">Logout</span>
             </Button>
         </div>
       </div>
