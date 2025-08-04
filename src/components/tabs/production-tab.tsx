@@ -373,7 +373,18 @@ export default function ProductionTab() {
                         <TableCell>{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
                         <TableCell>{day.totalEggs}</TableCell>
                         <TableCell>{day.productivity.toFixed(2)}%</TableCell>
-                        {ducks.map(duck => <TableCell key={duck.cage}>{day.perCage[duck.cage] ?? '-'}</TableCell>)}
+                        {ducks.map(duck => {
+                            const production = day.perCage[duck.cage];
+                            const productivity = duck.quantity > 0 && production != null
+                                ? (production / duck.quantity * 100).toFixed(1)
+                                : '0.0';
+                            return (
+                                <TableCell key={duck.cage}>
+                                    <div>{production ?? '-'}</div>
+                                    <div className="text-xs text-muted-foreground">({productivity}%)</div>
+                                </TableCell>
+                            );
+                        })}
                         <TableCell className="text-right">
                            <DailyDataForm production={day} onSave={handleDailySave}>
                                 <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-600 h-8 w-8">
