@@ -4,7 +4,7 @@
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2 } from "lucide-react";
@@ -304,7 +304,7 @@ export default function ProductionTab() {
     return acc;
   }, {} as Record<number, WeeklyProduction[]>);
 
-  const grandTotal = eggProduction.weekly.reduce(
+  const weeklyGrandTotal = eggProduction.weekly.reduce(
     (acc, week) => {
       acc.gradeA += week.gradeA;
       acc.gradeB += week.gradeB;
@@ -315,6 +315,18 @@ export default function ProductionTab() {
       return acc;
     },
     { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0, totalValue: 0 }
+  );
+
+  const monthlyGrandTotal = eggProduction.monthly.reduce(
+    (acc, month) => {
+      acc.gradeA += month.gradeA;
+      acc.gradeB += month.gradeB;
+      acc.gradeC += month.gradeC;
+      acc.consumption += month.consumption;
+      acc.totalEggs += month.totalEggs;
+      return acc;
+    },
+    { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0 }
   );
 
   return (
@@ -518,21 +530,23 @@ export default function ProductionTab() {
                         </React.Fragment>
                       );
                     })}
+                  </TableBody>
+                   <TableFooter>
                     <TableRow className="bg-primary/20 font-extrabold text-lg">
                       <TableCell colSpan={2}>Grand Total</TableCell>
-                      <TableCell className="border-l">{grandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
-                       <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
-                       <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
-                       <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.consumption.toLocaleString('id-ID')}</TableCell>
-                       <TableCell></TableCell>
-                      <TableCell className="border-l">{grandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
-                      <TableCell className="border-l">Rp {grandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="border-l">{weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell className="border-l">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell className="border-l">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell className="border-l">{weeklyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
+                      <TableCell></TableCell>
+                      <TableCell className="border-l">{weeklyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="border-l">Rp {weeklyGrandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="border-l"></TableCell>
                     </TableRow>
-                  </TableBody>
+                  </TableFooter>
                 </Table>
               </div>
             </TabsContent>
@@ -561,6 +575,16 @@ export default function ProductionTab() {
                                 </TableRow>
                             ))}
                         </TableBody>
+                         <TableFooter>
+                            <TableRow className="bg-primary/20 font-extrabold text-lg">
+                                <TableCell>Grand Total</TableCell>
+                                <TableCell>{monthlyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                                <TableCell>{monthlyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
+                                <TableCell>{monthlyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
+                                <TableCell>{monthlyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
+                                <TableCell>{monthlyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                            </TableRow>
+                        </TableFooter>
                     </Table>
                 </div>
             </TabsContent>
@@ -570,5 +594,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    

@@ -38,12 +38,11 @@ const calculateAge = (entryDate: Date): number => {
 
 const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyProduction[] => {
     const monthlyData: { [month: string]: MonthlyProduction } = {};
-    const now = new Date(); // Use a fixed date for the recalculation session
 
     weeklyData.forEach(week => {
-        // This is still a placeholder as weekly data lacks a specific date.
-        // We'll associate it with the current month and year for simplicity.
-        // A more robust solution would be to add a date to weekly entries.
+        // Find a daily entry that corresponds to the week to get a date.
+        // This is a bit of a hack. A better solution would be to add a date to weekly entries.
+        const now = new Date(); // Fallback to current date
         const monthKey = format(now, 'MMMM yyyy', { locale: idLocale });
 
         if (!monthlyData[monthKey]) {
@@ -60,26 +59,7 @@ const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyPr
         monthlyData[monthKey].totalEggs += week.totalEggs;
     });
 
-    // Also process existing monthly data to aggregate correctly
-    const allMonthlyData = Object.values(monthlyData);
-    
-    // This logic needs to be more robust to handle multiple months if weekly data had dates.
-    // For now, it just overwrites with the current month's calculation.
-    const finalMonthlyMap: { [month: string]: MonthlyProduction } = {};
-
-    [...allMonthlyData].forEach(monthEntry => {
-        if (!finalMonthlyMap[monthEntry.month]) {
-            finalMonthlyMap[monthEntry.month] = { ...monthEntry };
-        } else {
-            finalMonthlyMap[monthEntry.month].gradeA += monthEntry.gradeA;
-            finalMonthlyMap[monthEntry.month].gradeB += monthEntry.gradeB;
-            finalMonthlyMap[monthEntry.month].gradeC += monthEntry.gradeC;
-            finalMonthlyMap[monthEntry.month].consumption += monthEntry.consumption;
-            finalMonthlyMap[monthEntry.month].totalEggs += monthEntry.totalEggs;
-        }
-    });
-
-    return Object.values(finalMonthlyMap).sort((a,b) => {
+    return Object.values(monthlyData).sort((a,b) => {
         const dateA = parse(a.month, 'MMMM yyyy', new Date(), { locale: idLocale });
         const dateB = parse(b.month, 'MMMM yyyy', new Date(), { locale: idLocale });
         return dateA.getTime() - dateB.getTime();
