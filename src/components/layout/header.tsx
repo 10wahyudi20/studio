@@ -186,13 +186,13 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
             <ModeToggle />
-            <Button size="icon" variant="ghost" onClick={handleSave}>
+            <Button size="icon" variant="ghost" onClick={handleSave} className="bg-transparent border-none hover:bg-transparent">
                 <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
                 <span className="sr-only">Simpan Data</span>
             </Button>
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button size="icon" variant="ghost">
+                    <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent">
                         <Calculator className="h-5 w-5" />
                         <span className="sr-only">Kalkulator</span>
                     </Button>
@@ -207,11 +207,11 @@ export default function Header() {
                     <SimpleCalculator />
                 </DialogContent>
             </Dialog>
-            <Button size="icon" variant="ghost" className="cursor-default">
+            <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent">
                 <Wifi className="h-5 w-5 text-green-500" />
                 <span className="sr-only">Online</span>
             </Button>
-            <Button size="icon" variant="ghost">
+            <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent">
                 <LogOut className="h-5 w-5 text-red-500" />
                 <span className="sr-only">Logout</span>
             </Button>
