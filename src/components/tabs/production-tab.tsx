@@ -77,7 +77,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                {children}
+                 {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                  <form onSubmit={handleSubmit(onSubmit)}>
@@ -372,7 +372,6 @@ export default function ProductionTab() {
                           </div>
                         </TableHead>
                       ))}
-                      <TableHead className="text-center align-middle">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -385,11 +384,11 @@ export default function ProductionTab() {
                       .reverse()
                       .map((day, index) => (
                       <TableRow key={index} onDoubleClick={() => {
-                          const formTrigger = document.getElementById(`edit-daily-btn-${day.date.toISOString()}`);
+                          const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
                           formTrigger?.click();
                       }}>
-                        <TableCell className="align-middle">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
-                        <TableCell className="align-middle">{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
+                        <TableCell className="align-middle text-center">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
                         <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
                         <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
                         {ducks.map(duck => {
@@ -406,16 +405,9 @@ export default function ProductionTab() {
                                 </TableCell>
                             );
                         })}
-                        <TableCell className="text-center align-middle">
-                            <DailyDataForm production={day} onSave={handleDailySave}>
-                                <div>
-                                    <button id={`edit-daily-trigger-${day.date.toISOString()}`} className="hidden" />
-                                    <Button variant="ghost" size="icon" className="h-8 w-8" id={`edit-daily-btn-${day.date.toISOString()}`}>
-                                        <Edit className="h-4 w-4 text-green-500"/>
-                                    </Button>
-                                </div>
-                            </DailyDataForm>
-                        </TableCell>
+                        <DailyDataForm production={day} onSave={handleDailySave}>
+                            <div id={`edit-daily-trigger-${day.date.toISOString()}`} className="hidden"></div>
+                        </DailyDataForm>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -583,4 +575,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
 
