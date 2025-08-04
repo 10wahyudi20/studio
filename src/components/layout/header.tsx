@@ -46,6 +46,11 @@ const SimpleCalculator = () => {
     };
 
     const inputDecimal = () => {
+        if (waitingForSecondOperand) {
+            setDisplay("0.");
+            setWaitingForSecondOperand(false);
+            return;
+        }
         if (!display.includes(".")) {
             setDisplay(display + ".");
         }
@@ -68,7 +73,7 @@ const SimpleCalculator = () => {
     };
 
     const performOperation = (nextOperator: string) => {
-        const inputValue = parseFloat(display);
+        const inputValue = parseFloat(display.replace(/\./g, '').replace(',', '.'));
 
         if (operator && waitingForSecondOperand) {
             setOperator(nextOperator);
@@ -79,7 +84,8 @@ const SimpleCalculator = () => {
             setFirstOperand(inputValue);
         } else if (operator) {
             const result = calculate(firstOperand, inputValue, operator);
-            setDisplay(String(result));
+            const resultString = String(result);
+            setDisplay(resultString.includes('.') ? resultString.replace('.', ',') : resultString);
             setFirstOperand(result);
         }
 
@@ -99,8 +105,10 @@ const SimpleCalculator = () => {
 
     const handleEquals = () => {
         if (operator && firstOperand !== null) {
-            const result = calculate(firstOperand, parseFloat(display), operator);
-            setDisplay(String(result));
+            const inputValue = parseFloat(display.replace(/\./g, '').replace(',', '.'));
+            const result = calculate(firstOperand, inputValue, operator);
+            const resultString = String(result);
+            setDisplay(resultString.includes('.') ? resultString.replace('.', ',') : resultString);
             setFirstOperand(null);
             setOperator(null);
             setWaitingForSecondOperand(false);
@@ -121,11 +129,12 @@ const SimpleCalculator = () => {
             const { key } = event;
             if (/\d/.test(key)) {
                 handleButtonClick(key);
-            } else if (key === '.') {
+            } else if (key === '.' || key === ',') {
                 handleButtonClick('.');
             } else if (key === '+' || key === '-' || key === '*' || key === '/') {
                 handleButtonClick(key);
             } else if (key === 'Enter' || key === '=') {
+                event.preventDefault();
                 handleButtonClick('=');
             } else if (key === 'Backspace') {
                 handleButtonClick('DEL');
@@ -138,7 +147,7 @@ const SimpleCalculator = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [display, firstOperand, operator, waitingForSecondOperand]); // Add dependencies
+    }, [display, firstOperand, operator, waitingForSecondOperand]);
 
     const buttons = [
         "7", "8", "9", "/",
@@ -146,12 +155,19 @@ const SimpleCalculator = () => {
         "1", "2", "3", "-",
         "0", ".", "=", "+"
     ];
+    
+    const formatDisplay = (value: string) => {
+        if (value === "Infinity" || value === "-Infinity") return "Error";
+        const [integerPart, decimalPart] = value.split(',');
+        const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return decimalPart !== undefined ? `${formattedInteger},${decimalPart}` : formattedInteger;
+    };
 
 
     return (
         <div className="p-4 bg-background rounded-lg shadow-lg w-64">
             <div className="bg-muted text-right text-3xl font-code p-4 rounded-md mb-4 overflow-x-auto">
-                {display}
+                {formatDisplay(display)}
             </div>
             <div className="grid grid-cols-4 gap-2">
                 <Button onClick={() => handleButtonClick('AC')} className="col-span-2 bg-destructive hover:bg-destructive/90">AC</Button>
