@@ -87,5 +87,6 @@ export interface AppState {
     feed: Feed[];
     finance: Transaction[];
     isDirty: boolean;
+    isAuthenticated: boolean;
     lastStockUpdate: string | null;
 }

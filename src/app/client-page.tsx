@@ -23,9 +23,9 @@ export default function ClientPage() {
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
-    loadState();
+    // No need to call loadState here as AuthWrapper does it.
     setIsMounted(true);
-  }, [loadState]);
+  }, []);
 
   if (!isMounted) {
     return (

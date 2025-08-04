@@ -24,6 +24,7 @@ const getInitialState = (): AppState => ({
   feed: [],
   finance: [],
   isDirty: false,
+  isAuthenticated: false, // Default to not authenticated
   lastStockUpdate: null,
 });
 
@@ -77,6 +78,8 @@ type DailyProductionInput = {
 type WeeklyProductionInput = Omit<WeeklyProduction, 'id' | 'totalEggs' | 'totalValue'>;
 
 export const useAppStore = create<AppState & {
+  login: (username: string, password: string) => boolean;
+  logout: () => void;
   setDirty: () => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
@@ -96,12 +99,27 @@ export const useAppStore = create<AppState & {
   removeFeed: (id: number) => void;
   saveState: () => void;
   loadState: () => void;
-  getFullState: () => Omit<AppState, 'isDirty'>;
-  loadFullState: (state: Omit<AppState, 'isDirty'>) => void;
+  getFullState: () => Omit<AppState, 'isDirty' | 'isAuthenticated'>;
+  loadFullState: (state: Omit<AppState, 'isDirty' | 'isAuthenticated'>) => void;
   resetState: () => void;
   getInitialState: () => AppState;
 }>((set, get) => ({
   ...getInitialState(),
+
+  login: (username, password) => {
+    const { companyInfo } = get();
+    if (username === companyInfo.username && password === companyInfo.password) {
+      set({ isAuthenticated: true });
+      sessionStorage.setItem('clucksmart-auth', 'true'); // Persist auth state for session
+      return true;
+    }
+    return false;
+  },
+
+  logout: () => {
+    set({ isAuthenticated: false });
+    sessionStorage.removeItem('clucksmart-auth');
+  },
 
   setDirty: () => set({ isDirty: true }),
   
@@ -330,12 +348,17 @@ export const useAppStore = create<AppState & {
 
   loadState: () => {
     try {
+      // Check session storage first for auth state
+      const isAuthenticated = sessionStorage.getItem('clucksmart-auth') === 'true';
+      set({ isAuthenticated });
+
       const savedState = localStorage.getItem('clucksmart-state');
       if (savedState) {
         const parsedState = JSON.parse(savedState);
         const revivedState: AppState = {
             ...getInitialState(), // Start with defaults
             ...parsedState,
+            isAuthenticated, // Use the value from session storage
             companyInfo: {
               ...getInitialState().companyInfo,
               ...parsedState.companyInfo,
@@ -396,9 +419,11 @@ export const useAppStore = create<AppState & {
   },
   
   getFullState: () => {
-    const { isDirty, ...state } = get();
+    const { isDirty, isAuthenticated, ...state } = get();
     // Exclude functions before returning state
     const st: any = state;
+    delete st.login;
+    delete st.logout;
     delete st.setDirty;
     delete st.updateCompanyInfo;
     delete st.addDuck;
@@ -422,7 +447,7 @@ export const useAppStore = create<AppState & {
     delete st.loadFullState;
     delete st.resetState;
     delete st.getInitialState;
-    return st as Omit<AppState, 'isDirty'>;
+    return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;
   },
 
   loadFullState: (state) => {

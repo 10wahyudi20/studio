@@ -1,6 +1,7 @@
 
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 import { BrainCircuit, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
@@ -205,8 +206,9 @@ const SimpleCalculator = () => {
 };
 
 export default function Header() {
-    const { companyInfo, isDirty, saveState } = useAppStore();
+    const { companyInfo, isDirty, saveState, logout } = useAppStore();
     const { toast } = useToast();
+    const router = useRouter();
 
     const handleSave = () => {
         saveState();
@@ -214,6 +216,15 @@ export default function Header() {
             title: "Data Disimpan!",
             description: "Semua perubahan telah disimpan di browser.",
         });
+    };
+
+    const handleLogout = () => {
+        logout();
+        toast({
+            title: "Logout Berhasil",
+            description: "Anda telah keluar dari aplikasi.",
+        });
+        router.push("/login");
     };
 
   return (
@@ -267,7 +278,7 @@ export default function Header() {
                 <Wifi className="h-5 w-5 text-green-500" />
                 <span className="sr-only">Online</span>
             </Button>
-            <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+            <Button size="icon" variant="ghost" onClick={handleLogout} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                 <LogOut className="h-5 w-5 text-red-500" />
                 <span className="sr-only">Logout</span>
             </Button>
