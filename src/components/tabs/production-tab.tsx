@@ -396,7 +396,7 @@ export default function ProductionTab() {
                                 : 0;
                             return (
                                 <TableCell key={duck.cage} className="p-0 text-center align-middle">
-                                    <div className="p-4">{production ?? '-'}</div>
+                                    <div className="py-4">{production ?? '-'}</div>
                                     <div className={cn("text-xs py-0.5", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
                                     </div>
@@ -577,5 +577,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
