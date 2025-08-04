@@ -16,6 +16,7 @@ import SettingsTab from "@/components/tabs/settings-tab";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
+import { Home, Users, Egg, Wheat, DollarSign, FileText, BrainCircuit, Settings } from "lucide-react";
 
 export default function ClientPage() {
   const loadState = useAppStore(state => state.loadState);
@@ -34,6 +35,13 @@ export default function ClientPage() {
     );
   }
 
+  const NavLink = ({ value, icon: Icon, label }: { value: string, icon: React.ElementType, label: string }) => (
+    <TabsTrigger value={value} className="flex flex-col sm:flex-row items-center gap-1.5 h-full">
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+    </TabsTrigger>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-background font-body">
       <Header />
@@ -41,15 +49,15 @@ export default function ClientPage() {
         <Tabs defaultValue="home" className="w-full">
           <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2 bg-background/80 backdrop-blur-sm">
             <div className="px-4 sm:px-6 lg:px-8">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0">
-                  <TabsTrigger value="home">Home</TabsTrigger>
-                  <TabsTrigger value="population">Populasi Bebek</TabsTrigger>
-                  <TabsTrigger value="production">Produksi Telur</TabsTrigger>
-                  <TabsTrigger value="feed">Manajemen Pakan</TabsTrigger>
-                  <TabsTrigger value="finance">Analisis Keuangan</TabsTrigger>
-                  <TabsTrigger value="reports">Laporan</TabsTrigger>
-                  <TabsTrigger value="ai">Prediksi AI</TabsTrigger>
-                  <TabsTrigger value="settings">Pengaturan</TabsTrigger>
+                <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0 gap-y-2">
+                  <NavLink value="home" icon={Home} label="Home" />
+                  <NavLink value="population" icon={Users} label="Populasi" />
+                  <NavLink value="production" icon={Egg} label="Produksi" />
+                  <NavLink value="feed" icon={Wheat} label="Pakan" />
+                  <NavLink value="finance" icon={DollarSign} label="Keuangan" />
+                  <NavLink value="reports" icon={FileText} label="Laporan" />
+                  <NavLink value="ai" icon={BrainCircuit} label="Prediksi AI" />
+                  <NavLink value="settings" icon={Settings} label="Pengaturan" />
                 </TabsList>
             </div>
             <Separator className="mt-2" />
