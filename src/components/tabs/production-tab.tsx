@@ -372,7 +372,6 @@ export default function ProductionTab() {
                           </div>
                         </TableHead>
                       ))}
-                       <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -384,11 +383,14 @@ export default function ProductionTab() {
                       })
                       .reverse()
                       .map((day, index) => (
-                      <TableRow key={index}>
+                      <TableRow key={index} onDoubleClick={() => {
+                          const formTrigger = document.getElementById(`edit-daily-${day.date.toISOString()}`);
+                          formTrigger?.click();
+                      }}>
                         <TableCell className="align-middle">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
                         <TableCell className="align-middle">{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
-                        <TableCell className="align-middle">{day.totalEggs}</TableCell>
-                        <TableCell className="align-middle">{day.productivity.toFixed(2)}%</TableCell>
+                        <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
+                        <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
                         {ducks.map(duck => {
                             const production = day.perCage[duck.cage];
                             const productivity = duck.quantity > 0 && production != null
@@ -403,13 +405,9 @@ export default function ProductionTab() {
                                 </TableCell>
                             );
                         })}
-                        <TableCell className="text-right align-middle">
-                           <DailyDataForm production={day} onSave={handleDailySave}>
-                                <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-600 h-8 w-8">
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-                           </DailyDataForm>
-                        </TableCell>
+                        <DailyDataForm production={day} onSave={handleDailySave}>
+                            <button id={`edit-daily-${day.date.toISOString()}`} className="hidden" />
+                        </DailyDataForm>
                       </TableRow>
                     ))}
                   </TableBody>
