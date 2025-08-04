@@ -3,12 +3,13 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat } from "lucide-react";
+import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const COLORS = ["#64B5F6", "#81C784", "#FFB74D", "#E57373", "#BA68C8", "#7986CB"];
 
@@ -51,6 +52,12 @@ export default function HomeTab() {
     { name: 'Afkir', value: ducks.filter(d => d.status === 'Bebek Afkir').reduce((s, d) => s + d.quantity, 0) },
   ];
 
+  const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
+  
+  const worstProductionRecord = eggProduction.daily.length > 0 
+    ? eggProduction.daily.reduce((min, p) => p.totalEggs < min.totalEggs ? p : min, eggProduction.daily[0]) 
+    : null;
+
   const StatCard = ({ title, value, icon: Icon, description, footer }: { title: string, value: string, icon: React.ElementType, description?: string, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -62,7 +69,7 @@ export default function HomeTab() {
         {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </CardContent>
       {footer && (
-          <CardFooter className="text-xs text-muted-foreground pt-0 pb-4 border-t mt-auto mx-6">
+          <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
               {footer}
           </CardFooter>
       )}
@@ -74,7 +81,19 @@ export default function HomeTab() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard title="Total Bebek" value={totalDucks.toLocaleString('id-ID')} icon={Egg} />
         <StatCard title="Produksi Hari Ini" value={todayProduction.toLocaleString('id-ID')} icon={BarChart} />
-        <StatCard title="Produksi Bulan Ini" value={monthProduction.toLocaleString('id-ID')} icon={PieChart} />
+        <StatCard 
+            title="Produksi Terbaik" 
+            value={bestProduction.toLocaleString('id-ID')} 
+            icon={TrendingUp} 
+            footer={worstProductionRecord && (
+                 <div className="w-full pt-2 text-xs">
+                    <div className="flex justify-between items-center">
+                        <span className="flex items-center"><TrendingDown className="h-3 w-3 mr-1 text-red-500"/>Terendah:</span>
+                        <span className="font-semibold">{worstProductionRecord.totalEggs} <span className="text-muted-foreground">({format(new Date(worstProductionRecord.date), 'd MMM')})</span></span>
+                    </div>
+                </div>
+            )}
+        />
         <StatCard 
             title="Stok Pakan (Kg)" 
             value={feedStock.toLocaleString('id-ID')} 
