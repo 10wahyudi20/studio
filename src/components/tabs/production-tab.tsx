@@ -102,10 +102,10 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                         {errors.date && <p className="text-sm text-destructive mt-1">{errors.date.message}</p>}
 
                         <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                            <Label>Jumlah Telur per Kandang</Label>
+                            <Label>Jumlah Telur per Kdg</Label>
                             {ducks.map(duck => (
                                 <div key={duck.cage} className="flex items-center justify-between">
-                                    <Label htmlFor={`perCage.${duck.cage}`} className="font-normal">Kandang {duck.cage}</Label>
+                                    <Label htmlFor={`perCage.${duck.cage}`} className="font-normal">Kdg {duck.cage}</Label>
                                     <Input
                                         id={`perCage.${duck.cage}`}
                                         type="number"
@@ -352,7 +352,7 @@ export default function ProductionTab() {
                       <TableHead>Produktifitas</TableHead>
                       {ducks.map(duck => (
                         <TableHead key={duck.cage}>
-                          Kandang {duck.cage}
+                          Kdg {duck.cage}
                           <div className="font-normal text-xs">({duck.quantity} ekor)</div>
                         </TableHead>
                       ))}
@@ -548,3 +548,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
