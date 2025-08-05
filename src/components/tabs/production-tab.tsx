@@ -3,11 +3,11 @@
 
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2 } from "lucide-react";
+import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -248,7 +248,13 @@ export default function ProductionTab() {
   const { toast } = useToast();
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-  const todayProduction = eggProduction.daily.at(-1)?.totalEggs || 0;
+  
+  const productionTodayRecord = eggProduction.daily.at(-1);
+  const productionYesterdayRecord = eggProduction.daily.at(-2);
+  const todayProduction = productionTodayRecord?.totalEggs || 0;
+  const yesterdayProduction = productionYesterdayRecord?.totalEggs || 0;
+  const productionDifference = todayProduction - yesterdayProduction;
+
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
   const productivity = totalDucks > 0 && todayProduction > 0 ? (todayProduction / totalDucks * 100).toFixed(2) : 0;
   const monthProduction = eggProduction.daily
@@ -273,15 +279,20 @@ export default function ProductionTab() {
     return '';
   };
 
-  const StatCard = ({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) => (
-    <Card>
+  const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="flex-grow">
+        <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
       </CardContent>
+       {footer && (
+          <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
+              {footer}
+          </CardFooter>
+      )}
     </Card>
   );
   
@@ -332,7 +343,28 @@ export default function ProductionTab() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Produksi Hari Ini" value={todayProduction} icon={Egg} />
+        <StatCard 
+            title="Produksi Hari Ini" 
+            value={todayProduction} 
+            icon={Egg} 
+            valueClassName={cn({
+                'text-green-600 dark:text-green-500': productionDifference > 0,
+                'text-red-600 dark:text-red-500': productionDifference < 0,
+            })}
+            footer={
+                productionYesterdayRecord && (
+                    <div className={cn('flex items-center w-full pt-2 text-xs', {
+                        'text-green-600 dark:text-green-500': productionDifference > 0,
+                        'text-red-600 dark:text-red-500': productionDifference < 0,
+                    })}>
+                        {productionDifference > 0 && <ArrowUp className="h-4 w-4 mr-1" />}
+                        {productionDifference < 0 && <ArrowDown className="h-4 w-4 mr-1" />}
+                        {productionDifference !== 0 ? `${Math.abs(productionDifference)} butir` : 'Tidak ada perubahan'}{" "}
+                        dari kemarin
+                    </div>
+                )
+            }
+        />
         <StatCard title="Produksi Terbaik" value={bestProduction} icon={TrendingUp} />
         <StatCard title="Produktifitas" value={`${productivity}%`} icon={Percent} />
         <StatCard title="Telur Satu Bulan" value={monthProduction} icon={CalendarDays} />
