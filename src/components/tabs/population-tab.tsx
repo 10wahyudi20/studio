@@ -3,7 +3,7 @@
 
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle, Edit, Trash2, RefreshCw, Layers, Users, TrendingDown, ArrowRightLeft, ShieldOff } from "lucide-react";
@@ -192,22 +192,39 @@ export default function PopulationTab() {
   const tuaCount = ducks.filter(d => d.status === 'Bebek Tua').reduce((acc, duck) => acc + duck.quantity, 0);
   const afkirCount = ducks.filter(d => d.status === 'Bebek Afkir').reduce((acc, duck) => acc + duck.quantity, 0);
   
-  const StatCard = ({ title, value, icon: Icon }: { title: string, value: string | number, icon: React.ElementType }) => (
-    <Card>
+  const StatCard = ({ title, value, icon: Icon, footer }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode }) => (
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow">
         <div className="text-2xl font-bold">{value}</div>
       </CardContent>
+       {footer && (
+          <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
+              {footer}
+          </CardFooter>
+      )}
     </Card>
   );
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <StatCard title="Total Bebek" value={totalDucks} icon={Users}/>
+          <StatCard 
+            title="Total Bebek" 
+            value={totalDucks} 
+            icon={Users}
+            footer={
+                <div className="w-full pt-2 text-xs">
+                    <div className="flex justify-between items-center text-red-500 font-medium">
+                        <span>Bebek Mati:</span>
+                        <span>{totalDeaths}</span>
+                    </div>
+                </div>
+            }
+          />
           <StatCard title="Bebek Mati" value={totalDeaths} icon={TrendingDown}/>
           <StatCard title="Bebek Bayah" value={bayahCount} icon={Layers}/>
           <StatCard title="Bebek Petelur" value={petelurCount} icon={ArrowRightLeft}/>
