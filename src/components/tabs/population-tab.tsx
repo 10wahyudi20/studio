@@ -108,7 +108,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
                 <Input id="quantity" type="number" {...register("quantity")} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="deaths" className="text-right">Kematian</Label>
+                <Label htmlFor="deaths" className="text-right">Bebek Mati</Label>
                 <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -208,7 +208,7 @@ export default function PopulationTab() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <StatCard title="Total Bebek" value={totalDucks} icon={Users}/>
-          <StatCard title="Kematian" value={totalDeaths} icon={TrendingDown}/>
+          <StatCard title="Bebek Mati" value={totalDeaths} icon={TrendingDown}/>
           <StatCard title="Bebek Bayah" value={bayahCount} icon={Layers}/>
           <StatCard title="Bebek Petelur" value={petelurCount} icon={ArrowRightLeft}/>
           <StatCard title="Bebek Tua" value={tuaCount} icon={Users}/>
@@ -232,7 +232,7 @@ export default function PopulationTab() {
                 <TableRow>
                   <TableHead>Kandang</TableHead>
                   <TableHead>Jumlah Bebek</TableHead>
-                  <TableHead>Kematian</TableHead>
+                  <TableHead>Bebek Mati</TableHead>
                   <TableHead>Tanggal Masuk</TableHead>
                   <TableHead>Usia (Bulan)</TableHead>
                   <TableHead>Status</TableHead>
@@ -326,5 +326,3 @@ export default function PopulationTab() {
     </div>
   );
 }
-
-    
