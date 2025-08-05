@@ -26,9 +26,10 @@ export default function HomeTab() {
   
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  const monthProduction = eggProduction.daily
+  const monthlyProductionData = eggProduction.daily
     .filter(d => new Date(d.date).getMonth() === currentMonth && new Date(d.date).getFullYear() === currentYear)
-    .reduce((sum, day) => sum + day.totalEggs, 0);
+  
+  const monthProduction = monthlyProductionData.reduce((sum, day) => sum + day.totalEggs, 0);
   
   const feedStock = feed.reduce((sum, item) => sum + item.stock, 0);
   
@@ -57,11 +58,9 @@ export default function HomeTab() {
     { name: 'Afkir', value: ducks.filter(d => d.status === 'Bebek Afkir').reduce((s, d) => s + d.quantity, 0) },
   ];
 
-  const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
+  const bestProductionThisMonth = Math.max(...monthlyProductionData.map(d => d.totalEggs), 0);
+  const worstProductionThisMonth = Math.min(...monthlyProductionData.map(d => d.totalEggs), Infinity);
   
-  const worstProductionRecord = eggProduction.daily.length > 0 
-    ? eggProduction.daily.reduce((min, p) => p.totalEggs < min.totalEggs ? p : min, eggProduction.daily[0]) 
-    : null;
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, description?: React.ReactNode, footer?: React.ReactNode }) => (
@@ -124,15 +123,15 @@ export default function HomeTab() {
             title="Telur Satu Bulan" 
             value={monthProduction.toLocaleString('id-ID')} 
             icon={CalendarDays} 
-            footer={worstProductionRecord && (
+            footer={monthlyProductionData.length > 0 && (
                  <div className="w-full pt-2 text-xs">
                     <div className="flex justify-between items-center">
                         <span className="flex items-center"><TrendingUp className="h-3 w-3 mr-1 text-green-500"/>Terbaik:</span>
-                        <span className="font-semibold">{bestProduction}</span>
+                        <span className="font-semibold">{bestProductionThisMonth}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="flex items-center"><TrendingDown className="h-3 w-3 mr-1 text-red-500"/>Terendah:</span>
-                        <span className="font-semibold">{worstProductionRecord.totalEggs}</span>
+                        <span className="font-semibold">{worstProductionThisMonth === Infinity ? 0 : worstProductionThisMonth}</span>
                     </div>
                 </div>
             )}
@@ -219,3 +218,4 @@ export default function HomeTab() {
     </div>
   );
 }
+
