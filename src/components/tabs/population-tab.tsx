@@ -216,14 +216,6 @@ export default function PopulationTab() {
             title="Total Bebek" 
             value={totalDucks} 
             icon={Users}
-            footer={
-                <div className="w-full pt-2 text-xs">
-                    <div className="flex justify-between items-center text-red-500 font-medium">
-                        <span>Bebek Mati:</span>
-                        <span>{totalDeaths}</span>
-                    </div>
-                </div>
-            }
           />
           <StatCard title="Bebek Mati" value={totalDeaths} icon={TrendingDown}/>
           <StatCard title="Bebek Bayah" value={bayahCount} icon={Layers}/>

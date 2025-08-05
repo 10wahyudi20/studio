@@ -57,6 +57,7 @@ export default function HomeTab() {
   const worstProductionRecord = eggProduction.daily.length > 0 
     ? eggProduction.daily.reduce((min, p) => p.totalEggs < min.totalEggs ? p : min, eggProduction.daily[0]) 
     : null;
+  const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
 
   const StatCard = ({ title, value, icon: Icon, description, footer }: { title: string, value: string, icon: React.ElementType, description?: string, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
@@ -79,7 +80,19 @@ export default function HomeTab() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <StatCard title="Total Bebek" value={totalDucks.toLocaleString('id-ID')} icon={Egg} />
+        <StatCard 
+            title="Total Bebek" 
+            value={totalDucks.toLocaleString('id-ID')} 
+            icon={Egg} 
+            footer={
+                 <div className="w-full pt-2 text-xs">
+                    <div className="flex justify-between items-center text-red-500 font-medium">
+                        <span>Bebek Mati:</span>
+                        <span>{totalDeaths}</span>
+                    </div>
+                </div>
+            }
+        />
         <StatCard title="Produksi Hari Ini" value={todayProduction.toLocaleString('id-ID')} icon={BarChart} />
         <StatCard 
             title="Produksi Terbaik" 
