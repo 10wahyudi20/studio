@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown } from "lucide-react";
+import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -17,7 +17,12 @@ export default function HomeTab() {
   const { ducks, eggProduction, feed, finance } = useAppStore();
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-  const todayProduction = eggProduction.daily[eggProduction.daily.length - 1]?.totalEggs || 0;
+  
+  const productionTodayRecord = eggProduction.daily.at(-1);
+  const productionYesterdayRecord = eggProduction.daily.at(-2);
+  const todayProduction = productionTodayRecord?.totalEggs || 0;
+  const yesterdayProduction = productionYesterdayRecord?.totalEggs || 0;
+  const productionDifference = todayProduction - yesterdayProduction;
   
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -59,15 +64,15 @@ export default function HomeTab() {
     : null;
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
 
-  const StatCard = ({ title, value, icon: Icon, description, footer }: { title: string, value: string, icon: React.ElementType, description?: string, footer?: React.ReactNode }) => (
+  const StatCard = ({ title, value, valueClassName, icon: Icon, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="flex-grow">
-        <div className="text-2xl font-bold">{value}</div>
-        {description && <p className="text-xs text-muted-foreground">{description}</p>}
+        <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
+        {description && <div className="text-xs text-muted-foreground">{description}</div>}
       </CardContent>
       {footer && (
           <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
@@ -93,7 +98,28 @@ export default function HomeTab() {
                 </div>
             }
         />
-        <StatCard title="Produksi Hari Ini" value={todayProduction.toLocaleString('id-ID')} icon={BarChart} />
+        <StatCard 
+            title="Produksi Hari Ini" 
+            value={todayProduction.toLocaleString('id-ID')} 
+            valueClassName={cn({
+                'text-green-600 dark:text-green-500': productionDifference > 0,
+                'text-red-600 dark:text-red-500': productionDifference < 0,
+            })}
+            icon={BarChart}
+            description={
+                productionYesterdayRecord && (
+                    <span className={cn('flex items-center', {
+                        'text-green-600 dark:text-green-500': productionDifference > 0,
+                        'text-red-600 dark:text-red-500': productionDifference < 0,
+                    })}>
+                        {productionDifference > 0 && <ArrowUp className="h-4 w-4 mr-1" />}
+                        {productionDifference < 0 && <ArrowDown className="h-4 w-4 mr-1" />}
+                        {productionDifference !== 0 ? `${Math.abs(productionDifference)} butir` : 'Tidak ada perubahan'}{" "}
+                        dari kemarin
+                    </span>
+                )
+            }
+        />
         <StatCard 
             title="Produksi Terbaik" 
             value={bestProduction.toLocaleString('id-ID')} 
