@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown } from "lucide-react";
+import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -121,14 +121,18 @@ export default function HomeTab() {
             }
         />
         <StatCard 
-            title="Produksi Terbaik" 
-            value={bestProduction.toLocaleString('id-ID')} 
-            icon={TrendingUp} 
+            title="Telur Satu Bulan" 
+            value={monthProduction.toLocaleString('id-ID')} 
+            icon={CalendarDays} 
             footer={worstProductionRecord && (
                  <div className="w-full pt-2 text-xs">
                     <div className="flex justify-between items-center">
+                        <span className="flex items-center"><TrendingUp className="h-3 w-3 mr-1 text-green-500"/>Terbaik:</span>
+                        <span className="font-semibold">{bestProduction}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
                         <span className="flex items-center"><TrendingDown className="h-3 w-3 mr-1 text-red-500"/>Terendah:</span>
-                        <span className="font-semibold">{worstProductionRecord.totalEggs} <span className="text-muted-foreground">({format(new Date(worstProductionRecord.date), 'd MMM')})</span></span>
+                        <span className="font-semibold">{worstProductionRecord.totalEggs}</span>
                     </div>
                 </div>
             )}
