@@ -106,9 +106,9 @@ export default function HomeTab() {
                 'text-red-600 dark:text-red-500': productionDifference < 0,
             })}
             icon={BarChart}
-            description={
+            footer={
                 productionYesterdayRecord && (
-                    <span className={cn('flex items-center', {
+                    <div className={cn('flex items-center w-full pt-2 text-xs', {
                         'text-green-600 dark:text-green-500': productionDifference > 0,
                         'text-red-600 dark:text-red-500': productionDifference < 0,
                     })}>
@@ -116,7 +116,7 @@ export default function HomeTab() {
                         {productionDifference < 0 && <ArrowDown className="h-4 w-4 mr-1" />}
                         {productionDifference !== 0 ? `${Math.abs(productionDifference)} butir` : 'Tidak ada perubahan'}{" "}
                         dari kemarin
-                    </span>
+                    </div>
                 )
             }
         />
