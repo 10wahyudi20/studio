@@ -189,7 +189,7 @@ export default function FeedTab() {
                     <TableCell>{item.stock.toLocaleString('id-ID')}</TableCell>
                     <TableCell>Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
                     <TableCell>Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
-                    <TableCell className="text-green-700 dark:text-green-400 font-semibold">{item.schema}</TableCell>
+                    <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema}</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
