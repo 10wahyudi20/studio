@@ -376,13 +376,12 @@ export default function ProductionTab() {
         const endDate = new Date(w.endDate);
         const selectedMonth = currentDate.getMonth();
         const selectedYear = currentDate.getFullYear();
-        // Return true if the week's period overlaps with the selected month
-        return (startDate.getMonth() === selectedMonth && startDate.getFullYear() === selectedYear) ||
-               (endDate.getMonth() === selectedMonth && endDate.getFullYear() === selectedYear) ||
-               (startDate.getFullYear() === selectedYear && endDate.getFullYear() === selectedYear && startDate.getMonth() < selectedMonth && endDate.getMonth() > selectedMonth) ||
-               (startDate.getFullYear() < selectedYear && endDate.getFullYear() > selectedYear) ||
-               (startDate.getFullYear() === selectedYear && endDate.getFullYear() > selectedYear) ||
-               (startDate.getFullYear() < selectedYear && endDate.getFullYear() === selectedYear);
+        
+        const startOfMonth = new Date(selectedYear, selectedMonth, 1);
+        const endOfMonth = new Date(selectedYear, selectedMonth + 1, 0);
+
+        // Check if the production period overlaps with the selected month
+        return startDate <= endOfMonth && endDate >= startOfMonth;
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   
@@ -644,7 +643,7 @@ export default function ProductionTab() {
                               </TableRow>
                           ))}
                           <TableRow className="bg-secondary/50 font-bold">
-                            <TableCell colSpan={2} className="text-center">Subtotal Periode</TableCell>
+                            <TableCell colSpan={2} className="text-left">Subtotal Periode</TableCell>
                             <TableCell className="text-center">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
@@ -659,7 +658,7 @@ export default function ProductionTab() {
                   </TableBody>
                    <TableFooter>
                     <TableRow className="bg-primary/20 font-extrabold text-lg">
-                      <TableCell colSpan={2}>Grand Total Bulanan</TableCell>
+                      <TableCell colSpan={2} className="text-left">Grand Total Bulanan</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
