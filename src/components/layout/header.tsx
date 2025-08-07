@@ -1,6 +1,6 @@
 
 "use client";
-import React, {useRef} from "react";
+import React, {useRef, useEffect} from "react";
 import { useRouter } from "next/navigation";
 import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,25 +37,19 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
   );
 
 // Personal AI Assistant Component
-const PersonalAssistant = () => {
+const PersonalAssistant = ({ inputRef }: { inputRef: React.RefObject<HTMLInputElement> }) => {
     type Message = { role: 'user' | 'model'; content: string };
     const [history, setHistory] = React.useState<Message[]>([]);
     const [prompt, setPrompt] = React.useState('');
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
         if (scrollAreaRef.current) {
             scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
         }
     }, [history]);
-
-    React.useEffect(() => {
-        // Automatically focus the input when the component mounts
-        inputRef.current?.focus();
-    }, []);
 
     const handleSend = async () => {
         if (!prompt.trim()) return;
@@ -344,6 +338,17 @@ export default function Header() {
     const { companyInfo, isDirty, saveState, logout } = useAppStore();
     const { toast } = useToast();
     const router = useRouter();
+    const [aiDialogOpen, setAiDialogOpen] = React.useState(false);
+    const aiInputRef = React.useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (aiDialogOpen) {
+            // Timeout to allow the dialog to render and the ref to be attached
+            setTimeout(() => {
+                aiInputRef.current?.focus();
+            }, 100);
+        }
+    }, [aiDialogOpen]);
 
     const handleSave = () => {
         saveState();
@@ -392,7 +397,7 @@ export default function Header() {
                 <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
                 <span className="sr-only">Simpan Data</span>
             </Button>
-            <Dialog>
+            <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
                 <DialogTrigger asChild>
                      <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                         <Sparkles className="h-5 w-5 text-purple-500" />
@@ -400,7 +405,7 @@ export default function Header() {
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xl p-0">
-                   <PersonalAssistant />
+                   <PersonalAssistant inputRef={aiInputRef} />
                 </DialogContent>
             </Dialog>
             <Dialog>
