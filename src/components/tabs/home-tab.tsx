@@ -78,11 +78,6 @@ export default function HomeTab() {
   const bestProductionThisMonth = Math.max(...monthlyProductionData.map(d => d.totalEggs), 0);
   const worstProductionThisMonth = Math.min(...monthlyProductionData.map(d => d.totalEggs), Infinity);
   
-  const yearlyProductionData = eggProduction.daily
-    .filter(d => new Date(d.date).getFullYear() === currentYear);
-  const bestProductionThisYear = Math.max(...yearlyProductionData.map(d => d.totalEggs), 0);
-  const worstProductionThisYear = Math.min(...yearlyProductionData.map(d => d.totalEggs), Infinity);
-
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, description?: React.ReactNode, footer?: React.ReactNode }) => (
@@ -155,15 +150,6 @@ export default function HomeTab() {
                     <div className="flex justify-between items-center">
                         <span className="flex items-center"><TrendingDown className="h-3 w-3 mr-1 text-red-500"/>Terendah:</span>
                         <span className="font-semibold">{worstProductionThisMonth === Infinity ? 0 : worstProductionThisMonth}</span>
-                    </div>
-                     <div className="font-semibold border-t pt-2 mt-2">Riwayat Tahun Ini:</div>
-                     <div className="flex justify-between items-center">
-                        <span className="flex items-center"><TrendingUp className="h-3 w-3 mr-1 text-green-500"/>Terbaik:</span>
-                        <span className="font-semibold">{bestProductionThisYear}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="flex items-center"><TrendingDown className="h-3 w-3 mr-1 text-red-500"/>Terendah:</span>
-                        <span className="font-semibold">{worstProductionThisYear === Infinity ? 0 : worstProductionThisYear}</span>
                     </div>
                 </div>
             }
@@ -250,4 +236,3 @@ export default function HomeTab() {
     </div>
   );
 }
-
