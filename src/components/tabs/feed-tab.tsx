@@ -18,6 +18,7 @@ import { Feed } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const feedSchema = z.object({
   name: z.string().min(1, "Nama pakan tidak boleh kosong"),
@@ -185,7 +186,7 @@ export default function FeedTab() {
                   <TableRow key={item.id}>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.supplier}</TableCell>
-                    <TableCell>{new Date(item.lastUpdated).toLocaleDateString('id-ID')}</TableCell>
+                    <TableCell>{format(new Date(item.lastUpdated), "dd/MM/yyyy")}</TableCell>
                     <TableCell>{item.stock.toLocaleString('id-ID')}</TableCell>
                     <TableCell>Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
                     <TableCell>Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>

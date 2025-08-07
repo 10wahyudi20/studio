@@ -117,7 +117,7 @@ export default function ReportsTab() {
                     startY: finalY,
                     head: [['Tanggal', 'Jumlah Telur (Butir)', 'Produktifitas (%)']],
                     body: dailyProdData.map(d => [
-                        format(new Date(d.date), 'dd-MM-yyyy'),
+                        format(new Date(d.date), 'dd/MM/yyyy'),
                         d.totalEggs.toLocaleString('id-ID'),
                         `${d.productivity.toFixed(2)} %`
                     ]),
@@ -134,7 +134,7 @@ export default function ReportsTab() {
                     startY: finalY,
                     head: [['Tanggal', 'Uraian', 'Jenis', 'Total (Rp)']],
                     body: financeData.map(t => [
-                        format(new Date(t.date), 'dd-MM-yyyy'),
+                        format(new Date(t.date), 'dd/MM/yyyy'),
                         t.description,
                         t.type === 'debit' ? 'Pemasukan' : 'Pengeluaran',
                         t.total.toLocaleString('id-ID')
@@ -254,5 +254,3 @@ export default function ReportsTab() {
     </div>
   );
 }
-
-    

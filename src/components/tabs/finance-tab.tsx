@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
 
 const transactionSchema = z.object({
   date: z.string().nonempty("Tanggal harus diisi"),
@@ -154,7 +155,7 @@ export default function FinanceTab() {
 
   const TransactionRow = ({ t }: { t: Transaction }) => (
     <TableRow key={t.id} className={t.type === 'debit' ? "bg-green-100/50 dark:bg-green-900/20" : "bg-red-100/50 dark:bg-red-900/20"}>
-      <TableCell>{new Date(t.date).toLocaleDateString('id-ID')}</TableCell>
+      <TableCell>{format(new Date(t.date), "dd/MM/yyyy")}</TableCell>
       <TableCell>{t.description}</TableCell>
       <TableCell className={t.type === 'debit' ? 'text-green-700 dark:text-green-400 font-semibold' : 'text-red-700 dark:text-red-400 font-semibold'}>{t.quantity.toLocaleString('id-ID')}</TableCell>
       <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
@@ -238,5 +239,3 @@ export default function FinanceTab() {
     </div>
   );
 }
-
-    

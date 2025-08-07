@@ -134,7 +134,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
                                 )}
                                 >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>}
+                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Pilih tanggal</span>}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -271,7 +271,7 @@ export default function PopulationTab() {
                     <TableCell className="text-center align-middle">{duck.cage}</TableCell>
                     <TableCell className="text-center align-middle">{duck.quantity}</TableCell>
                     <TableCell className="text-center align-middle">{duck.deaths}</TableCell>
-                    <TableCell className="text-center align-middle">{format(new Date(duck.entryDate), "dd MMM yyyy")}</TableCell>
+                    <TableCell className="text-center align-middle">{format(new Date(duck.entryDate), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-center align-middle">{duck.ageMonths}</TableCell>
                     <TableCell className="text-center align-middle">{duck.status}</TableCell>
                     <TableCell className="text-center align-middle">{duck.cageSize}</TableCell>

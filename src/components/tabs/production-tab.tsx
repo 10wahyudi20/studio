@@ -65,7 +65,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
     const onSubmit = (data: DailyFormData) => {
         onSave(production ? new Date(production.date) : data.date, data);
         setOpen(false);
-        toast({ title: `Data Harian ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk tanggal ${format(data.date, "dd MMM yyyy")} telah ${production ? 'diperbarui' : 'disimpan'}.` });
+        toast({ title: `Data Harian ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk tanggal ${format(data.date, "dd/MM/yyyy")} telah ${production ? 'diperbarui' : 'disimpan'}.` });
     };
 
     return (
@@ -86,7 +86,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                                     <PopoverTrigger asChild>
                                         <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")} disabled={!!production}>
                                             <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.value ? format(field.value, "PPP", { locale: idLocale }) : <span>Pilih tanggal</span>}
+                                            {field.value ? format(field.value, "dd/MM/yyyy", { locale: idLocale }) : <span>Pilih tanggal</span>}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
@@ -220,11 +220,11 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                                       {field.value?.from ? (
                                       field.value.to ? (
                                           <>
-                                          {format(field.value.from, "LLL dd, y")} -{" "}
-                                          {format(field.value.to, "LLL dd, y")}
+                                          {format(field.value.from, "dd/MM/yyyy")} -{" "}
+                                          {format(field.value.to, "dd/MM/yyyy")}
                                           </>
                                       ) : (
-                                          format(field.value.from, "LLL dd, y")
+                                          format(field.value.from, "dd/MM/yyyy")
                                       )
                                       ) : (
                                       <span>Pilih rentang tanggal</span>
@@ -533,7 +533,7 @@ export default function ProductionTab() {
                           const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
                           formTrigger?.click();
                       }}>
-                        <TableCell className="align-middle text-center">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
+                        <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
                         <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
                         <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
                         <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
@@ -597,7 +597,7 @@ export default function ProductionTab() {
                                   <TableCell className="text-center">
                                     <div className="font-semibold">{week.description}</div>
                                     <div className="text-xs text-muted-foreground">
-                                        {format(new Date(week.startDate), 'dd MMM', { locale: idLocale })} - {format(new Date(week.endDate), 'dd MMM', { locale: idLocale })}
+                                        {format(new Date(week.startDate), 'dd/MM/yy', { locale: idLocale })} - {format(new Date(week.endDate), 'dd/MM/yy', { locale: idLocale })}
                                     </div>
                                   </TableCell>
                                   <TableCell>{week.buyer}</TableCell>
@@ -652,7 +652,7 @@ export default function ProductionTab() {
                               </TableRow>
                           ))}
                           <TableRow className="bg-secondary/50 font-bold">
-                            <TableCell colSpan={2} className="text-left">Subtotal Periode</TableCell>
+                            <TableCell className="text-left" colSpan={2}>Subtotal Periode</TableCell>
                             <TableCell className="text-center">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
@@ -667,7 +667,7 @@ export default function ProductionTab() {
                   </TableBody>
                    <TableFooter>
                     <TableRow className="bg-primary/20 font-extrabold text-lg">
-                      <TableCell colSpan={2} className="text-left">Grand Total Bulanan</TableCell>
+                      <TableCell className="text-left" colSpan={2}>Grand Total Bulanan</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
