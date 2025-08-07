@@ -47,6 +47,7 @@ const PersonalAssistant = () => {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
 
     // Effect to focus the input when dialog opens or after a message is sent
     useEffect(() => {
@@ -57,6 +58,13 @@ const PersonalAssistant = () => {
             }, 100);
         }
     }, [isLoading]);
+    
+    // Effect to scroll to the bottom of the chat history when new messages are added
+    useEffect(() => {
+        if (viewportRef.current) {
+            viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+        }
+    }, [history]);
 
     const handleSend = async () => {
         if (!prompt.trim()) return;
@@ -96,7 +104,7 @@ const PersonalAssistant = () => {
                 </DialogDescription>
             </DialogHeader>
             <div className="flex-grow my-4 overflow-hidden">
-                <ScrollArea className="h-full pr-4">
+                <ScrollArea className="h-full pr-4" viewportRef={viewportRef}>
                     <div className="space-y-4">
                         {history.length === 0 && (
                             <div className="text-center text-muted-foreground py-8">
@@ -446,5 +454,7 @@ export default function Header() {
     </header>
   );
 }
+
+    
 
     
