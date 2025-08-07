@@ -23,7 +23,6 @@ import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { DateRange } from "react-day-picker";
-import { Textarea } from "../ui/textarea";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -311,6 +310,7 @@ export default function ProductionTab() {
   const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = React.useState(new Date());
+  const [activeTab, setActiveTab] = React.useState("daily");
 
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -462,7 +462,7 @@ export default function ProductionTab() {
           <CardTitle>Tabel Produksi</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="daily">
+          <Tabs defaultValue="daily" onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
                 <TabsList>
                     <TabsTrigger value="daily">Harian</TabsTrigger>
@@ -470,35 +470,37 @@ export default function ProductionTab() {
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
                  <div className="flex items-center gap-2">
-                    <Popover>
-                        <PopoverTrigger asChild>
-                            <Button variant="outline" size="icon">
-                                <CalendarIcon className="h-4 w-4" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                            <Calendar
-                                mode="single"
-                                selected={currentDate}
-                                onSelect={(date) => date && setCurrentDate(date)}
-                                initialFocus
-                            />
-                        </PopoverContent>
-                    </Popover>
+                    {activeTab !== 'monthly' && (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" size="icon">
+                                    <CalendarIcon className="h-4 w-4" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={currentDate}
+                                    onSelect={(date) => date && setCurrentDate(date)}
+                                    initialFocus
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    )}
 
-                    <TabsContent value="daily" className="m-0">
+                    {activeTab === 'daily' && (
                         <DailyDataForm onSave={handleDailySave}>
                             <Button>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Input Data Harian
                             </Button>
                         </DailyDataForm>
-                    </TabsContent>
-                    <TabsContent value="weekly" className="m-0">
+                    )}
+                    {activeTab === 'weekly' && (
                         <WeeklyDataForm onSave={addWeeklyProduction}>
                             <Button><PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan</Button>
                         </WeeklyDataForm>
-                    </TabsContent>
+                    )}
                  </div>
             </div>
             
@@ -724,3 +726,4 @@ export default function ProductionTab() {
     </div>
   );
 }
+
