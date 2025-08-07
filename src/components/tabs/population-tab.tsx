@@ -58,8 +58,8 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
     ? {
         ...duck,
         entryDate: new Date(duck.entryDate),
-        cageSizeLength: duck.cageSize ? Number(duck.cageSize.split("x")[0]) : 0,
-        cageSizeWidth: duck.cageSize ? Number(duck.cageSize.split("x")[1]) : 0,
+        cageSizeLength: duck.cageSize ? Number(duck.cageSize.split("m")[0].trim()) : 0,
+        cageSizeWidth: duck.cageSize ? Number(duck.cageSize.split("x")[1]?.replace('m','').trim()) : 0,
       }
     : {
         cage: ducks.length > 0 ? Math.max(...ducks.map(d => d.cage)) + 1 : 1,
@@ -79,7 +79,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
   const onSubmit = (data: DuckFormData) => {
     const saveData = {
         ...data,
-        cageSize: `${data.cageSizeLength}x${data.cageSizeWidth}m`,
+        cageSize: `${data.cageSizeLength}m x ${data.cageSizeWidth}m`,
     };
     onSave(saveData);
     setOpen(false);
