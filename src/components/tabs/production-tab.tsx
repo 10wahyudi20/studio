@@ -211,7 +211,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                                       variant={"outline"}
                                       className={cn(
                                       "w-full justify-start text-left font-normal",
-                                      !field.value.from && "text-muted-foreground"
+                                      !field.value?.from && "text-muted-foreground"
                                       )}
                                   >
                                       <CalendarIcon className="mr-2 h-4 w-4" />
@@ -244,14 +244,14 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                       />
                   </div>
                   <div className="space-y-2">
-                      <Label htmlFor="buyer">Nama Pembeli</Label>
-                      <Input id="buyer" {...register("buyer")} />
-                      {errors.buyer && <p className="text-sm text-destructive mt-1">{errors.buyer.message}</p>}
-                  </div>
-                  <div className="space-y-2">
                       <Label htmlFor="description">Keterangan</Label>
                       <Textarea id="description" {...register("description")} />
                       {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
+                  </div>
+                   <div className="space-y-2">
+                      <Label htmlFor="buyer">Nama Pembeli</Label>
+                      <Input id="buyer" {...register("buyer")} />
+                      {errors.buyer && <p className="text-sm text-destructive mt-1">{errors.buyer.message}</p>}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -564,7 +564,7 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-center">Periode</TableHead>
+                      <TableHead>Periode</TableHead>
                       <TableHead>Pembeli</TableHead>
                       <TableHead className="text-center">Grade A</TableHead>
                       <TableHead className="text-center">Grade B</TableHead>
@@ -596,7 +596,7 @@ export default function ProductionTab() {
                         <React.Fragment key={period}>
                           {weekEntries.map((week) => (
                               <TableRow key={week.id}>
-                                  <TableCell className="text-center">
+                                  <TableCell>
                                     <div className="font-semibold">{week.description}</div>
                                     <div className="text-xs text-muted-foreground">
                                         {format(new Date(week.startDate), 'dd MMM', { locale: idLocale })} - {format(new Date(week.endDate), 'dd MMM', { locale: idLocale })}
