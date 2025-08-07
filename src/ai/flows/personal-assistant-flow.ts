@@ -116,7 +116,7 @@ const getFinancialData = ai.defineTool(
 
 export async function personalAssistant(input: PersonalAssistantInput): Promise<PersonalAssistantOutput> {
   const {ducks, eggProduction, feed, finance, ...restOfInput} = input;
-  return personalAssistantFlow(restOfInput, {ducks, eggProduction, feed, finance});
+  return personalAssistantFlow(restOfInput, {state: {ducks, eggProduction, feed, finance}});
 }
 
 const personalAssistantFlow = ai.defineFlow(
@@ -187,6 +187,7 @@ Tanggal hari ini adalah ${currentDate}.`;
       history: formattedHistory,
       prompt: currentPromptParts,
       tools: toolsToUse,
+      state: flow.state,
       config: {
         safetySettings: [
           {
