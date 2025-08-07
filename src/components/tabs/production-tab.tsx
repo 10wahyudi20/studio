@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { DateRange } from "react-day-picker";
 import { Textarea } from "../ui/textarea";
+import { ScrollArea } from "../ui/scroll-area";
 
 // Daily Data Form
 const dailySchemaGenerator = (ducks: Duck[]) => {
@@ -195,104 +196,106 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
             <DialogHeader>
             <DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Mingguan</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                    <Label>Periode Penjualan</Label>
-                    <Controller
-                        name="dateRange"
-                        control={control}
-                        render={({ field }) => (
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                <Button
-                                    id="date"
-                                    variant={"outline"}
-                                    className={cn(
-                                    "w-full justify-start text-left font-normal",
-                                    !field.value.from && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {field.value?.from ? (
-                                    field.value.to ? (
-                                        <>
-                                        {format(field.value.from, "LLL dd, y")} -{" "}
-                                        {format(field.value.to, "LLL dd, y")}
-                                        </>
-                                    ) : (
-                                        format(field.value.from, "LLL dd, y")
-                                    )
-                                    ) : (
-                                    <span>Pilih rentang tanggal</span>
-                                    )}
-                                </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    defaultMonth={field.value?.from}
-                                    selected={field.value as DateRange}
-                                    onSelect={field.onChange}
-                                    numberOfMonths={2}
-                                />
-                                </PopoverContent>
-                            </Popover>
-                        )}
-                    />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="buyer">Nama Pembeli</Label>
-                    <Input id="buyer" {...register("buyer")} />
-                    {errors.buyer && <p className="text-sm text-destructive mt-1">{errors.buyer.message}</p>}
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="description">Keterangan</Label>
-                    <Textarea id="description" {...register("description")} />
-                    {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Jumlah Telur</Label>
-                        <div>
-                          <Label htmlFor="gradeA" className="text-xs text-muted-foreground">Grade A</Label>
-                          <Input id="gradeA" type="number" {...register("gradeA")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="gradeB" className="text-xs text-muted-foreground">Grade B</Label>
-                          <Input id="gradeB" type="number" {...register("gradeB")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="gradeC" className="text-xs text-muted-foreground">Grade C</Label>
-                          <Input id="gradeC" type="number" {...register("gradeC")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="consumption" className="text-xs text-muted-foreground">Konsumsi</Label>
-                          <Input id="consumption" type="number" {...register("consumption")} />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Harga Satuan</Label>
-                         <div>
-                          <Label htmlFor="priceA" className="text-xs text-muted-foreground">Harga Grade A</Label>
-                          <Input id="priceA" type="number" {...register("priceA")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="priceB" className="text-xs text-muted-foreground">Harga Grade B</Label>
-                          <Input id="priceB" type="number" {...register("priceB")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="priceC" className="text-xs text-muted-foreground">Harga Grade C</Label>
-                          <Input id="priceC" type="number" {...register("priceC")} />
-                        </div>
-                        <div>
-                          <Label htmlFor="priceConsumption" className="text-xs text-muted-foreground">Harga Konsumsi</Label>
-                          <Input id="priceConsumption" type="number" {...register("priceConsumption")} />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <DialogFooter>
+            <ScrollArea className="max-h-[70vh] p-4">
+              <div className="space-y-4">
+                  <div className="space-y-2">
+                      <Label>Periode Penjualan</Label>
+                      <Controller
+                          name="dateRange"
+                          control={control}
+                          render={({ field }) => (
+                              <Popover>
+                                  <PopoverTrigger asChild>
+                                  <Button
+                                      id="date"
+                                      variant={"outline"}
+                                      className={cn(
+                                      "w-full justify-start text-left font-normal",
+                                      !field.value.from && "text-muted-foreground"
+                                      )}
+                                  >
+                                      <CalendarIcon className="mr-2 h-4 w-4" />
+                                      {field.value?.from ? (
+                                      field.value.to ? (
+                                          <>
+                                          {format(field.value.from, "LLL dd, y")} -{" "}
+                                          {format(field.value.to, "LLL dd, y")}
+                                          </>
+                                      ) : (
+                                          format(field.value.from, "LLL dd, y")
+                                      )
+                                      ) : (
+                                      <span>Pilih rentang tanggal</span>
+                                      )}
+                                  </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                      initialFocus
+                                      mode="range"
+                                      defaultMonth={field.value?.from}
+                                      selected={field.value as DateRange}
+                                      onSelect={field.onChange}
+                                      numberOfMonths={2}
+                                  />
+                                  </PopoverContent>
+                              </Popover>
+                          )}
+                      />
+                  </div>
+                  <div className="space-y-2">
+                      <Label htmlFor="buyer">Nama Pembeli</Label>
+                      <Input id="buyer" {...register("buyer")} />
+                      {errors.buyer && <p className="text-sm text-destructive mt-1">{errors.buyer.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                      <Label htmlFor="description">Keterangan</Label>
+                      <Textarea id="description" {...register("description")} />
+                      {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                          <Label>Jumlah Telur</Label>
+                          <div>
+                            <Label htmlFor="gradeA" className="text-xs text-muted-foreground">Grade A</Label>
+                            <Input id="gradeA" type="number" {...register("gradeA")} />
+                          </div>
+                          <div>
+                            <Label htmlFor="gradeB" className="text-xs text-muted-foreground">Grade B</Label>
+                            <Input id="gradeB" type="number" {...register("gradeB")} />
+                          </div>
+                          <div>
+                            <Label htmlFor="gradeC" className="text-xs text-muted-foreground">Grade C</Label>
+                            <Input id="gradeC" type="number" {...register("gradeC")} />
+                          </div>
+                          <div>
+                            <Label htmlFor="consumption" className="text-xs text-muted-foreground">Konsumsi</Label>
+                            <Input id="consumption" type="number" {...register("consumption")} />
+                          </div>
+                      </div>
+                      <div className="space-y-2">
+                          <Label>Harga Satuan</Label>
+                          <div>
+                            <Label htmlFor="priceA" className="text-xs text-muted-foreground">Harga Grade A</Label>
+                            <Input id="priceA" type="number" {...register("priceA")} />
+                          </div>
+                          <div>
+                            <Label htmlFor="priceB" className="text-xs text-muted-foreground">Harga Grade B</Label>
+                            <Input id="priceB" type="number" {...register("priceB")} />
+                          </div>
+                          <div>
+                            <Label htmlFor="priceC" className="text-xs text-muted-foreground">Harga Grade C</Label>
+                            <Input id="priceC" type="number" {...register("priceC")} />
+                          </div>
+                          <div>
+                            <Label htmlFor="priceConsumption" className="text-xs text-muted-foreground">Harga Konsumsi</Label>
+                            <Input id="priceConsumption" type="number" {...register("priceConsumption")} />
+                          </div>
+                      </div>
+                  </div>
+              </div>
+            </ScrollArea>
+            <DialogFooter className="pt-4">
                 <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
                 <Button type="submit">Simpan</Button>
             </DialogFooter>
