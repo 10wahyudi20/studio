@@ -246,6 +246,8 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
 export default function ProductionTab() {
   const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
   const { toast } = useToast();
+  const [currentDate, setCurrentDate] = React.useState(new Date());
+
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
@@ -257,11 +259,11 @@ export default function ProductionTab() {
 
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
   const productivity = totalDucks > 0 && todayProduction > 0 ? (todayProduction / totalDucks * 100).toFixed(2) : 0;
+  
   const monthProduction = eggProduction.daily
     .filter(d => {
         const dDate = new Date(d.date);
-        const now = new Date();
-        return dDate.getMonth() === now.getMonth() && dDate.getFullYear() === now.getFullYear();
+        return dDate.getMonth() === currentDate.getMonth() && dDate.getFullYear() === currentDate.getFullYear();
     })
     .reduce((sum, d) => sum + d.totalEggs, 0);
   
@@ -281,20 +283,23 @@ export default function ProductionTab() {
   
   const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
     const firstDayOfMonth = new Date(year, month, 1);
-    let firstSunday = new Date(firstDayOfMonth);
+    const firstSunday = startOfWeek(firstDayOfMonth, { weekStartsOn: 0 }); // Start of the week containing the 1st
     
-    // Find the first Sunday of the calendar month view
-    firstSunday.setDate(1 - firstDayOfMonth.getDay());
-
-    const startDate = addDays(firstSunday, (weekNumber - 1) * 7);
-    const endDate = addDays(startDate, 6);
-
-    // Clamp dates to the actual month
-    const realStartDate = startDate < firstDayOfMonth ? firstDayOfMonth : startDate;
+    let startDate = addDays(firstSunday, (weekNumber - 1) * 7);
+    
+    // If the calculated start date is in the previous month, adjust it to the first day of the current month
+    if (startDate.getMonth() < month) {
+      startDate = firstDayOfMonth;
+    }
+    
+    const endDate = endOfWeek(startDate, { weekStartsOn: 0 });
+    
     const lastDayOfMonthDate = lastDayOfMonth(firstDayOfMonth);
-    const realEndDate = endDate > lastDayOfMonthDate ? lastDayOfMonthDate : endDate;
-
-    return { startDate: realStartDate, endDate: realEndDate };
+    
+    return { 
+      startDate, 
+      endDate: endDate > lastDayOfMonthDate ? lastDayOfMonthDate : endDate
+    };
   };
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (
@@ -394,7 +399,7 @@ export default function ProductionTab() {
         />
         <StatCard title="Produksi Terbaik" value={bestProduction} icon={TrendingUp} />
         <StatCard title="Produktifitas" value={`${productivity}%`} icon={Percent} />
-        <StatCard title="Telur Satu Bulan" value={monthProduction} icon={CalendarDays} />
+        <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction} icon={CalendarDays} />
       </div>
 
       <Card>
@@ -409,19 +414,37 @@ export default function ProductionTab() {
                     <TabsTrigger value="weekly">Mingguan</TabsTrigger>
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
-                 <TabsContent value="daily" className="m-0">
-                    <DailyDataForm onSave={handleDailySave}>
-                         <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Input Data Harian
-                        </Button>
-                    </DailyDataForm>
-                 </TabsContent>
-                 <TabsContent value="weekly" className="m-0">
-                    <WeeklyDataForm onSave={addWeeklyProduction}>
-                        <Button><PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan</Button>
-                    </WeeklyDataForm>
-                 </TabsContent>
+                 <div className="flex items-center gap-2">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline" size="icon">
+                                <CalendarIcon className="h-4 w-4" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                            <Calendar
+                                mode="single"
+                                selected={currentDate}
+                                onSelect={(date) => date && setCurrentDate(date)}
+                                initialFocus
+                            />
+                        </PopoverContent>
+                    </Popover>
+
+                    <TabsContent value="daily" className="m-0">
+                        <DailyDataForm onSave={handleDailySave}>
+                            <Button>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Input Data Harian
+                            </Button>
+                        </DailyDataForm>
+                    </TabsContent>
+                    <TabsContent value="weekly" className="m-0">
+                        <WeeklyDataForm onSave={addWeeklyProduction}>
+                            <Button><PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan</Button>
+                        </WeeklyDataForm>
+                    </TabsContent>
+                 </div>
             </div>
             
             <TabsContent value="daily">
@@ -447,8 +470,7 @@ export default function ProductionTab() {
                     {[...eggProduction.daily]
                       .filter(day => {
                         const dayDate = new Date(day.date);
-                        const now = new Date();
-                        return dayDate.getMonth() === now.getMonth() && dayDate.getFullYear() === now.getFullYear();
+                        return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
                       })
                       .reverse()
                       .map((day, index) => (
@@ -499,8 +521,7 @@ export default function ProductionTab() {
                   <TableBody>
                     {Object.keys(weeklyDataByWeek).sort((a,b) => Number(a) - Number(b)).map(weekNumber => {
                       const weekEntries = weeklyDataByWeek[Number(weekNumber)];
-                       const now = new Date();
-                      const { startDate, endDate } = getWeekDateRange(Number(weekNumber), now.getFullYear(), now.getMonth());
+                      const { startDate, endDate } = getWeekDateRange(Number(weekNumber), currentDate.getFullYear(), currentDate.getMonth());
 
                       const subtotal = weekEntries.reduce(
                         (acc, week) => {
@@ -639,9 +660,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-
-
-
-
-    
