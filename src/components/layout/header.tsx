@@ -40,12 +40,11 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
   );
 
 // Personal AI Assistant Component
-const PersonalAssistant = () => {
+const PersonalAssistant = ({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoading: (loading: boolean) => void }) => {
     const { ducks, eggProduction, feed, finance } = useAppStore();
     const [history, setHistory] = React.useState<Message[]>([]);
     const [prompt, setPrompt] = React.useState('');
     const [imageDataUri, setImageDataUri] = React.useState<string | null>(null);
-    const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -414,6 +413,7 @@ export default function Header() {
     const { toast } = useToast();
     const router = useRouter();
     const [aiDialogOpen, setAiDialogOpen] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSave = () => {
         saveState();
@@ -480,7 +480,7 @@ export default function Header() {
                         )}
                         data-loading={isLoading}
                     >
-                      <PersonalAssistant />
+                      <PersonalAssistant isLoading={isLoading} setIsLoading={setIsLoading} />
                        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
                           <X className="h-4 w-4" />
                           <span className="sr-only">Close</span>
