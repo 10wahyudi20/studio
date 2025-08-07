@@ -70,8 +70,9 @@ const getDuckPopulationData = ai.defineTool(
         inputSchema: z.void(),
         outputSchema: z.array(DuckSchema),
     },
-    async (_, flow) => {
-        return flow.state.ducks || [];
+    async () => {
+        // This implementation will be overridden in the flow
+        return [];
     }
 );
 
@@ -82,8 +83,9 @@ const getEggProductionData = ai.defineTool(
         inputSchema: z.void(),
         outputSchema: EggProductionSchema,
     },
-    async (_, flow) => {
-        return flow.state.eggProduction || { daily: [], weekly: [], monthly: [] };
+    async () => {
+         // This implementation will be overridden in the flow
+        return { daily: [], weekly: [], monthly: [] };
     }
 );
 
@@ -94,8 +96,9 @@ const getFeedData = ai.defineTool(
         inputSchema: z.void(),
         outputSchema: z.array(FeedSchema),
     },
-    async (_, flow) => {
-        return flow.state.feed || [];
+    async () => {
+        // This implementation will be overridden in the flow
+        return [];
     }
 );
 
@@ -106,8 +109,9 @@ const getFinancialData = ai.defineTool(
         inputSchema: z.void(),
         outputSchema: z.array(TransactionSchema),
     },
-    async (_, flow) => {
-        return flow.state.finance || [];
+    async () => {
+        // This implementation will be overridden in the flow
+        return [];
     }
 );
 
@@ -123,7 +127,7 @@ const personalAssistantFlow = ai.defineFlow(
     inputSchema: PersonalAssistantInputSchema,
     outputSchema: PersonalAssistantOutputSchema,
   },
-  async (input, flow) => {
+  async (input) => {
     
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
     const keyword = "hallo bebek";
@@ -189,8 +193,22 @@ Tanggal hari ini adalah ${currentDate}.`;
       system: systemPrompt,
       history: formattedHistory,
       prompt: currentPromptParts,
-      tools: toolsToUse,
-      state: { ducks, eggProduction, feed, finance }, // Pass farm data to the flow state
+      tools: toolsToUse.map(tool => {
+        // Re-bind the tool implementation to have access to the current input data
+        if (tool.name === 'getDuckPopulationData') {
+            return ai.defineTool({ ...tool.info }, async () => ducks || []);
+        }
+        if (tool.name === 'getEggProductionData') {
+            return ai.defineTool({ ...tool.info }, async () => eggProduction || { daily: [], weekly: [], monthly: [] });
+        }
+        if (tool.name === 'getFeedData') {
+            return ai.defineTool({ ...tool.info }, async () => feed || []);
+        }
+        if (tool.name === 'getFinancialData') {
+            return ai.defineTool({ ...tool.info }, async () => finance || []);
+        }
+        return tool;
+      }),
       config: {
         safetySettings: [
           {
