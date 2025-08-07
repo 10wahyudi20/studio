@@ -379,10 +379,10 @@ export default function ProductionTab() {
         // Return true if the week's period overlaps with the selected month
         return (startDate.getMonth() === selectedMonth && startDate.getFullYear() === selectedYear) ||
                (endDate.getMonth() === selectedMonth && endDate.getFullYear() === selectedYear) ||
+               (startDate.getFullYear() === selectedYear && endDate.getFullYear() === selectedYear && startDate.getMonth() < selectedMonth && endDate.getMonth() > selectedMonth) ||
                (startDate.getFullYear() < selectedYear && endDate.getFullYear() > selectedYear) ||
                (startDate.getFullYear() === selectedYear && endDate.getFullYear() > selectedYear) ||
-               (startDate.getFullYear() < selectedYear && endDate.getFullYear() === selectedYear) ||
-               (startDate.getFullYear() === selectedYear && startDate.getMonth() < selectedMonth && endDate.getMonth() > selectedMonth);
+               (startDate.getFullYear() < selectedYear && endDate.getFullYear() === selectedYear);
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   
@@ -564,7 +564,7 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Periode</TableHead>
+                      <TableHead className="text-center">Periode</TableHead>
                       <TableHead>Pembeli</TableHead>
                       <TableHead className="text-center">Grade A</TableHead>
                       <TableHead className="text-center">Grade B</TableHead>
@@ -596,7 +596,7 @@ export default function ProductionTab() {
                         <React.Fragment key={period}>
                           {weekEntries.map((week) => (
                               <TableRow key={week.id}>
-                                  <TableCell>
+                                  <TableCell className="text-center">
                                     <div className="font-semibold">{week.description}</div>
                                     <div className="text-xs text-muted-foreground">
                                         {format(new Date(week.startDate), 'dd MMM', { locale: idLocale })} - {format(new Date(week.endDate), 'dd MMM', { locale: idLocale })}
@@ -644,7 +644,7 @@ export default function ProductionTab() {
                               </TableRow>
                           ))}
                           <TableRow className="bg-secondary/50 font-bold">
-                            <TableCell colSpan={2}>Subtotal Periode</TableCell>
+                            <TableCell colSpan={2} className="text-center">Subtotal Periode</TableCell>
                             <TableCell className="text-center">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
