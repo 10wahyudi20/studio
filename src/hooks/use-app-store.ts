@@ -53,20 +53,23 @@ const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyPr
     const monthlyData: { [month: string]: MonthlyProduction } = {};
 
     weeklyData.forEach(week => {
-        const monthKey = format(new Date(week.startDate), 'MMMM yyyy', { locale: idLocale });
+        // Add a check to ensure week.startDate is valid before processing
+        if (week && week.startDate && !isNaN(new Date(week.startDate).getTime())) {
+            const monthKey = format(new Date(week.startDate), 'MMMM yyyy', { locale: idLocale });
 
-        if (!monthlyData[monthKey]) {
-            monthlyData[monthKey] = {
-                month: monthKey,
-                gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0
-            };
+            if (!monthlyData[monthKey]) {
+                monthlyData[monthKey] = {
+                    month: monthKey,
+                    gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0
+                };
+            }
+
+            monthlyData[monthKey].gradeA += week.gradeA;
+            monthlyData[monthKey].gradeB += week.gradeB;
+            monthlyData[monthKey].gradeC += week.gradeC;
+            monthlyData[monthKey].consumption += week.consumption;
+            monthlyData[monthKey].totalEggs += week.totalEggs;
         }
-
-        monthlyData[monthKey].gradeA += week.gradeA;
-        monthlyData[monthKey].gradeB += week.gradeB;
-        monthlyData[monthKey].gradeC += week.gradeC;
-        monthlyData[monthKey].consumption += week.consumption;
-        monthlyData[monthKey].totalEggs += week.totalEggs;
     });
 
     return Object.values(monthlyData).sort((a,b) => {
