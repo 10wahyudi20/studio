@@ -121,7 +121,7 @@ export default function FeedTab() {
   const totalSchema = feed.reduce((sum, item) => sum + item.schema, 0);
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   const totalFeedPerDay = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) : 0), 0);
-  const averageFeedValue = totalFeedPerDay > 0 ? (feed.reduce((sum, item) => sum + (item.stock > 0 ? ((totalDucks * item.schema / 1000) * item.pricePerKg) : 0), 0) / totalFeedPerDay) : 0;
+  const totalStockValue = feed.reduce((sum, item) => sum + (item.stock * item.pricePerKg), 0);
 
   const StatCard = ({ title, value, icon: Icon, valueClassName, footer }: { title: string, value: string, icon: React.ElementType, valueClassName?: string, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
@@ -157,7 +157,7 @@ export default function FeedTab() {
             }
         />
         <StatCard title="Total Skema Pakan" value={`${totalSchema.toLocaleString('id-ID')} g`} icon={Inbox} valueClassName="text-green-700 dark:text-green-400" />
-        <StatCard title="Nilai Pakan" value={`Rp ${averageFeedValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}/kg`} icon={Sigma} />
+        <StatCard title="Nilai Pakan" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
         <StatCard title="Total Pakan/Hari" value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} icon={Wheat} />
       </div>
 
