@@ -80,7 +80,7 @@ const getDuckPopulationData = ai.defineTool(
 const getEggProductionData = ai.defineTool(
     {
         name: 'getEggProductionData',
-        description: 'Get data about daily, weekly, and monthly egg production.',
+        description: 'Get data about daily, weekly, and monthly egg-production.',
         inputSchema: z.void(),
         outputSchema: EggProductionSchema,
     },
@@ -115,7 +115,6 @@ const getFinancialData = ai.defineTool(
 
 
 export async function personalAssistant(input: PersonalAssistantInput): Promise<PersonalAssistantOutput> {
-  // Pass farm data as the second argument (state) to the flow
   const {ducks, eggProduction, feed, finance, ...restOfInput} = input;
   return personalAssistantFlow(restOfInput, {ducks, eggProduction, feed, finance});
 }
@@ -123,10 +122,46 @@ export async function personalAssistant(input: PersonalAssistantInput): Promise<
 const personalAssistantFlow = ai.defineFlow(
   {
     name: 'personalAssistantFlow',
-    inputSchema: z.any(), // Input is now just history/prompt/image
+    inputSchema: z.any(),
     outputSchema: PersonalAssistantOutputSchema,
   },
-  async (input) => {
+  async (input, flow) => {
+    
+    const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
+    const keyword = "hallo bebek";
+    let userPrompt = input.prompt;
+    let systemPrompt: string;
+    let toolsToUse: any[] = [];
+    
+    // Check if the keyword is present
+    if (userPrompt.toLowerCase().startsWith(keyword)) {
+      // Remove keyword from prompt
+      userPrompt = userPrompt.substring(keyword.length).trim();
+      
+      // Use the expert farm management system prompt
+      systemPrompt = `Anda adalah seorang ahli dan konsultan peternakan bebek yang sangat cerdas untuk aplikasi CluckSmart.
+Peran Anda adalah untuk membantu pengguna mengelola peternakan mereka dengan lebih baik.
+
+Anda memiliki dua kemampuan utama:
+1. Akses Informasi Eksternal: Anda memiliki pengetahuan luas setara dengan Google. Gunakan ini untuk memberikan informasi umum, praktik terbaik, harga pasar, atau informasi penyakit.
+2. Analisis Data Internal: Anda memiliki akses ke data peternakan pengguna secara real-time melalui "alat" (tools) yang tersedia. Jika pengguna bertanya tentang data spesifik dari aplikasi (populasi, produksi, pakan, atau keuangan), Anda HARUS menggunakan alat yang sesuai untuk mendapatkan informasi terbaru sebelum menjawab. Jangan mengarang data.
+
+Tugas Anda:
+- Jawab pertanyaan pengguna secara informatif.
+- Jika pertanyaan bersifat analitis (misalnya, "bagaimana cara meningkatkan produksi?"), gunakan alat untuk mengambil data relevan, analisis, lalu berikan S-A-R-A-N dan S-O-L-U-S-I yang konkret dan dapat ditindaklanjuti.
+- Selalu gabungkan pengetahuan eksternal Anda dengan data internal pengguna untuk memberikan jawaban yang paling relevan dan kontekstual.
+- Tanggal hari ini adalah ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
+      
+      // Provide all the available tools
+      toolsToUse = [getDuckPopulationData, getEggProductionData, getFeedData, getFinancialData];
+      
+    } else {
+      // Use a general-purpose system prompt
+      systemPrompt = `Anda adalah asisten pribadi yang membantu. Anda cerdas, ramah, dan informatif.
+Jawab pertanyaan pengguna secara langsung dan jelas.
+Tanggal hari ini adalah ${currentDate}.`;
+      // No tools are provided for general questions
+    }
     
     // Format previous messages for the model
     const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => ({
@@ -142,30 +177,16 @@ const personalAssistantFlow = ai.defineFlow(
     if (input.imageDataUri) {
         currentPromptParts.push({ media: { url: input.imageDataUri } });
     }
-    if (input.prompt) {
-        currentPromptParts.push({ text: input.prompt });
+    if (userPrompt) {
+        currentPromptParts.push({ text: userPrompt });
     }
-
-    const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
-    const systemPrompt = `Anda adalah seorang ahli dan konsultan peternakan bebek yang sangat cerdas untuk aplikasi CluckSmart.
-Peran Anda adalah untuk membantu pengguna mengelola peternakan mereka dengan lebih baik.
-
-Anda memiliki dua kemampuan utama:
-1. Akses Informasi Eksternal: Anda memiliki pengetahuan luas setara dengan Google. Gunakan ini untuk memberikan informasi umum, praktik terbaik, harga pasar, atau informasi penyakit.
-2. Analisis Data Internal: Anda memiliki akses ke data peternakan pengguna secara real-time melalui "alat" (tools) yang tersedia. Jika pengguna bertanya tentang data spesifik dari aplikasi (populasi, produksi, pakan, atau keuangan), Anda HARUS menggunakan alat yang sesuai untuk mendapatkan informasi terbaru sebelum menjawab. Jangan mengarang data.
-
-Tugas Anda:
-- Jawab pertanyaan pengguna secara informatif.
-- Jika pertanyaan bersifat analitis (misalnya, "bagaimana cara meningkatkan produksi?"), gunakan alat untuk mengambil data relevan, analisis, lalu berikan S-A-R-A-N dan S-O-L-U-S-I yang konkret dan dapat ditindaklanjuti.
-- Selalu gabungkan pengetahuan eksternal Anda dengan data internal pengguna untuk memberikan jawaban yang paling relevan dan kontekstual.
-- Tanggal hari ini adalah ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
 
     const response = await ai.generate({
       model: ai.model,
       system: systemPrompt,
       history: formattedHistory,
       prompt: currentPromptParts,
-      tools: [getDuckPopulationData, getEggProductionData, getFeedData, getFinancialData],
+      tools: toolsToUse,
       config: {
         safetySettings: [
           {
