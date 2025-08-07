@@ -481,7 +481,7 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Minggu</TableHead>
+                      <TableHead className="text-center">Minggu</TableHead>
                       <TableHead>Pembeli</TableHead>
                       <TableHead className="text-center">Grade A</TableHead>
                       <TableHead className="text-center">Grade B</TableHead>
@@ -635,5 +635,6 @@ export default function ProductionTab() {
     </div>
   );
 }
+
 
 
