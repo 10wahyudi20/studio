@@ -44,12 +44,18 @@ const PersonalAssistant = () => {
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
         if (scrollAreaRef.current) {
             scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
         }
     }, [history]);
+
+    React.useEffect(() => {
+        // Automatically focus the input when the component mounts
+        inputRef.current?.focus();
+    }, []);
 
     const handleSend = async () => {
         if (!prompt.trim()) return;
@@ -125,6 +131,7 @@ const PersonalAssistant = () => {
                 </Button>
                 <div className="relative flex-grow">
                     <Input
+                        ref={inputRef}
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder="Ketik pesan Anda..."
