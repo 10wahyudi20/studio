@@ -179,12 +179,10 @@ const PersonalAssistant = () => {
                         <span className="sr-only">Hapus Obrolan</span>
                     </Button>
                     <div className="relative flex-grow flex items-center">
-                         <Button asChild variant="ghost" size="icon" className="absolute left-1.5 h-8 w-8 text-muted-foreground">
-                            <label htmlFor="file-upload">
-                                <Paperclip className="h-4 w-4" />
-                                <span className="sr-only">Lampirkan file</span>
-                            </label>
-                        </Button>
+                         <label htmlFor="file-upload" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "absolute left-1.5 h-8 w-8 text-muted-foreground cursor-pointer")}>
+                            <Paperclip className="h-4 w-4" />
+                            <span className="sr-only">Lampirkan file</span>
+                        </label>
                         <Input id="file-upload" type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange}/>
                         <Input
                             ref={inputRef}
