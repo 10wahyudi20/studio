@@ -93,7 +93,7 @@ export default function LoginPage() {
                     <DuckIcon className="h-16 w-16 text-primary" data-ai-hint="duck logo"/>
                 )}
             </div>
-          <CardTitle className="animated-rainbow-text">Login</CardTitle>
+          <CardTitle className="text-3xl font-bold">Login</CardTitle>
           <CardDescription>Silakan masuk untuk melanjutkan ke dasbor Anda</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
