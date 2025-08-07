@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { format, startOfMonth, endOfMonth, addDays, getDate, getDay, getDaysInMonth, lastDayOfMonth, add, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
+import { format, addDays } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -17,20 +17,12 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DailyProduction, Duck, WeeklyProduction } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
-
-
-const getWeekOfMonth = (date: Date) => {
-  const start = startOfWeek(startOfMonth(date));
-  const end = endOfWeek(date);
-  const weekNumber = Math.ceil(eachDayOfInterval({start, end}).length / 7);
-  return weekNumber;
-};
+import { DateRange } from "react-day-picker";
 
 // Daily Data Form
 const dailySchemaGenerator = (ducks: Duck[]) => {
@@ -128,7 +120,10 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
 
 // Weekly Data Form
 const weeklySchema = z.object({
-  week: z.coerce.number().min(1).max(5),
+  dateRange: z.object({
+      from: z.date({ required_error: "Tanggal mulai harus diisi." }),
+      to: z.date({ required_error: "Tanggal akhir harus diisi." }),
+  }),
   buyer: z.string().nonempty("Nama pembeli harus diisi"),
   gradeA: z.coerce.number().min(0),
   gradeB: z.coerce.number().min(0),
@@ -145,20 +140,46 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
-  const { control, register, handleSubmit, formState: { errors } } = useForm<WeeklyFormData>({
-    resolver: zodResolver(weeklySchema),
-    defaultValues: production || {
-      week: getWeekOfMonth(new Date()),
+  const defaultValues = production ? {
+      dateRange: { from: new Date(production.startDate), to: new Date(production.endDate) },
+      buyer: production.buyer,
+      gradeA: production.gradeA,
+      gradeB: production.gradeB,
+      gradeC: production.gradeC,
+      consumption: production.consumption,
+      priceA: production.priceA,
+      priceB: production.priceB,
+      priceC: production.priceC,
+      priceConsumption: production.priceConsumption,
+  } : {
+      dateRange: { from: new Date(), to: addDays(new Date(), 6) },
       buyer: "",
       gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0,
       priceA: 0, priceB: 0, priceC: 0, priceConsumption: 0,
-    }
+  };
+
+  const { control, register, handleSubmit, formState: { errors } } = useForm<WeeklyFormData>({
+    resolver: zodResolver(weeklySchema),
+    defaultValues
   });
 
   const onSubmit = (data: WeeklyFormData) => {
-    onSave(data);
+    const saveData = {
+        startDate: data.dateRange.from,
+        endDate: data.dateRange.to,
+        buyer: data.buyer,
+        gradeA: data.gradeA,
+        gradeB: data.gradeB,
+        gradeC: data.gradeC,
+        consumption: data.consumption,
+        priceA: data.priceA,
+        priceB: data.priceB,
+        priceC: data.priceC,
+        priceConsumption: data.priceConsumption,
+    }
+    onSave(saveData);
     setOpen(false);
-    toast({ title: `Data Mingguan ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk minggu ke-${data.week} telah disimpan.` });
+    toast({ title: `Data Mingguan ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk pembeli ${data.buyer} telah disimpan.` });
   };
   
   return (
@@ -171,20 +192,48 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
             </DialogHeader>
             <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                    <Label htmlFor="week">Pilih Minggu</Label>
+                    <Label>Periode Penjualan</Label>
                     <Controller
-                    name="week"
-                    control={control}
-                    render={({ field }) => (
-                        <Select onValueChange={(val) => field.onChange(Number(val))} defaultValue={String(field.value)}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Pilih minggu" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {[1, 2, 3, 4, 5].map(w => <SelectItem key={w} value={String(w)}>Minggu {w}</SelectItem>)}
-                        </SelectContent>
-                        </Select>
-                    )}
+                        name="dateRange"
+                        control={control}
+                        render={({ field }) => (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    id="date"
+                                    variant={"outline"}
+                                    className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !field.value.from && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {field.value?.from ? (
+                                    field.value.to ? (
+                                        <>
+                                        {format(field.value.from, "LLL dd, y")} -{" "}
+                                        {format(field.value.to, "LLL dd, y")}
+                                        </>
+                                    ) : (
+                                        format(field.value.from, "LLL dd, y")
+                                    )
+                                    ) : (
+                                    <span>Pilih rentang tanggal</span>
+                                    )}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    initialFocus
+                                    mode="range"
+                                    defaultMonth={field.value?.from}
+                                    selected={field.value as DateRange}
+                                    onSelect={field.onChange}
+                                    numberOfMonths={2}
+                                />
+                                </PopoverContent>
+                            </Popover>
+                        )}
                     />
                 </div>
                  <div className="space-y-2">
@@ -281,27 +330,6 @@ export default function ProductionTab() {
     return '';
   };
   
-  const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
-    const firstDayOfMonth = new Date(year, month, 1);
-    const firstSunday = startOfWeek(firstDayOfMonth, { weekStartsOn: 0 }); // Start of the week containing the 1st
-    
-    let startDate = addDays(firstSunday, (weekNumber - 1) * 7);
-    
-    // If the calculated start date is in the previous month, adjust it to the first day of the current month
-    if (startDate.getMonth() < month) {
-      startDate = firstDayOfMonth;
-    }
-    
-    const endDate = endOfWeek(startDate, { weekStartsOn: 0 });
-    
-    const lastDayOfMonthDate = lastDayOfMonth(firstDayOfMonth);
-    
-    return { 
-      startDate, 
-      endDate: endDate > lastDayOfMonthDate ? lastDayOfMonthDate : endDate
-    };
-  };
-
   const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -320,7 +348,6 @@ export default function ProductionTab() {
   );
   
   const handleDailySave = (date: Date, data: DailyFormData) => {
-    // Check if a record for this date already exists
     const existingRecord = eggProduction.daily.find(d => new Date(d.date).toDateString() === date.toDateString());
     if (existingRecord) {
         updateDailyProduction(date, data);
@@ -329,16 +356,20 @@ export default function ProductionTab() {
     }
   };
 
-  const weeklyDataByWeek = eggProduction.weekly.reduce((acc, current) => {
-    const week = current.week;
-    if (!acc[week]) {
-      acc[week] = [];
+  const weeklyDataForMonth = eggProduction.weekly
+    .filter(w => new Date(w.startDate).getMonth() === currentDate.getMonth() && new Date(w.startDate).getFullYear() === currentDate.getFullYear())
+    .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  
+  const weeklyDataByPeriod = weeklyDataForMonth.reduce((acc, current) => {
+    const period = `${format(new Date(current.startDate), 'dd MMM yyyy')} - ${format(new Date(current.endDate), 'dd MMM yyyy')}`;
+    if (!acc[period]) {
+      acc[period] = [];
     }
-    acc[week].push(current);
+    acc[period].push(current);
     return acc;
-  }, {} as Record<number, WeeklyProduction[]>);
+  }, {} as Record<string, WeeklyProduction[]>);
 
-  const weeklyGrandTotal = eggProduction.weekly.reduce(
+  const weeklyGrandTotal = weeklyDataForMonth.reduce(
     (acc, week) => {
       acc.gradeA += week.gradeA;
       acc.gradeB += week.gradeB;
@@ -453,7 +484,7 @@ export default function ProductionTab() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-center align-middle">Tanggal</TableHead>
-                      <TableHead className="align-middle text-center">Hari</TableHead>
+                      <TableHead className="text-center align-middle">Hari</TableHead>
                       <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
                       <TableHead className="text-center align-middle">Produktifitas</TableHead>
                       {ducks.map(duck => (
@@ -507,7 +538,7 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-center">Minggu</TableHead>
+                      <TableHead className="text-center">Periode</TableHead>
                       <TableHead>Pembeli</TableHead>
                       <TableHead className="text-center">Grade A</TableHead>
                       <TableHead className="text-center">Grade B</TableHead>
@@ -519,9 +550,8 @@ export default function ProductionTab() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Object.keys(weeklyDataByWeek).sort((a,b) => Number(a) - Number(b)).map(weekNumber => {
-                      const weekEntries = weeklyDataByWeek[Number(weekNumber)];
-                      const { startDate, endDate } = getWeekDateRange(Number(weekNumber), currentDate.getFullYear(), currentDate.getMonth());
+                    {Object.keys(weeklyDataByPeriod).map(period => {
+                      const weekEntries = weeklyDataByPeriod[period];
 
                       const subtotal = weekEntries.reduce(
                         (acc, week) => {
@@ -537,14 +567,11 @@ export default function ProductionTab() {
                       );
 
                       return (
-                        <React.Fragment key={weekNumber}>
+                        <React.Fragment key={period}>
                           {weekEntries.map((week) => (
                               <TableRow key={week.id}>
                                   <TableCell className="text-center">
-                                    <div>Minggu {week.week}</div>
-                                    <div className="text-xs text-muted-foreground">
-                                        {format(startDate, 'dd MMM', { locale: idLocale })} - {format(endDate, 'dd MMM', { locale: idLocale })}
-                                    </div>
+                                    {format(new Date(week.startDate), 'dd MMM', { locale: idLocale })} - {format(new Date(week.endDate), 'dd MMM', { locale: idLocale })}
                                   </TableCell>
                                   <TableCell>{week.buyer}</TableCell>
                                   <GradeCell amount={week.gradeA} price={week.priceA} />
@@ -572,7 +599,7 @@ export default function ProductionTab() {
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Hapus data penjualan ini?</AlertDialogTitle>
-                                                    <AlertDialogDescription>Aksi ini akan menghapus data penjualan dari pembeli "{week.buyer}" untuk minggu ke-{week.week} secara permanen.</AlertDialogDescription>
+                                                    <AlertDialogDescription>Aksi ini akan menghapus data penjualan dari pembeli "{week.buyer}" secara permanen.</AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -588,7 +615,7 @@ export default function ProductionTab() {
                               </TableRow>
                           ))}
                           <TableRow className="bg-secondary/50 font-bold">
-                            <TableCell colSpan={2}>Subtotal Minggu {weekNumber}</TableCell>
+                            <TableCell colSpan={2}>Subtotal Periode</TableCell>
                             <TableCell className="text-center">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
@@ -603,7 +630,7 @@ export default function ProductionTab() {
                   </TableBody>
                    <TableFooter>
                     <TableRow className="bg-primary/20 font-extrabold text-lg">
-                      <TableCell colSpan={2}>Grand Total</TableCell>
+                      <TableCell colSpan={2}>Grand Total Bulanan</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>

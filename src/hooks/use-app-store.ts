@@ -53,10 +53,7 @@ const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyPr
     const monthlyData: { [month: string]: MonthlyProduction } = {};
 
     weeklyData.forEach(week => {
-        // Find a daily entry that corresponds to the week to get a date.
-        // This is a bit of a hack. A better solution would be to add a date to weekly entries.
-        const now = new Date(); // Fallback to current date
-        const monthKey = format(now, 'MMMM yyyy', { locale: idLocale });
+        const monthKey = format(new Date(week.startDate), 'MMMM yyyy', { locale: idLocale });
 
         if (!monthlyData[monthKey]) {
             monthlyData[monthKey] = {
@@ -394,7 +391,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...parsedState.eggProduction,
                 daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
-                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now() })),
+                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate) })),
                 monthly: parsedState.eggProduction.monthly || [],
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
@@ -453,7 +450,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...state.eggProduction,
                 daily: state.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
-                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now() })),
+                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate) })),
                  monthly: state.eggProduction.monthly || [],
             },
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),

@@ -31,7 +31,8 @@ export interface DailyProduction {
 
 export interface WeeklyProduction {
     id: number;
-    week: number;
+    startDate: Date;
+    endDate: Date;
     buyer: string;
     gradeA: number;
     gradeB: number;
