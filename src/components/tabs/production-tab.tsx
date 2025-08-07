@@ -25,7 +25,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 
 
@@ -362,13 +362,13 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
                 <CardHeader><CardTitle>Komposisi Total Produksi</CardTitle></CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
+                        <RechartsPieChart>
                             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <Tooltip />
                             <Legend />
-                        </PieChart>
+                        </RechartsPieChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
@@ -533,7 +533,7 @@ export default function ProductionTab() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tabel Produksi</CardTitle>
            {activeTab === 'monthly' && (
-              <Button variant="outline" size="icon" onClick={() => setShowChart(!showChart)}>
+              <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)}>
                 <BarChartIcon className="h-4 w-4" />
                 <span className="sr-only">Tampilkan Grafik</span>
               </Button>
