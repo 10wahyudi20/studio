@@ -109,7 +109,10 @@ export const useAppStore = create<AppState & {
 
   login: (username, password) => {
     const { companyInfo } = get();
-    if (username === companyInfo.username && password === companyInfo.password) {
+    // If no username/password is set in the store, allow login.
+    const noCredentialsSet = !companyInfo.username && !companyInfo.password;
+    
+    if (noCredentialsSet || (username === companyInfo.username && password === companyInfo.password)) {
       set({ isAuthenticated: true });
       sessionStorage.setItem('clucksmart-auth', 'true'); // Persist auth state for session
       return true;
@@ -476,5 +479,3 @@ export const useAppStore = create<AppState & {
   },
 
 }));
-
-    
