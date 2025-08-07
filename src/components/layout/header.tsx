@@ -22,7 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { personalAssistant } from "@/ai/flows/personal-assistant-flow";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -46,7 +46,7 @@ const PersonalAssistant = () => {
     const [prompt, setPrompt] = React.useState('');
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Effect to focus the input when dialog opens or after a message is sent
@@ -60,8 +60,8 @@ const PersonalAssistant = () => {
     }, [isLoading]);
 
     useEffect(() => {
-        if (scrollAreaRef.current) {
-            scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+        if (viewportRef.current) {
+            viewportRef.current.scrollTo({ top: viewportRef.current.scrollHeight, behavior: 'smooth' });
         }
     }, [history]);
 
@@ -103,7 +103,7 @@ const PersonalAssistant = () => {
                 </DialogDescription>
             </DialogHeader>
             <div className="flex-grow my-4 overflow-hidden">
-                <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
+                <ScrollArea className="h-full pr-4" viewportRef={viewportRef}>
                     <div className="space-y-4">
                         {history.length === 0 && (
                             <div className="text-center text-muted-foreground py-8">
