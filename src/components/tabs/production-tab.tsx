@@ -195,11 +195,11 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Mingguan</DialogTitle>
+        </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
-            <DialogHeader>
-            <DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Mingguan</DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="max-h-[70vh] p-4 -mx-4">
+            <ScrollArea className="h-[60vh] p-4 -mx-4">
               <div className="space-y-4 px-4">
                   <div className="space-y-2">
                       <Label>Periode Penjualan</Label>
@@ -879,5 +879,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
