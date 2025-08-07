@@ -199,8 +199,8 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
             <DialogHeader>
             <DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Mingguan</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="max-h-[70vh] p-4">
-              <div className="space-y-4">
+            <ScrollArea className="max-h-[70vh] p-4 -mx-4">
+              <div className="space-y-4 px-4">
                   <div className="space-y-2">
                       <Label>Periode Penjualan</Label>
                       <Controller
@@ -298,7 +298,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                   </div>
               </div>
             </ScrollArea>
-            <DialogFooter className="pt-4">
+            <DialogFooter className="pt-4 mt-4 border-t">
                 <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
                 <Button type="submit">Simpan</Button>
             </DialogFooter>
@@ -879,3 +879,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
