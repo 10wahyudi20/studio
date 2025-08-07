@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react";
+import { format, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DateRange } from "react-day-picker";
 import { Textarea } from "../ui/textarea";
 import { ScrollArea } from "../ui/scroll-area";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 
 // Daily Data Form
 const dailySchemaGenerator = (ducks: Duck[]) => {
@@ -374,14 +376,11 @@ export default function ProductionTab() {
         if (!w || !w.startDate || !w.endDate) return false;
         const startDate = new Date(w.startDate);
         const endDate = new Date(w.endDate);
-        const selectedMonth = currentDate.getMonth();
-        const selectedYear = currentDate.getFullYear();
-        
-        const startOfMonth = new Date(selectedYear, selectedMonth, 1);
-        const endOfMonth = new Date(selectedYear, selectedMonth + 1, 0);
+        const startOfSelectedMonth = startOfMonth(currentDate);
+        const endOfSelectedMonth = endOfMonth(currentDate);
 
         // Check if the production period overlaps with the selected month
-        return startDate <= endOfMonth && endDate >= startOfMonth;
+        return startDate <= endOfSelectedMonth && endDate >= startOfSelectedMonth;
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   
@@ -571,7 +570,7 @@ export default function ProductionTab() {
                       <TableHead className="text-center">Konsumsi</TableHead>
                       <TableHead>Total Telur</TableHead>
                       <TableHead>Total Harga</TableHead>
-                      <TableHead>Aksi</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -608,37 +607,47 @@ export default function ProductionTab() {
                                   <GradeCell amount={week.consumption} price={week.priceConsumption} />
                                   <TableCell>{week.totalEggs.toLocaleString('id-ID')}</TableCell>
                                   <TableCell>Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell>
-                                    <div className="flex gap-1">
-                                        <WeeklyDataForm
-                                            production={week}
-                                            onSave={(updatedData) => updateWeeklyProduction(week.id, updatedData)}
-                                        >
-                                            <Button variant="ghost" size="icon" className="text-green-500 hover:text-green-600 h-8 w-8">
-                                                <Edit className="h-4 w-4" />
+                                  <TableCell className="text-right">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                                <span className="sr-only">Buka menu</span>
                                             </Button>
-                                        </WeeklyDataForm>
-                                         <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 h-8 w-8">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Hapus data penjualan ini?</AlertDialogTitle>
-                                                    <AlertDialogDescription>Aksi ini akan menghapus data penjualan dari pembeli "{week.buyer}" secara permanen.</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Batal</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => {
-                                                        removeWeeklyProduction(week.id);
-                                                        toast({ variant: 'destructive', title: `Data penjualan dihapus!` });
-                                                    }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </div>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <WeeklyDataForm
+                                                production={week}
+                                                onSave={(updatedData) => updateWeeklyProduction(week.id, updatedData)}
+                                            >
+                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                    <Edit className="mr-2 h-4 w-4" />
+                                                    <span>Edit</span>
+                                                </DropdownMenuItem>
+                                            </WeeklyDataForm>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        <span>Hapus</span>
+                                                    </DropdownMenuItem>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Hapus data penjualan ini?</AlertDialogTitle>
+                                                        <AlertDialogDescription>Aksi ini akan menghapus data penjualan dari pembeli "{week.buyer}" secara permanen.</AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => {
+                                                            removeWeeklyProduction(week.id);
+                                                            toast({ variant: 'destructive', title: `Data penjualan dihapus!` });
+                                                        }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                   </TableCell>
                               </TableRow>
                           ))}
