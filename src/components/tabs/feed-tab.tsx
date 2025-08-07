@@ -173,7 +173,7 @@ export default function FeedTab() {
                 <TableRow>
                   <TableHead>Nama Pakan</TableHead>
                   <TableHead>Supplier</TableHead>
-                  <TableHead>Tanggal Update</TableHead>
+                  <TableHead>Update</TableHead>
                   <TableHead>Stok (Kg)</TableHead>
                   <TableHead>Harga/50 Kg</TableHead>
                   <TableHead>Harga/Kg</TableHead>

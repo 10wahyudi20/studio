@@ -81,7 +81,7 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
         <DialogHeader><DialogTitle>{transaction ? 'Edit' : 'Input'} Data Keuangan</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="date">Tanggal</Label>
+                <Label htmlFor="date">Tgl</Label>
                 <Input id="date" type="date" {...register("date")} />
                 {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
             </div>
@@ -200,7 +200,7 @@ export default function FinanceTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Tanggal</TableHead>
+                  <TableHead>Tgl</TableHead>
                   <TableHead>Uraian</TableHead>
                   <TableHead>Jumlah</TableHead>
                   <TableHead>Harga Satuan</TableHead>

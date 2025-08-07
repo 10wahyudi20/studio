@@ -119,7 +119,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
                 <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Tanggal Masuk</Label>
+                <Label className="text-right">Tgl. Masuk</Label>
                 <Controller
                     control={control}
                     name="entryDate"
@@ -257,7 +257,7 @@ export default function PopulationTab() {
                   <TableHead className="text-center">Kandang</TableHead>
                   <TableHead className="text-center">Jumlah Bebek</TableHead>
                   <TableHead className="text-center">Bebek Mati</TableHead>
-                  <TableHead className="text-center">Tanggal Masuk</TableHead>
+                  <TableHead className="text-center">Masuk</TableHead>
                   <TableHead className="text-center">Usia (Bulan)</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-center">Ukuran Kandang</TableHead>
