@@ -138,9 +138,15 @@ export const useAppStore = create<AppState & {
   setDirty: () => set({ isDirty: true }),
   
   setActiveTab: (tab) => {
-    set({ activeTab: tab });
-    localStorage.setItem('clucksmart-activeTab', tab);
-    channel?.postMessage({ type: 'tab-changed', payload: tab });
+    set(state => {
+      // Only update and broadcast if the tab has changed
+      if (state.activeTab !== tab) {
+        localStorage.setItem('clucksmart-activeTab', tab);
+        channel?.postMessage({ type: 'tab-changed', payload: tab });
+        return { activeTab: tab };
+      }
+      return {};
+    });
   },
 
   getInitialState: getInitialState,
@@ -471,12 +477,12 @@ export const useAppStore = create<AppState & {
 // Listen for messages from other tabs
 if (channel) {
     channel.onmessage = (event) => {
+      const { set, loadState } = useAppStore.getState();
         if (event.data.type === 'state-updated') {
-            useAppStore.getState().loadState();
+            loadState();
         }
         if (event.data.type === 'tab-changed') {
             set({ activeTab: event.data.payload });
-            localStorage.setItem('clucksmart-activeTab', event.data.payload);
         }
     };
 }

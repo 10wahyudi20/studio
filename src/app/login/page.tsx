@@ -26,7 +26,11 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function LoginPage() {
-  const { login, companyInfo } = useAppStore();
+  const { login, companyInfo, isAuthenticated } = useAppStore(state => ({
+    login: state.login,
+    companyInfo: state.companyInfo,
+    isAuthenticated: state.isAuthenticated,
+  }));
   const router = useRouter();
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -34,6 +38,18 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+      // If user is already authenticated (e.g., hits back button), redirect them
+      if(isAuthenticated) {
+          router.replace('/');
+      }
+  }, [isAuthenticated, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +67,15 @@ export default function LoginPage() {
       setIsLoading(false);
     }, 500); // Simulate network delay
   };
+
+  if (!isMounted) {
+    // Render a loading state on the server and initial client render to avoid hydration mismatch
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-2xl font-semibold text-primary">Memuat Halaman Login...</div>
+      </div>
+    );
+  }
 
   const backgroundStyle = companyInfo.loginBackground ? { backgroundImage: `url(${companyInfo.loginBackground})` } : {};
   const inputStyles = "bg-transparent border-white/30 placeholder:text-gray-300 dark:placeholder:text-gray-400 focus:ring-accent";
