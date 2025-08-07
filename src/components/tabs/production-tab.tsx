@@ -8,8 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import { format, startOfMonth, endOfMonth, addDays, getDate } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,7 +90,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                                     <PopoverTrigger asChild>
                                         <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")} disabled={!!production}>
                                             <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {field.value ? format(field.value, "PPP", { locale: id }) : <span>Pilih tanggal</span>}
+                                            {field.value ? format(field.value, "PPP", { locale: idLocale }) : <span>Pilih tanggal</span>}
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
@@ -278,6 +278,20 @@ export default function ProductionTab() {
     if (p > 0) return 'bg-black text-white';
     return '';
   };
+  
+  const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const firstDayOfWeek = (weekNumber - 1) * 7 + 1 - (firstDayOfMonth.getDay() % 7);
+    
+    let startDate = new Date(year, month, firstDayOfWeek);
+    let endDate = new Date(year, month, firstDayOfWeek + 6);
+
+    if (startDate < firstDayOfMonth) startDate = firstDayOfMonth;
+    if (endDate > lastDayOfMonth) endDate = lastDayOfMonth;
+
+    return { startDate, endDate };
+  };
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
@@ -439,7 +453,7 @@ export default function ProductionTab() {
                           formTrigger?.click();
                       }}>
                         <TableCell className="align-middle text-center">{format(new Date(day.date), "dd MMM yyyy")}</TableCell>
-                        <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: id })}</TableCell>
+                        <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
                         <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
                         <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
                         {ducks.map(duck => {
@@ -481,6 +495,9 @@ export default function ProductionTab() {
                   <TableBody>
                     {Object.keys(weeklyDataByWeek).sort((a,b) => Number(a) - Number(b)).map(weekNumber => {
                       const weekEntries = weeklyDataByWeek[Number(weekNumber)];
+                       const now = new Date();
+                      const { startDate, endDate } = getWeekDateRange(Number(weekNumber), now.getFullYear(), now.getMonth());
+
                       const subtotal = weekEntries.reduce(
                         (acc, week) => {
                           acc.gradeA += week.gradeA;
@@ -498,7 +515,12 @@ export default function ProductionTab() {
                         <React.Fragment key={weekNumber}>
                           {weekEntries.map((week) => (
                               <TableRow key={week.id}>
-                                  <TableCell>{week.week}</TableCell>
+                                  <TableCell className="text-center">
+                                    <div>Minggu {week.week}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {format(startDate, 'dd MMM', { locale: idLocale })} - {format(endDate, 'dd MMM', { locale: idLocale })}
+                                    </div>
+                                  </TableCell>
                                   <TableCell>{week.buyer}</TableCell>
                                   <GradeCell amount={week.gradeA} price={week.priceA} />
                                   <GradeCell amount={week.gradeB} price={week.priceB} />
@@ -613,4 +635,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
 
