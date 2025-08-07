@@ -376,6 +376,77 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
     );
 };
 
+const WeeklyChart = ({ data }: { data: any[] }) => {
+    const chartData = data.map(week => ({
+        ...week,
+        period: `${format(new Date(week.startDate), 'dd/MM')} - ${format(new Date(week.endDate), 'dd/MM')}`
+    }));
+
+    const pieData = [
+        { name: "Grade A", value: data.reduce((sum, item) => sum + item.gradeA, 0) },
+        { name: "Grade B", value: data.reduce((sum, item) => sum + item.gradeB, 0) },
+        { name: "Grade C", value: data.reduce((sum, item) => sum + item.gradeC, 0) },
+        { name: "Konsumsi", value: data.reduce((sum, item) => sum + item.consumption, 0) },
+    ].filter(item => item.value > 0);
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+            <Card>
+                <CardHeader><CardTitle>Total Produksi per Minggu</CardTitle></CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="period" fontSize={12} />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
+                            <Bar dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
+                            <Bar dataKey="gradeC" stackId="a" fill={CHART_COLORS[2]} name="Grade C" />
+                            <Bar dataKey="consumption" stackId="a" fill={CHART_COLORS[3]} name="Konsumsi" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader><CardTitle>Tren Produksi Mingguan</CardTitle></CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="period" fontSize={12} />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
+                            <Line type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
+                            <Line type="monotone" dataKey="gradeC" stroke={CHART_COLORS[2]} name="Grade C" />
+                            <Line type="monotone" dataKey="consumption" stroke={CHART_COLORS[3]} name="Konsumsi" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+                <CardHeader><CardTitle>Komposisi Total Produksi (Bulan Ini)</CardTitle></CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <RechartsPieChart>
+                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
+                                 {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </RechartsPieChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
+
 
 export default function ProductionTab() {
   const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
@@ -532,7 +603,7 @@ export default function ProductionTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tabel Produksi</CardTitle>
-           {activeTab === 'monthly' && (
+           {(activeTab === 'monthly' || activeTab === 'weekly') && (
               <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="hover:bg-transparent">
                 <BarChartIcon className="h-4 w-4" />
                 <span className="sr-only">Tampilkan Grafik</span>
@@ -540,8 +611,8 @@ export default function ProductionTab() {
            )}
         </CardHeader>
         <CardContent>
-        {showChart && activeTab === 'monthly' ? (
-                <MonthlyChart data={eggProduction.monthly} />
+        {showChart && (activeTab === 'monthly' || activeTab === 'weekly') ? (
+                activeTab === 'monthly' ? <MonthlyChart data={eggProduction.monthly} /> : <WeeklyChart data={weeklyDataForMonth} />
             ) : (
           <Tabs defaultValue="daily" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
