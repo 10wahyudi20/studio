@@ -23,6 +23,7 @@ import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import { DateRange } from "react-day-picker";
+import { Textarea } from "../ui/textarea";
 
 // Daily Data Form
 const dailySchemaGenerator = (ducks: Duck[]) => {
@@ -125,6 +126,7 @@ const weeklySchema = z.object({
       to: z.date({ required_error: "Tanggal akhir harus diisi." }),
   }),
   buyer: z.string().nonempty("Nama pembeli harus diisi"),
+  description: z.string().nonempty("Keterangan harus diisi"),
   gradeA: z.coerce.number().min(0),
   gradeB: z.coerce.number().min(0),
   gradeC: z.coerce.number().min(0),
@@ -143,6 +145,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   const defaultValues = production ? {
       dateRange: { from: new Date(production.startDate), to: new Date(production.endDate) },
       buyer: production.buyer,
+      description: production.description || "",
       gradeA: production.gradeA,
       gradeB: production.gradeB,
       gradeC: production.gradeC,
@@ -154,6 +157,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   } : {
       dateRange: { from: new Date(), to: addDays(new Date(), 6) },
       buyer: "",
+      description: "",
       gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0,
       priceA: 0, priceB: 0, priceC: 0, priceConsumption: 0,
   };
@@ -168,6 +172,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
         startDate: data.dateRange.from,
         endDate: data.dateRange.to,
         buyer: data.buyer,
+        description: data.description,
         gradeA: data.gradeA,
         gradeB: data.gradeB,
         gradeC: data.gradeC,
@@ -240,6 +245,11 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                     <Label htmlFor="buyer">Nama Pembeli</Label>
                     <Input id="buyer" {...register("buyer")} />
                     {errors.buyer && <p className="text-sm text-destructive mt-1">{errors.buyer.message}</p>}
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="description">Keterangan</Label>
+                    <Textarea id="description" {...register("description")} />
+                    {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -584,7 +594,10 @@ export default function ProductionTab() {
                           {weekEntries.map((week) => (
                               <TableRow key={week.id}>
                                   <TableCell className="text-center">
-                                    {format(new Date(week.startDate), 'dd MMM', { locale: idLocale })} - {format(new Date(week.endDate), 'dd MMM', { locale: idLocale })}
+                                    <div className="font-semibold">{week.description}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {format(new Date(week.startDate), 'dd MMM', { locale: idLocale })} - {format(new Date(week.endDate), 'dd MMM', { locale: idLocale })}
+                                    </div>
                                   </TableCell>
                                   <TableCell>{week.buyer}</TableCell>
                                   <GradeCell amount={week.gradeA} price={week.priceA} />

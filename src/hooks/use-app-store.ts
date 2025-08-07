@@ -394,7 +394,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...parsedState.eggProduction,
                 daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
-                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate) })),
+                weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate), description: w.description || '' })),
                 monthly: parsedState.eggProduction.monthly || [],
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
@@ -453,7 +453,7 @@ export const useAppStore = create<AppState & {
             eggProduction: {
                 ...state.eggProduction,
                 daily: state.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
-                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate) })),
+                 weekly: state.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate), description: w.description || '' })),
                  monthly: state.eggProduction.monthly || [],
             },
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),

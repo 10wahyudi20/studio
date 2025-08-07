@@ -34,6 +34,7 @@ export interface WeeklyProduction {
     startDate: Date;
     endDate: Date;
     buyer: string;
+    description: string;
     gradeA: number;
     gradeB: number;
     gradeC: number;
