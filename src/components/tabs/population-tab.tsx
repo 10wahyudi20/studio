@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -21,7 +20,6 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
-  DialogPortal,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,17 +30,13 @@ import { Duck } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
 
 const duckSchema = z.object({
   cage: z.number().min(1),
   quantity: z.coerce.number().min(0),
   deaths: z.coerce.number().min(0),
-  entryDate: z.date(),
+  entryDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Tanggal tidak valid" }),
   cageSizeLength: z.coerce.number().min(0),
   cageSizeWidth: z.coerce.number().min(0),
   cageSystem: z.enum(["baterai", "umbaran"]),
@@ -68,7 +62,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
   const defaultValues = duck
     ? {
         ...duck,
-        entryDate: new Date(duck.entryDate),
+        entryDate: format(new Date(duck.entryDate), "yyyy-MM-dd"),
         cageSizeLength: parseCageSize(duck.cageSize).length,
         cageSizeWidth: parseCageSize(duck.cageSize).width,
       }
@@ -76,7 +70,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
         cage: ducks.length > 0 ? Math.max(...ducks.map(d => d.cage)) + 1 : 1,
         quantity: 0,
         deaths: 0,
-        entryDate: new Date(),
+        entryDate: format(new Date(), "yyyy-MM-dd"),
         cageSizeLength: 0,
         cageSizeWidth: 0,
         cageSystem: "umbaran" as "baterai" | "umbaran",
@@ -88,7 +82,8 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
   });
 
   const onSubmit = (data: DuckFormData) => {
-    const saveData = { ...data };
+    // Convert string date back to Date object before saving
+    const saveData = { ...data, entryDate: parseISO(data.entryDate) };
     onSave(saveData);
     setOpen(false);
     toast({
@@ -120,37 +115,8 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
                 <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Tanggal Masuk</Label>
-                <Controller
-                    control={control}
-                    name="entryDate"
-                    render={({ field }) => (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-start text-left font-normal col-span-3",
-                                    !field.value && "text-muted-foreground"
-                                )}
-                                >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.value ? format(field.value, "dd/MM/yyyy") : <span>Pilih tanggal</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <DialogPortal>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    initialFocus
-                                    />
-                                </PopoverContent>
-                            </DialogPortal>
-                        </Popover>
-                    )}
-                />
+                <Label htmlFor="entryDate" className="text-right">Tanggal Masuk</Label>
+                 <Input id="entryDate" type="date" {...register("entryDate")} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Ukuran Kandang</Label>

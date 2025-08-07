@@ -1,7 +1,6 @@
-
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
-import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth } from 'date-fns';
+import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 let channel: BroadcastChannel | null = null;
@@ -91,7 +90,7 @@ export const useAppStore = create<AppState & {
   setActiveTab: (tab: string) => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'> & { cageSizeLength: number, cageSizeWidth: number }) => void;
-  updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status' | 'cageSize'>> & { cageSizeLength?: number, cageSizeWidth?: number }) => void;
+  updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status' | 'cageSize'>> & { cageSizeLength?: number, cageSizeWidth?: number, entryDate?: Date }) => void;
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
