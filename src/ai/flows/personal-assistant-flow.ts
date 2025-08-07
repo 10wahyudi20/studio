@@ -115,22 +115,21 @@ const getFinancialData = ai.defineTool(
 
 
 export async function personalAssistant(input: PersonalAssistantInput): Promise<PersonalAssistantOutput> {
-  return personalAssistantFlow(input);
+  // Pass farm data as the second argument (state) to the flow
+  const {ducks, eggProduction, feed, finance, ...restOfInput} = input;
+  return personalAssistantFlow(restOfInput, {ducks, eggProduction, feed, finance});
 }
 
 const personalAssistantFlow = ai.defineFlow(
   {
     name: 'personalAssistantFlow',
-    inputSchema: PersonalAssistantInputSchema,
+    inputSchema: z.any(), // Input is now just history/prompt/image
     outputSchema: PersonalAssistantOutputSchema,
   },
   async (input) => {
     
-    // Store farm data in the flow's state to make it accessible to tools
-    ai.setState(input);
-
     // Format previous messages for the model
-    const formattedHistory: {role: Role; content: Part[]}[] = input.history.map(msg => ({
+    const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => ({
       role: msg.role as Role,
       content: [
           ...(msg.imageUrl ? [{media: {url: msg.imageUrl}}] : []),
