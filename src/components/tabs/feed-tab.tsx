@@ -118,7 +118,7 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
                     <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted"/>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="schema">Skema Pakan (%)</Label>
+                    <Label htmlFor="schema">Skema Pakan (gram)</Label>
                     <Input id="schema" type="number" {...register("schema")} className="text-green-700 dark:text-green-400 font-semibold"/>
                     {errors.schema && <p className="text-sm text-destructive">{errors.schema.message}</p>}
                   </div>
@@ -178,7 +178,7 @@ export default function FeedTab() {
             }
         />
         <StatCard title="Total Skema Pakan" value={`${totalSchema.toLocaleString('id-ID')} g`} icon={Inbox} valueClassName="text-green-700 dark:text-green-400" />
-        <StatCard title="Nilai Stok Pakan" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
+        <StatCard title="Total Nilai Stok" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
         <StatCard title="Total Pakan/Hari" value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} icon={Wheat} />
       </div>
 
@@ -198,53 +198,56 @@ export default function FeedTab() {
                   <TableHead>Stok (Kg)</TableHead>
                   <TableHead>Harga/50 Kg</TableHead>
                   <TableHead>Harga/Kg</TableHead>
-                  <TableHead className="text-center">Skema Pakan (%)</TableHead>
+                  <TableHead className="text-center">Skema Pakan</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {feed.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.supplier}</TableCell>
-                    <TableCell>{format(new Date(item.lastUpdated), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>{item.stock.toLocaleString('id-ID')}</TableCell>
-                    <TableCell>Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
-                    <TableCell>Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
-                    <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema}%</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <FeedForm feed={item} onSave={(updatedFeed) => updateFeed(item.id, updatedFeed)} />
-                           <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                   <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>Hapus</span>
-                                  </DropdownMenuItem>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>Anda yakin ingin menghapus pakan {item.name}?</AlertDialogTitle>
-                                    <AlertDialogDescription>Aksi ini akan menghapus data pakan secara permanen.</AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Batal</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => {
-                                      removeFeed(item.id);
-                                      toast({ variant: 'destructive', title: `Pakan ${item.name} dihapus!` });
-                                    }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {feed.map((item) => {
+                  const schemaPercentage = totalSchema > 0 ? (item.schema / totalSchema * 100) : 0;
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.supplier}</TableCell>
+                      <TableCell>{format(new Date(item.lastUpdated), "dd/MM/yyyy")}</TableCell>
+                      <TableCell>{item.stock.toLocaleString('id-ID')}</TableCell>
+                      <TableCell>Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
+                      <TableCell>Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema} - {schemaPercentage.toFixed(1)}%</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <FeedForm feed={item} onSave={(updatedFeed) => updateFeed(item.id, updatedFeed)} />
+                             <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                     <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600">
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      <span>Hapus</span>
+                                    </DropdownMenuItem>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                      <AlertDialogTitle>Anda yakin ingin menghapus pakan {item.name}?</AlertDialogTitle>
+                                      <AlertDialogDescription>Aksi ini akan menghapus data pakan secara permanen.</AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => {
+                                        removeFeed(item.id);
+                                        toast({ variant: 'destructive', title: `Pakan ${item.name} dihapus!` });
+                                      }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                                      </AlertDialogFooter>
+                                  </AlertDialogContent>
+                              </AlertDialog>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
