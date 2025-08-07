@@ -77,7 +77,7 @@ const personalAssistantFlow = ai.defineFlow(
       model: ai.model,
       system: systemPrompt,
       history: formattedHistory,
-      prompt: { content: currentPromptParts },
+      prompt: currentPromptParts,
       config: {
         // Adjust safety settings as requested
         safetySettings: [
