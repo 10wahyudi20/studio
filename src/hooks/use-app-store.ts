@@ -107,7 +107,7 @@ export const useAppStore = create<AppState & {
   updateFeed: (id: number, feed: Partial<Omit<Feed, 'id'>>) => void;
   removeFeed: (id: number) => void;
   saveState: () => void;
-  loadState: (options?: { fromRemote?: boolean }) => void;
+  loadState: () => void;
   getFullState: () => Omit<AppState, 'isDirty' | 'isAuthenticated'>;
   loadFullState: (state: Omit<AppState, 'isDirty' | 'isAuthenticated'>) => void;
   resetState: () => void;
@@ -360,7 +360,7 @@ export const useAppStore = create<AppState & {
     }
   },
 
-  loadState: (options) => {
+  loadState: () => {
     try {
       // Check session storage first for auth state
       const isAuthenticated = sessionStorage.getItem('clucksmart-auth') === 'true';
@@ -391,42 +391,6 @@ export const useAppStore = create<AppState & {
         // Recalculate monthly production on load to ensure consistency
         revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
         
-        // --- Automatic Daily Stock Reduction ---
-        // Only perform stock reduction if the call is not from a remote update
-        if (!options?.fromRemote) {
-            const today = startOfDay(new Date());
-            const lastUpdate = revivedState.lastStockUpdate ? startOfDay(new Date(revivedState.lastStockUpdate)) : null;
-
-            if (lastUpdate && lastUpdate < today) {
-                const totalDucks = revivedState.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-                if (totalDucks > 0) {
-                    const totalFeedPerDayKg = revivedState.feed.reduce((sum, item) => {
-                        const consumptionPerFeed = (totalDucks * item.schema) / 1000; // in kg
-                        return sum + consumptionPerFeed;
-                    }, 0);
-
-                    if (totalFeedPerDayKg > 0) {
-                        const totalOriginalStock = revivedState.feed.reduce((sum, item) => sum + item.stock, 0);
-                        
-                        if (totalOriginalStock > 0) {
-                            revivedState.feed = revivedState.feed.map(item => {
-                                // Reduce stock based on its proportion to the total stock
-                                const proportion = item.stock / totalOriginalStock;
-                                const reduction = totalFeedPerDayKg * proportion;
-                                const newStock = Math.max(0, item.stock - reduction);
-                                return { ...item, stock: newStock };
-                            });
-                            revivedState.isDirty = true;
-                        }
-                    }
-                }
-                revivedState.lastStockUpdate = today.toISOString();
-            } else if (!lastUpdate) {
-                revivedState.lastStockUpdate = today.toISOString();
-            }
-        }
-        // --- End of Stock Reduction Logic ---
-
         set(revivedState);
       } else {
         // If no saved state, just set the auth status
@@ -485,13 +449,12 @@ export const useAppStore = create<AppState & {
       // Recalculate monthly production on load to ensure consistency
       revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
       set({...revivedState, isDirty: true});
-      // Notify other tabs that the state has changed
-      channel?.postMessage({ type: 'state-updated' });
+      get().saveState(); // Save and broadcast change
   },
 
   resetState: () => {
       set({...getInitialState(), isDirty: true});
-      // Also notify other tabs about the reset
+      // Also save and notify other tabs about the reset
       get().saveState();
   },
 
@@ -502,9 +465,9 @@ export const useAppStore = create<AppState & {
 if (channel) {
     channel.onmessage = (event) => {
         if (event.data.type === 'state-updated') {
-            // Reload state from localStorage, but skip the stock reduction logic
-            // as the saving tab already handled it.
-            useAppStore.getState().loadState({ fromRemote: true });
+            useAppStore.getState().loadState();
         }
     };
 }
+
+    
