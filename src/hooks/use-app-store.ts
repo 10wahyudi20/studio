@@ -4,9 +4,6 @@ import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, M
 import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
-// Create a BroadcastChannel for cross-tab communication.
-// This is used for real-time events that don't involve saving to localStorage,
-// like login/logout or tab switching. The main data sync is handled by the 'storage' event.
 let channel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined') {
     channel = new BroadcastChannel('clucksmart-channel');
@@ -34,7 +31,7 @@ const getInitialState = (): AppState => ({
   feed: [],
   finance: [],
   isDirty: false,
-  isAuthenticated: false, // Default to not authenticated
+  isAuthenticated: false, 
   lastStockUpdate: null,
   activeTab: 'home',
 });
@@ -54,7 +51,6 @@ const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyPr
     const monthlyData: { [month: string]: MonthlyProduction } = {};
 
     weeklyData.forEach(week => {
-        // Add a check to ensure week.startDate is valid before processing
         if (week && week.startDate && !isNaN(new Date(week.startDate).getTime())) {
             const monthKey = format(new Date(week.startDate), 'MMMM yyyy', { locale: idLocale });
 
@@ -125,8 +121,7 @@ export const useAppStore = create<AppState & {
     if (noCredentialsSet || (username === companyInfo.username && password === companyInfo.password)) {
       set({ isAuthenticated: true });
       localStorage.setItem('clucksmart-auth', 'true');
-      // Notify other tabs of auth change immediately
-      channel?.postMessage({ type: 'auth-changed' });
+      channel?.postMessage({ type: 'auth-change' });
       return true;
     }
     return false;
@@ -135,8 +130,7 @@ export const useAppStore = create<AppState & {
   logout: () => {
     set({ isAuthenticated: false });
     localStorage.removeItem('clucksmart-auth');
-    // Notify other tabs of auth change immediately
-    channel?.postMessage({ type: 'auth-changed' });
+    channel?.postMessage({ type: 'auth-change' });
   },
 
   setDirty: () => set({ isDirty: true }),
@@ -145,8 +139,7 @@ export const useAppStore = create<AppState & {
     set(state => {
       if (state.activeTab !== tab) {
         localStorage.setItem('clucksmart-activeTab', tab);
-         // Notify other tabs of tab change immediately
-        channel?.postMessage({ type: 'tab-changed' });
+        channel?.postMessage({ type: 'tab-change' });
         return { activeTab: tab };
       }
       return {};
@@ -377,10 +370,9 @@ export const useAppStore = create<AppState & {
     try {
         const stateToSave = get().getFullState();
         const serializedState = JSON.stringify(stateToSave);
-        // Saving to localStorage will trigger the 'storage' event in other tabs,
-        // which is the primary mechanism for data synchronization.
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
+        channel?.postMessage({ type: 'state-change' }); // Notify other tabs that state was saved
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
     }
@@ -419,7 +411,6 @@ export const useAppStore = create<AppState & {
         
         set(revivedState);
       } else {
-        // If no saved state, just set auth and tab
         set({ isAuthenticated, activeTab: savedTab || 'home' });
       }
     } catch (error) {
@@ -429,34 +420,15 @@ export const useAppStore = create<AppState & {
   
   getFullState: () => {
     const { isDirty, isAuthenticated, ...state } = get();
-    // Exclude functions before returning state
     const st: any = state;
-    delete st.login;
-    delete st.logout;
-    delete st.setDirty;
-    delete st.setActiveTab;
-    delete st.updateCompanyInfo;
-    delete st.addDuck;
-    delete st.updateDuck;
-    delete st.removeDuck;
-    delete st.resetDuck;
-    delete st.addDailyProduction;
-    delete st.updateDailyProduction;
-    delete st.addWeeklyProduction;
-    delete st.updateWeeklyProduction;
-    delete st.removeWeeklyProduction;
-    delete st.addTransaction;
-    delete st.updateTransaction;
-    delete st.removeTransaction;
-    delete st.addFeed;
-    delete st.updateFeed;
-    delete st.removeFeed;
-    delete st.saveState;
-    delete st.loadState;
-    delete st.getFullState;
-    delete st.loadFullState;
-    delete st.resetState;
-    delete st.getInitialState;
+    const functions = [
+        "login", "logout", "setDirty", "setActiveTab", "updateCompanyInfo", "addDuck",
+        "updateDuck", "removeDuck", "resetDuck", "addDailyProduction", "updateDailyProduction",
+        "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
+        "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
+        "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState"
+    ];
+    functions.forEach(f => delete st[f]);
     return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;
   },
 
@@ -487,16 +459,17 @@ export const useAppStore = create<AppState & {
 }));
 
 
-// Listen for messages from other tabs for non-persisted, real-time events.
 if (channel) {
     channel.onmessage = (event) => {
         const { loadState } = useAppStore.getState();
-        // Handle auth status sync and active tab sync immediately without a full data reload
-        if (event.data?.type === 'auth-changed') {
+        if (event.data?.type === 'state-change') {
+            loadState(); // Force reload from storage if another tab saved
+        }
+        if (event.data?.type === 'auth-change') {
             const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
             useAppStore.setState({ isAuthenticated });
         }
-        if (event.data?.type === 'tab-changed') {
+        if (event.data?.type === 'tab-change') {
             const activeTab = localStorage.getItem('clucksmart-activeTab') || 'home';
             useAppStore.setState({ activeTab });
         }

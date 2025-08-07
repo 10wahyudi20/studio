@@ -15,39 +15,35 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const [isAuthCheckComplete, setIsAuthCheckComplete] = React.useState(false);
 
   React.useEffect(() => {
-    // Initial load from storage on component mount
-    loadState();
+    loadState(); // Initial load
     
-    // Add event listener for storage changes from other tabs
     const handleStorageChange = (event: StorageEvent) => {
-      // Reload state if the main data or auth status changes in another tab
-      if (event.key === 'clucksmart-state' || event.key === 'clucksmart-auth') {
+      // If the main data store changes in another tab, reload our state
+      if (event.key === 'clucksmart-state') {
         loadState();
+      }
+      // Handle auth changes separately to avoid a full reload just for auth
+      if (event.key === 'clucksmart-auth') {
+        const newAuthStatus = event.newValue === 'true';
+        useAppStore.setState({ isAuthenticated: newAuthStatus });
       }
     };
     
     window.addEventListener('storage', handleStorageChange);
-
-    // Set auth check to complete after initial load
     setIsAuthCheckComplete(true);
 
-    // Cleanup the event listener when the component unmounts
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [loadState]); // Dependency on loadState ensures the latest function version is used
+  }, [loadState]);
 
 
   React.useEffect(() => {
-    // This effect runs after the initial state is loaded or updated.
-    // It is responsible for redirecting if needed.
     if (isAuthCheckComplete && !isAuthenticated) {
       router.replace('/login');
     }
   }, [isAuthenticated, isAuthCheckComplete, router]);
 
-  // While the auth check is not complete, or if the user is not authenticated, show a loading screen.
-  // This prevents a flash of the login page or unstyled content.
   if (!isAuthCheckComplete || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
@@ -57,6 +53,5 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     );
   }
 
-  // If check is complete and user is authenticated, render the children.
   return <>{children}</>;
 }
