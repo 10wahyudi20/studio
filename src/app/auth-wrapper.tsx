@@ -7,31 +7,43 @@ import { useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAppStore(state => state.isAuthenticated);
-  const loadState = useAppStore(state => state.loadState);
+  const { isAuthenticated, loadState } = useAppStore(state => ({
+    isAuthenticated: state.isAuthenticated,
+    loadState: state.loadState,
+  }));
   const router = useRouter();
   const [isAuthCheckComplete, setIsAuthCheckComplete] = React.useState(false);
 
   React.useEffect(() => {
-    // On initial mount, load the state from storage.
-    // This will update isAuthenticated and trigger the next effect.
+    // Initial load from storage
     loadState();
+    
+    // Add event listener for storage changes from other tabs
+    const handleStorageChange = () => {
+      loadState();
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    // Set auth check to complete after initial load
+    setIsAuthCheckComplete(true);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [loadState]);
 
+
   React.useEffect(() => {
-    // This effect runs after the initial state is loaded.
+    // This effect runs after the initial state is loaded or updated.
     // It is responsible for redirecting if needed.
-    if (!isAuthenticated) {
+    if (isAuthCheckComplete && !isAuthenticated) {
       router.replace('/login');
-    } else {
-      // If authenticated, mark the check as complete to render children.
-      setIsAuthCheckComplete(true);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAuthCheckComplete, router]);
 
   // While the auth check is not complete, show a loading screen.
   // This prevents a flash of the login page or unstyled content.
-  if (!isAuthCheckComplete) {
+  if (!isAuthCheckComplete || !isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-2xl font-semibold text-primary">Memuat...</div>
