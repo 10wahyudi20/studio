@@ -37,15 +37,24 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
   );
 
 // Personal AI Assistant Component
-const PersonalAssistant = ({ inputRef }: { inputRef: React.RefObject<HTMLInputElement> }) => {
+const PersonalAssistant = () => {
     type Message = { role: 'user' | 'model'; content: string };
     const [history, setHistory] = React.useState<Message[]>([]);
     const [prompt, setPrompt] = React.useState('');
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
-    React.useEffect(() => {
+    // Effect to focus the input when dialog opens or after a message is sent
+    useEffect(() => {
+        // We use a small timeout to ensure the input is rendered and visible before focusing
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 100);
+    }, [isLoading]); // Reruns when isLoading changes, e.g., after a response is received.
+
+    useEffect(() => {
         if (scrollAreaRef.current) {
             scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
         }
@@ -72,9 +81,6 @@ const PersonalAssistant = ({ inputRef }: { inputRef: React.RefObject<HTMLInputEl
             setError("Maaf, terjadi kesalahan saat menghubungi asisten AI. Silakan coba lagi.");
         } finally {
             setIsLoading(false);
-            setTimeout(() => {
-                inputRef.current?.focus();
-            }, 0);
         }
     };
 
@@ -342,16 +348,6 @@ export default function Header() {
     const { toast } = useToast();
     const router = useRouter();
     const [aiDialogOpen, setAiDialogOpen] = React.useState(false);
-    const aiInputRef = React.useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (aiDialogOpen) {
-            // Timeout to allow the dialog to render and the ref to be attached
-            setTimeout(() => {
-                aiInputRef.current?.focus();
-            }, 100);
-        }
-    }, [aiDialogOpen]);
 
     const handleSave = () => {
         saveState();
@@ -408,7 +404,7 @@ export default function Header() {
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-xl p-0">
-                   <PersonalAssistant inputRef={aiInputRef} />
+                   <PersonalAssistant />
                 </DialogContent>
             </Dialog>
             <Dialog>
