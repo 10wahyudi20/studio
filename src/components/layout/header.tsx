@@ -41,6 +41,7 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 // Personal AI Assistant Component
 const PersonalAssistant = () => {
+    const { ducks, eggProduction, feed, finance } = useAppStore();
     const [history, setHistory] = React.useState<Message[]>([]);
     const [prompt, setPrompt] = React.useState('');
     const [imageDataUri, setImageDataUri] = React.useState<string | null>(null);
@@ -52,7 +53,7 @@ const PersonalAssistant = () => {
 
     // Effect to focus the input when dialog opens or after a message is sent
     useEffect(() => {
-        if (!isLoading && inputRef.current) {
+        if (!isLoading) {
              // We use a small timeout to ensure the input is rendered and visible before focusing
             setTimeout(() => {
                 inputRef.current?.focus();
@@ -95,10 +96,15 @@ const PersonalAssistant = () => {
         setError(null);
 
         try {
+            // Pass the current state of the farm data to the AI
             const result = await personalAssistant({
                 history,
                 prompt: currentPrompt,
                 imageDataUri: currentImageDataUri ?? undefined,
+                ducks,
+                eggProduction,
+                feed,
+                finance
             });
             const aiResponse: Message = { role: 'model', content: result.response };
             setHistory(prev => [...prev, aiResponse]);
@@ -122,7 +128,7 @@ const PersonalAssistant = () => {
             <DialogHeader>
                 <DialogTitle>Asisten AI Pribadi</DialogTitle>
                 <DialogDescription>
-                    Ajukan pertanyaan apa pun, termasuk dengan gambar. Riwayat obrolan hanya sementara.
+                    Ajukan pertanyaan apa pun, termasuk analisis data peternakan Anda. Riwayat obrolan hanya sementara.
                 </DialogDescription>
             </DialogHeader>
             <div className="flex-grow my-4 overflow-hidden">
