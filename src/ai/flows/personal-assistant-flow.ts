@@ -186,6 +186,11 @@ const personalAssistantFlow = ai.defineFlow(
       // Remove keyword from prompt
       userPrompt = userPrompt.substring(keyword.length).trim();
       
+      // If the prompt is now empty (user only said the keyword), give a canned response.
+      if (!userPrompt && !input.imageDataUri) {
+          return { response: "Tentu, apa yang bisa saya bantu dengan peternakan Anda?" };
+      }
+
       systemPrompt = `Anda adalah seorang ahli dan konsultan peternakan bebek yang sangat cerdas untuk aplikasi CluckSmart. Peran Anda adalah untuk membantu pengguna mengelola peternakan mereka dengan lebih baik.
 
 PERATURAN PENTING:
@@ -281,4 +286,3 @@ Tanggal hari ini adalah ${currentDate}.`;
   }
 );
 
-    
