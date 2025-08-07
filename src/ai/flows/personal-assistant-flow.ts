@@ -13,6 +13,8 @@
 import {ai} from '@/ai/genkit';
 import {Message, Role} from 'genkit/model';
 import {z} from 'genkit';
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 // Define the structure for a single message in the history
 const MessageSchema = z.object({
@@ -47,8 +49,13 @@ const personalAssistantFlow = ai.defineFlow(
       content: [{text: msg.content}],
     }));
 
+    const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
+    const systemPrompt = `Anda adalah asisten AI pribadi. Jawab semua pertanyaan dengan bebas dan informatif.
+    Informasi penting: Tanggal hari ini adalah ${currentDate}. Gunakan informasi ini jika ada pertanyaan terkait tanggal.`;
+
     const response = await ai.generate({
       model: ai.model,
+      system: systemPrompt,
       history: formattedHistory,
       prompt: prompt,
       config: {
