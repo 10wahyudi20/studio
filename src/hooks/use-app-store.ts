@@ -102,7 +102,7 @@ export const useAppStore = create<AppState & {
   updateTransaction: (id: number, transaction: Partial<Omit<Transaction, 'id'>>) => void;
   removeTransaction: (id: number) => void;
   addFeed: (feed: Omit<Feed, 'id' | 'pricePerKg'>) => void;
-  updateFeed: (id: number, feed: Partial<Omit<Feed, 'id'>>) => void;
+  updateFeed: (id: number, feed: Partial<Omit<Feed, 'id' | 'pricePerKg'>>) => void;
   removeFeed: (id: number) => void;
   saveState: () => void;
   loadState: () => void;
@@ -337,7 +337,6 @@ export const useAppStore = create<AppState & {
         feed: [...state.feed, { 
             ...feed, 
             id: Date.now(), 
-            lastUpdated: new Date(),
             pricePerKg: feed.pricePerBag > 0 ? feed.pricePerBag / 50 : 0
         }], 
         isDirty: true 
@@ -350,7 +349,7 @@ export const useAppStore = create<AppState & {
         if (f.id === id) {
           const pricePerBag = updatedFeed.pricePerBag ?? f.pricePerBag;
           const pricePerKg = pricePerBag > 0 ? pricePerBag / 50 : 0;
-          return { ...f, ...updatedFeed, pricePerKg, lastUpdated: new Date() };
+          return { ...f, ...updatedFeed, pricePerKg, lastUpdated: updatedFeed.lastUpdated ?? f.lastUpdated };
         }
         return f;
       }),

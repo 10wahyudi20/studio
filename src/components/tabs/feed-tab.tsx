@@ -18,11 +18,13 @@ import { Feed } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { ScrollArea } from "../ui/scroll-area";
 
 const feedSchema = z.object({
   name: z.string().min(1, "Nama pakan tidak boleh kosong"),
   supplier: z.string().min(1, "Supplier tidak boleh kosong"),
+  lastUpdated: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Tanggal tidak valid" }),
   stock: z.coerce.number().min(0, "Stok harus angka positif"),
   pricePerBag: z.coerce.number().min(0, "Harga harus angka positif"),
   schema: z.coerce.number().min(0, "Skema harus angka positif"),
@@ -35,14 +37,24 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
   const [open, setOpen] = React.useState(false);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FeedFormData>({
     resolver: zodResolver(feedSchema),
-    defaultValues: feed || { name: "", supplier: "", stock: 0, pricePerBag: 0, schema: 0 },
+    defaultValues: feed ? {
+        ...feed,
+        lastUpdated: format(new Date(feed.lastUpdated), "yyyy-MM-dd"),
+    } : {
+        name: "",
+        supplier: "",
+        lastUpdated: format(new Date(), "yyyy-MM-dd"),
+        stock: 0,
+        pricePerBag: 0,
+        schema: 0
+    },
   });
 
   const onSubmit = (data: FeedFormData) => {
     const pricePerKg = data.pricePerBag > 0 ? data.pricePerBag / 50 : 0;
     const newFeedData = {
         ...data,
-        lastUpdated: new Date(),
+        lastUpdated: parseISO(data.lastUpdated),
         pricePerKg,
     };
     
@@ -73,37 +85,46 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader><DialogTitle>{feed ? 'Edit' : 'Tambah'} Pakan</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Nama Pakan</Label>
-            <Input id="name" {...register("name")} />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="supplier">Supplier</Label>
-            <Input id="supplier" {...register("supplier")} />
-            {errors.supplier && <p className="text-sm text-destructive">{errors.supplier.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="stock">Stok (Kg)</Label>
-            <Input id="stock" type="number" {...register("stock")} />
-            {errors.stock && <p className="text-sm text-destructive">{errors.stock.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pricePerBag">Harga / 50Kg</Label>
-            <Input id="pricePerBag" type="number" {...register("pricePerBag")} />
-            {errors.pricePerBag && <p className="text-sm text-destructive">{errors.pricePerBag.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label>Harga / Kg</Label>
-            <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted"/>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="schema">Skema Pakan (gram)</Label>
-            <Input id="schema" type="number" {...register("schema")} className="text-green-700 dark:text-green-400 font-semibold"/>
-            {errors.schema && <p className="text-sm text-destructive">{errors.schema.message}</p>}
-          </div>
-          <DialogFooter>
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <ScrollArea className="h-[60vh] p-4">
+              <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nama Pakan</Label>
+                    <Input id="name" {...register("name")} />
+                    {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="supplier">Supplier</Label>
+                    <Input id="supplier" {...register("supplier")} />
+                    {errors.supplier && <p className="text-sm text-destructive">{errors.supplier.message}</p>}
+                  </div>
+                   <div className="space-y-2">
+                    <Label htmlFor="lastUpdated">Tanggal Masuk</Label>
+                    <Input id="lastUpdated" type="date" {...register("lastUpdated")} />
+                    {errors.lastUpdated && <p className="text-sm text-destructive">{errors.lastUpdated.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="stock">Stok (Kg)</Label>
+                    <Input id="stock" type="number" {...register("stock")} />
+                    {errors.stock && <p className="text-sm text-destructive">{errors.stock.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pricePerBag">Harga / 50Kg</Label>
+                    <Input id="pricePerBag" type="number" {...register("pricePerBag")} />
+                    {errors.pricePerBag && <p className="text-sm text-destructive">{errors.pricePerBag.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Harga / Kg</Label>
+                    <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted"/>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="schema">Skema Pakan (gram)</Label>
+                    <Input id="schema" type="number" {...register("schema")} className="text-green-700 dark:text-green-400 font-semibold"/>
+                    {errors.schema && <p className="text-sm text-destructive">{errors.schema.message}</p>}
+                  </div>
+              </div>
+            </ScrollArea>
+          <DialogFooter className="pt-4">
             <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
             <Button type="submit">Simpan</Button>
           </DialogFooter>
@@ -157,7 +178,7 @@ export default function FeedTab() {
             }
         />
         <StatCard title="Total Skema Pakan" value={`${totalSchema.toLocaleString('id-ID')} g`} icon={Inbox} valueClassName="text-green-700 dark:text-green-400" />
-        <StatCard title="Nilai Pakan" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
+        <StatCard title="Nilai Stok Pakan" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
         <StatCard title="Total Pakan/Hari" value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} icon={Wheat} />
       </div>
 
