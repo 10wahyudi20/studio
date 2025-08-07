@@ -533,7 +533,7 @@ export default function ProductionTab() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tabel Produksi</CardTitle>
            {activeTab === 'monthly' && (
-              <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)}>
+              <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="hover:bg-transparent">
                 <BarChartIcon className="h-4 w-4" />
                 <span className="sr-only">Tampilkan Grafik</span>
               </Button>
