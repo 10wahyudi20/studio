@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { BrainCircuit, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail } from "lucide-react";
+import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -268,7 +268,7 @@ export default function Header() {
                 <span className="sr-only">Simpan Data</span>
             </Button>
             <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                <BrainCircuit className="h-5 w-5 text-purple-500" />
+                <Sparkles className="h-5 w-5 text-purple-500" />
                 <span className="sr-only">Asisten AI</span>
             </Button>
             <Dialog>
