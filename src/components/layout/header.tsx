@@ -72,6 +72,9 @@ const PersonalAssistant = ({ inputRef }: { inputRef: React.RefObject<HTMLInputEl
             setError("Maaf, terjadi kesalahan saat menghubungi asisten AI. Silakan coba lagi.");
         } finally {
             setIsLoading(false);
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
         }
     };
 
