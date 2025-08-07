@@ -63,11 +63,11 @@ const personalAssistantFlow = ai.defineFlow(
         safetySettings: [
           {
             category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_ONLY_HIGH',
+            threshold: 'BLOCK_NONE',
           },
           {
             category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+            threshold: 'BLOCK_NONE',
           },
           {
             category: 'HARM_CATEGORY_HATE_SPEECH',
