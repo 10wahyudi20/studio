@@ -267,6 +267,10 @@ export default function Header() {
                 <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
                 <span className="sr-only">Simpan Data</span>
             </Button>
+            <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                <BrainCircuit className="h-5 w-5 text-purple-500" />
+                <span className="sr-only">Asisten AI</span>
+            </Button>
             <Dialog>
                 <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
