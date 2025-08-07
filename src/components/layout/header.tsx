@@ -1,8 +1,8 @@
 
 "use client";
-import React from "react";
+import React, {useRef} from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail } from "lucide-react";
+import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -14,9 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { personalAssistant } from "@/ai/flows/personal-assistant-flow";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -29,6 +35,118 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M11.372 13.061C11.12 12.56 10.636 12 10.001 12c-.552 0-1 .448-1 1s.449 1 1 1c.552 0 1.135-.448 1.499-1.24.331.144.69.24 1.059.24 1.381 0 2.5-1.119 2.5-2.5s-1.119-2.5-2.5-2.5c-1.282 0-2.343.967-2.484 2.212C12.19 11.08 12 10.562 12 10c0-1.339 1.01-2.433 2.288-2.494C14.624 5.438 16.657 4 19.001 4c2.761 0 5 2.239 5 5s-2.239 5-5 5c-1.636 0-3.111-.79-4.029-2.035a3.465 3.465 0 0 1-1.21.285c-1.112 0-2.11-.539-2.73-1.378a3.53 3.53 0 0 1-.66.814C4.249 13.921 2 14.058 2 12.5c0-.663.486-1.22 1.123-1.428.21-.069.428-.103.649-.103.422 0 .821.143 1.145.404.223.18.423.388.599.615a4.52 4.52 0 0 0 .543.61c.45.494 1.066.8 1.741.8.498 0 .97-.158 1.372-.439z" />
     </svg>
   );
+
+// Personal AI Assistant Component
+const PersonalAssistant = () => {
+    type Message = { role: 'user' | 'model'; content: string };
+    const [history, setHistory] = React.useState<Message[]>([]);
+    const [prompt, setPrompt] = React.useState('');
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | null>(null);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+        }
+    }, [history]);
+
+    const handleSend = async () => {
+        if (!prompt.trim()) return;
+
+        const newUserMessage: Message = { role: 'user', content: prompt };
+        setHistory(prev => [...prev, newUserMessage]);
+        setPrompt('');
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const result = await personalAssistant({
+                history,
+                prompt,
+            });
+            const aiResponse: Message = { role: 'model', content: result.response };
+            setHistory(prev => [...prev, aiResponse]);
+        } catch (e) {
+            console.error("AI Assistant Error:", e);
+            setError("Maaf, terjadi kesalahan saat menghubungi asisten AI. Silakan coba lagi.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleClear = () => {
+        setHistory([]);
+        setError(null);
+    };
+
+    return (
+        <div className="flex flex-col h-[70vh]">
+            <DialogHeader>
+                <DialogTitle>Asisten AI Pribadi</DialogTitle>
+                <DialogDescription>
+                    Ajukan pertanyaan apa pun. Riwayat obrolan hanya sementara dan akan hilang saat dialog ditutup.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex-grow my-4 overflow-hidden">
+                <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
+                    <div className="space-y-4">
+                        {history.length === 0 && (
+                            <div className="text-center text-muted-foreground py-8">
+                                <Bot className="mx-auto h-12 w-12" />
+                                <p className="mt-2">Bagaimana saya bisa membantu Anda hari ini?</p>
+                            </div>
+                        )}
+                        {history.map((msg, index) => (
+                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
+                                {msg.role === 'model' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
+                                <div className={cn("p-3 rounded-lg max-w-sm", msg.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
+                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                </div>
+                                {msg.role === 'user' && <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
+                            </div>
+                        ))}
+                         {isLoading && (
+                            <div className="flex items-start gap-3">
+                                <Bot className="h-6 w-6 text-primary flex-shrink-0" />
+                                <div className="p-3 rounded-lg bg-muted">
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </ScrollArea>
+            </div>
+            {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
+            <DialogFooter>
+                 <Button variant="ghost" size="icon" onClick={handleClear} className="absolute left-4 bottom-4">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Hapus Obrolan</span>
+                </Button>
+                <div className="relative flex-grow">
+                    <Input
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        placeholder="Ketik pesan Anda..."
+                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                        disabled={isLoading}
+                        className="pr-12"
+                    />
+                    <Button
+                        type="submit"
+                        size="icon"
+                        onClick={handleSend}
+                        disabled={isLoading || !prompt.trim()}
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+                    >
+                        <Send className="h-4 w-4" />
+                    </Button>
+                </div>
+            </DialogFooter>
+        </div>
+    );
+};
+
 
 // Simple Calculator Component
 const SimpleCalculator = () => {
@@ -267,10 +385,17 @@ export default function Header() {
                 <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
                 <span className="sr-only">Simpan Data</span>
             </Button>
-            <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                <Sparkles className="h-5 w-5 text-purple-500" />
-                <span className="sr-only">Asisten AI</span>
-            </Button>
+            <Dialog>
+                <DialogTrigger asChild>
+                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                        <Sparkles className="h-5 w-5 text-purple-500" />
+                        <span className="sr-only">Asisten AI</span>
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-xl p-0">
+                   <PersonalAssistant />
+                </DialogContent>
+            </Dialog>
             <Dialog>
                 <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
