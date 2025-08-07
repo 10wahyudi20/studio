@@ -46,10 +46,10 @@ export default function LoginPage() {
 
   useEffect(() => {
       // If user is already authenticated (e.g., hits back button), redirect them
-      if(isAuthenticated) {
+      if (isMounted && isAuthenticated) {
           router.replace('/');
       }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isMounted, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +68,12 @@ export default function LoginPage() {
     }, 500); // Simulate network delay
   };
 
-  if (!isMounted) {
-    // Render a loading state on the server and initial client render to avoid hydration mismatch
+  // Only render the login form if the component has mounted and the user is not authenticated.
+  // This prevents rendering the form while the initial auth check is happening.
+  if (!isMounted || isAuthenticated) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
-        <div className="text-2xl font-semibold text-primary">Memuat Halaman Login...</div>
+        <div className="text-2xl font-semibold text-primary">Memuat...</div>
       </div>
     );
   }

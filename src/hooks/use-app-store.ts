@@ -124,7 +124,8 @@ export const useAppStore = create<AppState & {
     
     if (noCredentialsSet || (username === companyInfo.username && password === companyInfo.password)) {
       set({ isAuthenticated: true });
-      sessionStorage.setItem('clucksmart-auth', 'true'); // Persist auth state for session
+      localStorage.setItem('clucksmart-auth', 'true'); // Use localStorage for cross-tab session
+      channel?.postMessage({ type: 'auth-changed', payload: { isAuthenticated: true } });
       return true;
     }
     return false;
@@ -132,7 +133,8 @@ export const useAppStore = create<AppState & {
 
   logout: () => {
     set({ isAuthenticated: false });
-    sessionStorage.removeItem('clucksmart-auth');
+    localStorage.removeItem('clucksmart-auth');
+    channel?.postMessage({ type: 'auth-changed', payload: { isAuthenticated: false } });
   },
 
   setDirty: () => set({ isDirty: true }),
@@ -376,7 +378,7 @@ export const useAppStore = create<AppState & {
 
   loadState: () => {
     try {
-      const isAuthenticated = sessionStorage.getItem('clucksmart-auth') === 'true';
+      const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
       const savedState = localStorage.getItem('clucksmart-state');
       const savedTab = localStorage.getItem('clucksmart-activeTab');
 
@@ -478,7 +480,7 @@ export const useAppStore = create<AppState & {
 if (channel) {
     channel.onmessage = (event) => {
       const { loadState, setActiveTab } = useAppStore.getState();
-        if (event.data.type === 'state-updated') {
+        if (event.data.type === 'state-updated' || event.data.type === 'auth-changed') {
             loadState();
         }
         if (event.data.type === 'tab-changed') {
