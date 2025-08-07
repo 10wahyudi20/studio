@@ -52,7 +52,7 @@ const PersonalAssistant = () => {
 
     // Effect to focus the input when dialog opens or after a message is sent
     useEffect(() => {
-        if (!isLoading) {
+        if (!isLoading && inputRef.current) {
              // We use a small timeout to ensure the input is rendered and visible before focusing
             setTimeout(() => {
                 inputRef.current?.focus();
@@ -81,7 +81,7 @@ const PersonalAssistant = () => {
     const handleSend = async () => {
         if (!prompt.trim() && !imageDataUri) return;
 
-        const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri };
+        const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri ?? undefined };
         setHistory(prev => [...prev, newUserMessage]);
         
         const currentPrompt = prompt;
@@ -98,7 +98,7 @@ const PersonalAssistant = () => {
             const result = await personalAssistant({
                 history,
                 prompt: currentPrompt,
-                imageDataUri: currentImageDataUri,
+                imageDataUri: currentImageDataUri ?? undefined,
             });
             const aiResponse: Message = { role: 'model', content: result.response };
             setHistory(prev => [...prev, aiResponse]);
