@@ -101,7 +101,7 @@ const PersonalAssistant = () => {
                 history,
                 prompt: currentPrompt,
                 imageDataUri: currentImageDataUri ?? undefined,
-                ducks,
+                ducks: ducks.map(d => ({...d, entryDate: d.entryDate.toISOString()})),
                 eggProduction,
                 feed,
                 finance
@@ -510,3 +510,4 @@ export default function Header() {
     
 
     
+
