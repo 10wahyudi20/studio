@@ -280,25 +280,27 @@ export default function ProductionTab() {
   };
   
   const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const firstOfMonth = new Date(year, month, 1);
+    const lastOfMonth = new Date(year, month + 1, 0);
     
-    // Calculate the date of the first day of the target week.
-    // The week starts on Sunday (day 0).
-    const dayOfWeek = firstDayOfMonth.getDay();
-    let firstDayOfWeekDate = 1 + (weekNumber - 1) * 7 - dayOfWeek;
-
-    let startDate = new Date(year, month, firstDayOfWeekDate);
-    let endDate = addDays(startDate, 6);
-
-    // Clamp dates to the current month
-    if (startDate < firstDayOfMonth) {
-        startDate = firstDayOfMonth;
+    const firstDayOfWeek = firstOfMonth.getDay(); // 0 for Sunday, 1 for Monday, etc.
+    
+    // Calculate start date
+    let startDate = new Date(firstOfMonth);
+    startDate.setDate(1 + (weekNumber - 1) * 7 - firstDayOfWeek);
+    
+    // Calculate end date
+    let endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    
+    // Clamp dates to be within the month
+    if (startDate < firstOfMonth) {
+        startDate = firstOfMonth;
     }
-    if (endDate > lastDayOfMonth) {
-        endDate = lastDayOfMonth;
+    if (endDate > lastOfMonth) {
+        endDate = lastOfMonth;
     }
-
+    
     return { startDate, endDate };
   };
 
