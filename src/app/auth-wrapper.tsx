@@ -15,22 +15,27 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const [isAuthCheckComplete, setIsAuthCheckComplete] = React.useState(false);
 
   React.useEffect(() => {
-    // Initial load from storage
+    // Initial load from storage on component mount
     loadState();
     
     // Add event listener for storage changes from other tabs
-    const handleStorageChange = () => {
-      loadState();
+    const handleStorageChange = (event: StorageEvent) => {
+      // Reload state if the main data or auth status changes in another tab
+      if (event.key === 'clucksmart-state' || event.key === 'clucksmart-auth') {
+        loadState();
+      }
     };
+    
     window.addEventListener('storage', handleStorageChange);
 
     // Set auth check to complete after initial load
     setIsAuthCheckComplete(true);
 
+    // Cleanup the event listener when the component unmounts
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [loadState]);
+  }, [loadState]); // Dependency on loadState ensures the latest function version is used
 
 
   React.useEffect(() => {
@@ -41,7 +46,7 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     }
   }, [isAuthenticated, isAuthCheckComplete, router]);
 
-  // While the auth check is not complete, show a loading screen.
+  // While the auth check is not complete, or if the user is not authenticated, show a loading screen.
   // This prevents a flash of the login page or unstyled content.
   if (!isAuthCheckComplete || !isAuthenticated) {
     return (

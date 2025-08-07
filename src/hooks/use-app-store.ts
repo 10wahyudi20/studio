@@ -5,7 +5,8 @@ import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, s
 import { id as idLocale } from 'date-fns/locale';
 
 // Create a BroadcastChannel for cross-tab communication.
-// This will notify other tabs when the state changes.
+// This is used for real-time events that don't involve saving to localStorage,
+// like login/logout or tab switching. The main data sync is handled by the 'storage' event.
 let channel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined') {
     channel = new BroadcastChannel('clucksmart-channel');
@@ -124,7 +125,8 @@ export const useAppStore = create<AppState & {
     if (noCredentialsSet || (username === companyInfo.username && password === companyInfo.password)) {
       set({ isAuthenticated: true });
       localStorage.setItem('clucksmart-auth', 'true');
-      channel?.postMessage({ type: 'auth-changed', payload: { isAuthenticated: true } });
+      // Notify other tabs of auth change immediately
+      channel?.postMessage({ type: 'auth-changed' });
       return true;
     }
     return false;
@@ -133,7 +135,8 @@ export const useAppStore = create<AppState & {
   logout: () => {
     set({ isAuthenticated: false });
     localStorage.removeItem('clucksmart-auth');
-    channel?.postMessage({ type: 'auth-changed', payload: { isAuthenticated: false } });
+    // Notify other tabs of auth change immediately
+    channel?.postMessage({ type: 'auth-changed' });
   },
 
   setDirty: () => set({ isDirty: true }),
@@ -142,7 +145,8 @@ export const useAppStore = create<AppState & {
     set(state => {
       if (state.activeTab !== tab) {
         localStorage.setItem('clucksmart-activeTab', tab);
-        channel?.postMessage({ type: 'tab-changed', payload: tab });
+         // Notify other tabs of tab change immediately
+        channel?.postMessage({ type: 'tab-changed' });
         return { activeTab: tab };
       }
       return {};
@@ -373,19 +377,19 @@ export const useAppStore = create<AppState & {
     try {
         const stateToSave = get().getFullState();
         const serializedState = JSON.stringify(stateToSave);
+        // Saving to localStorage will trigger the 'storage' event in other tabs,
+        // which is the primary mechanism for data synchronization.
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
-        // Send a message that forces other tabs to reload state.
-        channel?.postMessage({ type: 'state-changed', payload: serializedState });
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
     }
   },
 
-  loadState: (newState?: string) => {
+  loadState: () => {
     try {
       const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
-      const savedState = newState || localStorage.getItem('clucksmart-state');
+      const savedState = localStorage.getItem('clucksmart-state');
       const savedTab = localStorage.getItem('clucksmart-activeTab');
 
       if (savedState) {
@@ -415,6 +419,7 @@ export const useAppStore = create<AppState & {
         
         set(revivedState);
       } else {
+        // If no saved state, just set auth and tab
         set({ isAuthenticated, activeTab: savedTab || 'home' });
       }
     } catch (error) {
@@ -482,21 +487,18 @@ export const useAppStore = create<AppState & {
 }));
 
 
-// Listen for messages from other tabs
+// Listen for messages from other tabs for non-persisted, real-time events.
 if (channel) {
     channel.onmessage = (event) => {
         const { loadState } = useAppStore.getState();
-        // When state changes in another tab, load it directly from the message payload
-        if (event.data?.type === 'state-changed') {
-            loadState(event.data.payload);
-        }
-        // Handle auth status sync
+        // Handle auth status sync and active tab sync immediately without a full data reload
         if (event.data?.type === 'auth-changed') {
-            useAppStore.setState({ isAuthenticated: event.data.payload.isAuthenticated });
+            const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
+            useAppStore.setState({ isAuthenticated });
         }
-        // Handle active tab sync
         if (event.data?.type === 'tab-changed') {
-            useAppStore.setState({ activeTab: event.data.payload });
+            const activeTab = localStorage.getItem('clucksmart-activeTab') || 'home';
+            useAppStore.setState({ activeTab });
         }
     };
 }
