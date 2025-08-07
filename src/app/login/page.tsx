@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Loader2, Wifi, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, EyeOff, Loader2, Wifi } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -26,7 +26,7 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function LoginPage() {
-  const { login, companyInfo, loadState, isAuthenticated } = useAppStore();
+  const { login, companyInfo, isAuthenticated, loadState } = useAppStore();
   const router = useRouter();
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -37,53 +37,53 @@ export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // Load state from local/session storage when component mounts
     loadState();
     setIsMounted(true);
   }, [loadState]);
 
   useEffect(() => {
+    // If user is already authenticated (e.g. from session storage), redirect to home
     if (isMounted && isAuthenticated) {
       router.replace("/");
     }
-  }, [isAuthenticated, isMounted, router]);
-
+  }, [isMounted, isAuthenticated, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setHasLoginError(false);
     setTimeout(() => {
+      // The `login` function now uses the most up-to-date state from the store
       if (login(username, password)) {
         toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
         router.push("/");
       } else {
         toast({ variant: "destructive", title: "Login Gagal", description: "Username atau password salah." });
-        setIsLoading(false);
         setHasLoginError(true);
-        setTimeout(() => setHasLoginError(false), 7000);
+        setTimeout(() => setHasLoginError(false), 3000); // Shorter reset time
       }
+      setIsLoading(false);
     }, 500); // Simulate network delay
   };
-  
+
+  // While mounting or if authenticated, show a loading screen to prevent flash of login page
   if (!isMounted || isAuthenticated) {
-     return (
-        <div className="flex items-center justify-center h-screen bg-background">
-            <div className="text-2xl font-semibold text-primary">Memuat...</div>
-        </div>
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="text-2xl font-semibold text-primary">Memuat...</div>
+      </div>
     );
   }
 
-  const backgroundStyle = companyInfo.loginBackground 
-  ? { backgroundImage: `url(${companyInfo.loginBackground})` }
-  : {};
-
+  const backgroundStyle = companyInfo.loginBackground ? { backgroundImage: `url(${companyInfo.loginBackground})` } : {};
   const inputStyles = "bg-transparent border-white/30 placeholder:text-gray-300 dark:placeholder:text-gray-400 focus:ring-accent";
 
   return (
     <div 
       className={cn(
-          "relative flex items-center justify-center min-h-screen bg-background p-4",
-          companyInfo.loginBackground && "bg-cover bg-center"
+        "relative flex items-center justify-center min-h-screen bg-background p-4",
+        companyInfo.loginBackground && "bg-cover bg-center"
       )}
       style={backgroundStyle}
     >
@@ -122,7 +122,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Password Anda"
-                    className={inputStyles}
+                    className={cn(inputStyles, hasLoginError && 'border-destructive')}
                 />
                  <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8 text-white/70 hover:text-white" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
