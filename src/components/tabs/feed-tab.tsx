@@ -176,7 +176,7 @@ export default function FeedTab() {
                   <TableHead>Stok (Kg)</TableHead>
                   <TableHead>Harga/50 Kg</TableHead>
                   <TableHead>Harga/Kg</TableHead>
-                  <TableHead>Skema Pakan (g)</TableHead>
+                  <TableHead className="text-center">Skema Pakan (g)</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
