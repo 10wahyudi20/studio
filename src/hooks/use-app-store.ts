@@ -119,12 +119,11 @@ export const useAppStore = create<AppState & {
 
   login: (username, password) => {
     const { companyInfo } = get();
-    // If no username/password is set in the store, allow login.
     const noCredentialsSet = !companyInfo.username && !companyInfo.password;
     
     if (noCredentialsSet || (username === companyInfo.username && password === companyInfo.password)) {
       set({ isAuthenticated: true });
-      localStorage.setItem('clucksmart-auth', 'true'); // Use localStorage for cross-tab session
+      localStorage.setItem('clucksmart-auth', 'true');
       channel?.postMessage({ type: 'auth-changed', payload: { isAuthenticated: true } });
       return true;
     }
@@ -141,7 +140,6 @@ export const useAppStore = create<AppState & {
   
   setActiveTab: (tab) => {
     set(state => {
-      // Only update and broadcast if the tab has changed
       if (state.activeTab !== tab) {
         localStorage.setItem('clucksmart-activeTab', tab);
         channel?.postMessage({ type: 'tab-changed', payload: tab });
@@ -369,7 +367,6 @@ export const useAppStore = create<AppState & {
         const serializedState = JSON.stringify(stateToSave);
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
-        // Notify other tabs that the data state has changed
         channel?.postMessage({ type: 'state-updated' });
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
