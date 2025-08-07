@@ -402,7 +402,7 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="align-middle">Tanggal</TableHead>
+                      <TableHead className="text-center align-middle">Tanggal</TableHead>
                       <TableHead className="align-middle">Hari</TableHead>
                       <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
                       <TableHead className="text-center align-middle">Produktifitas</TableHead>
