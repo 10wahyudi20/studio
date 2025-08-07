@@ -3,7 +3,7 @@
 import React, {useRef, useEffect} from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { useRouter } from "next/navigation";
-import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send, X } from "lucide-react";
+import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send, X, Paperclip, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -21,11 +21,11 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { personalAssistant } from "@/ai/flows/personal-assistant-flow";
+import { personalAssistant, Message } from "@/ai/flows/personal-assistant-flow";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -41,12 +41,13 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 // Personal AI Assistant Component
 const PersonalAssistant = () => {
-    type Message = { role: 'user' | 'model'; content: string };
     const [history, setHistory] = React.useState<Message[]>([]);
     const [prompt, setPrompt] = React.useState('');
+    const [imageDataUri, setImageDataUri] = React.useState<string | null>(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const viewportRef = useRef<HTMLDivElement>(null);
 
     // Effect to focus the input when dialog opens or after a message is sent
@@ -65,20 +66,39 @@ const PersonalAssistant = () => {
             viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
         }
     }, [history]);
+    
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setImageDataUri(event.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleSend = async () => {
-        if (!prompt.trim()) return;
+        if (!prompt.trim() && !imageDataUri) return;
 
-        const newUserMessage: Message = { role: 'user', content: prompt };
+        const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri };
         setHistory(prev => [...prev, newUserMessage]);
+        
+        const currentPrompt = prompt;
+        const currentImageDataUri = imageDataUri;
+
         setPrompt('');
+        setImageDataUri(null);
+        if(fileInputRef.current) fileInputRef.current.value = '';
+
         setIsLoading(true);
         setError(null);
 
         try {
             const result = await personalAssistant({
                 history,
-                prompt,
+                prompt: currentPrompt,
+                imageDataUri: currentImageDataUri,
             });
             const aiResponse: Message = { role: 'model', content: result.response };
             setHistory(prev => [...prev, aiResponse]);
@@ -93,6 +113,8 @@ const PersonalAssistant = () => {
     const handleClear = () => {
         setHistory([]);
         setError(null);
+        setImageDataUri(null);
+        if(fileInputRef.current) fileInputRef.current.value = '';
     };
 
     return (
@@ -100,13 +122,13 @@ const PersonalAssistant = () => {
             <DialogHeader>
                 <DialogTitle>Asisten AI Pribadi</DialogTitle>
                 <DialogDescription>
-                    Ajukan pertanyaan apa pun. Riwayat obrolan hanya sementara dan akan hilang saat dialog ditutup.
+                    Ajukan pertanyaan apa pun, termasuk dengan gambar. Riwayat obrolan hanya sementara.
                 </DialogDescription>
             </DialogHeader>
             <div className="flex-grow my-4 overflow-hidden">
                 <ScrollArea className="h-full pr-4" viewportRef={viewportRef}>
                     <div className="space-y-4">
-                        {history.length === 0 && (
+                        {history.length === 0 && !imageDataUri && (
                             <div className="text-center text-muted-foreground py-8">
                                 <Bot className="mx-auto h-12 w-12" />
                                 <p className="mt-2">Bagaimana saya bisa membantu Anda hari ini?</p>
@@ -116,6 +138,7 @@ const PersonalAssistant = () => {
                             <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
                                 {msg.role === 'model' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
                                 <div className={cn("p-3 rounded-lg max-w-sm", msg.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
+                                    {msg.imageUrl && <Image src={msg.imageUrl} alt="Lampiran" width={200} height={200} className="rounded-md mb-2" />}
                                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                                 </div>
                                 {msg.role === 'user' && <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
@@ -133,32 +156,57 @@ const PersonalAssistant = () => {
                 </ScrollArea>
             </div>
             {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
-            <DialogFooter>
-                 <Button variant="ghost" size="icon" onClick={handleClear} className="absolute left-4 bottom-4">
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Hapus Obrolan</span>
-                </Button>
-                <div className="relative flex-grow">
-                    <Input
-                        ref={inputRef}
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Ketik pesan Anda..."
-                        onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                        disabled={isLoading}
-                        className="pr-12"
-                    />
-                    <Button
-                        type="submit"
-                        size="icon"
-                        onClick={handleSend}
-                        disabled={isLoading || !prompt.trim()}
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                    >
-                        <Send className="h-4 w-4" />
+            
+            <div className="space-y-2">
+                 {imageDataUri && (
+                    <div className="relative w-fit">
+                        <Image src={imageDataUri} alt="Pratinjau" width={80} height={80} className="rounded-md object-cover" />
+                        <Button
+                            variant="destructive" size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                            onClick={() => {
+                                setImageDataUri(null);
+                                if(fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
+                <DialogFooter>
+                    <Button variant="ghost" size="icon" onClick={handleClear} className="absolute left-4 bottom-4">
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Hapus Obrolan</span>
                     </Button>
-                </div>
-            </DialogFooter>
+                    <div className="relative flex-grow flex items-center">
+                         <Button asChild variant="ghost" size="icon" className="absolute left-1.5 h-8 w-8 text-muted-foreground">
+                            <label htmlFor="file-upload">
+                                <Paperclip className="h-4 w-4" />
+                                <span className="sr-only">Lampirkan file</span>
+                            </label>
+                        </Button>
+                        <Input id="file-upload" type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange}/>
+                        <Input
+                            ref={inputRef}
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder="Ketik pesan Anda..."
+                            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                            disabled={isLoading}
+                            className="pl-12 pr-12"
+                        />
+                        <Button
+                            type="submit"
+                            size="icon"
+                            onClick={handleSend}
+                            disabled={isLoading || (!prompt.trim() && !imageDataUri)}
+                            className="absolute right-1.5 h-8 w-8"
+                        >
+                            <Send className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </DialogFooter>
+            </div>
         </div>
     );
 };

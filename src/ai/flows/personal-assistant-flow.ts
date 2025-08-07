@@ -8,10 +8,11 @@
  * - personalAssistant - Handles conversational AI interactions.
  * - PersonalAssistantInput - The input type for the personalAssistant function.
  * - PersonalAssistantOutput - The return type for the personalAssistant function.
+ * - Message - The type for a single message in the conversation history.
  */
 
 import {ai} from '@/ai/genkit';
-import {Message, Role} from 'genkit/model';
+import {Part, Role} from 'genkit/model';
 import {z} from 'genkit';
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
@@ -20,11 +21,17 @@ import { id as idLocale } from "date-fns/locale";
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
   content: z.string(),
+  imageUrl: z.string().optional().describe("A URL of an image associated with the message, if any. Can be a data URI."),
 });
+export type Message = z.infer<typeof MessageSchema>;
+
 
 const PersonalAssistantInputSchema = z.object({
   history: z.array(MessageSchema).describe('The conversation history.'),
   prompt: z.string().describe('The user\'s latest prompt.'),
+  imageDataUri: z.string().optional().describe(
+    "An optional image provided by the user, as a data URI."
+  ),
 });
 export type PersonalAssistantInput = z.infer<typeof PersonalAssistantInputSchema>;
 
@@ -43,11 +50,24 @@ const personalAssistantFlow = ai.defineFlow(
     inputSchema: PersonalAssistantInputSchema,
     outputSchema: PersonalAssistantOutputSchema,
   },
-  async ({history, prompt}) => {
-    const formattedHistory: Message[] = history.map(msg => ({
+  async ({history, prompt, imageDataUri}) => {
+    // Format previous messages for the model
+    const formattedHistory: {role: Role; content: Part[]}[] = history.map(msg => ({
       role: msg.role as Role,
-      content: [{text: msg.content}],
+      content: [
+          ...(msg.imageUrl ? [{media: {url: msg.imageUrl}}] : []),
+          {text: msg.content}
+      ],
     }));
+
+    // Construct the current prompt with optional image
+    const currentPromptParts: Part[] = [];
+    if (imageDataUri) {
+        currentPromptParts.push({ media: { url: imageDataUri } });
+    }
+    if (prompt) {
+        currentPromptParts.push({ text: prompt });
+    }
 
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
     const systemPrompt = `Anda adalah asisten AI pribadi. Jawab semua pertanyaan dengan bebas dan informatif.
@@ -57,7 +77,7 @@ const personalAssistantFlow = ai.defineFlow(
       model: ai.model,
       system: systemPrompt,
       history: formattedHistory,
-      prompt: prompt,
+      prompt: { content: currentPromptParts },
       config: {
         // Adjust safety settings as requested
         safetySettings: [
