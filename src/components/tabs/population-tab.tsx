@@ -254,29 +254,29 @@ export default function PopulationTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Kandang</TableHead>
-                  <TableHead>Jumlah Bebek</TableHead>
-                  <TableHead>Bebek Mati</TableHead>
-                  <TableHead>Tanggal Masuk</TableHead>
-                  <TableHead>Usia (Bulan)</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ukuran Kandang</TableHead>
-                  <TableHead>Sistem Kandang</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead className="text-center">Kandang</TableHead>
+                  <TableHead className="text-center">Jumlah Bebek</TableHead>
+                  <TableHead className="text-center">Bebek Mati</TableHead>
+                  <TableHead className="text-center">Tanggal Masuk</TableHead>
+                  <TableHead className="text-center">Usia (Bulan)</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Ukuran Kandang</TableHead>
+                  <TableHead className="text-center">Sistem Kandang</TableHead>
+                  <TableHead className="text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {ducks.map((duck) => (
                   <TableRow key={duck.cage}>
-                    <TableCell>{duck.cage}</TableCell>
-                    <TableCell>{duck.quantity}</TableCell>
-                    <TableCell>{duck.deaths}</TableCell>
-                    <TableCell>{format(new Date(duck.entryDate), "dd MMM yyyy")}</TableCell>
-                    <TableCell>{duck.ageMonths}</TableCell>
-                    <TableCell>{duck.status}</TableCell>
-                    <TableCell>{duck.cageSize}</TableCell>
-                    <TableCell>{duck.cageSystem}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-center align-middle">{duck.cage}</TableCell>
+                    <TableCell className="text-center align-middle">{duck.quantity}</TableCell>
+                    <TableCell className="text-center align-middle">{duck.deaths}</TableCell>
+                    <TableCell className="text-center align-middle">{format(new Date(duck.entryDate), "dd MMM yyyy")}</TableCell>
+                    <TableCell className="text-center align-middle">{duck.ageMonths}</TableCell>
+                    <TableCell className="text-center align-middle">{duck.status}</TableCell>
+                    <TableCell className="text-center align-middle">{duck.cageSize}</TableCell>
+                    <TableCell className="text-center align-middle">{duck.cageSystem}</TableCell>
+                    <TableCell className="text-center align-middle">
                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -350,5 +350,3 @@ export default function PopulationTab() {
     </div>
   );
 }
-
-
