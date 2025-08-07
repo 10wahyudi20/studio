@@ -26,7 +26,7 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export default function LoginPage() {
-  const { login, companyInfo, isAuthenticated, loadState } = useAppStore();
+  const { login, companyInfo } = useAppStore();
   const router = useRouter();
   const { toast } = useToast();
   const [username, setUsername] = useState("");
@@ -34,47 +34,23 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    // Load state from local/session storage when component mounts
-    loadState();
-    setIsMounted(true);
-  }, [loadState]);
-
-  useEffect(() => {
-    // If user is already authenticated (e.g. from session storage), redirect to home
-    if (isMounted && isAuthenticated) {
-      router.replace("/");
-    }
-  }, [isMounted, isAuthenticated, router]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setHasLoginError(false);
     setTimeout(() => {
-      // The `login` function now uses the most up-to-date state from the store
       if (login(username, password)) {
         toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
         router.push("/");
       } else {
         toast({ variant: "destructive", title: "Login Gagal", description: "Username atau password salah." });
         setHasLoginError(true);
-        setTimeout(() => setHasLoginError(false), 3000); // Shorter reset time
+        setTimeout(() => setHasLoginError(false), 3000);
       }
       setIsLoading(false);
     }, 500); // Simulate network delay
   };
-
-  // While mounting or if authenticated, show a loading screen to prevent flash of login page
-  if (!isMounted || isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <div className="text-2xl font-semibold text-primary">Memuat...</div>
-      </div>
-    );
-  }
 
   const backgroundStyle = companyInfo.loginBackground ? { backgroundImage: `url(${companyInfo.loginBackground})` } : {};
   const inputStyles = "bg-transparent border-white/30 placeholder:text-gray-300 dark:placeholder:text-gray-400 focus:ring-accent";
