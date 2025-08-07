@@ -4,6 +4,14 @@ import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, M
 import { format, getMonth, getYear, parse, startOfDay, subMonths } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
+// Create a BroadcastChannel for cross-tab communication.
+// This will notify other tabs when the state changes.
+let channel: BroadcastChannel | null = null;
+if (typeof window !== 'undefined') {
+    channel = new BroadcastChannel('clucksmart-channel');
+}
+
+
 const getInitialState = (): AppState => ({
   companyInfo: {
     name: "Nama Peternakan Anda",
@@ -99,7 +107,7 @@ export const useAppStore = create<AppState & {
   updateFeed: (id: number, feed: Partial<Omit<Feed, 'id'>>) => void;
   removeFeed: (id: number) => void;
   saveState: () => void;
-  loadState: () => void;
+  loadState: (options?: { fromRemote?: boolean }) => void;
   getFullState: () => Omit<AppState, 'isDirty' | 'isAuthenticated'>;
   loadFullState: (state: Omit<AppState, 'isDirty' | 'isAuthenticated'>) => void;
   resetState: () => void;
@@ -345,12 +353,14 @@ export const useAppStore = create<AppState & {
         const serializedState = JSON.stringify(stateToSave);
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
+        // Notify other tabs that the state has changed
+        channel?.postMessage({ type: 'state-updated' });
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
     }
   },
 
-  loadState: () => {
+  loadState: (options) => {
     try {
       // Check session storage first for auth state
       const isAuthenticated = sessionStorage.getItem('clucksmart-auth') === 'true';
@@ -382,35 +392,38 @@ export const useAppStore = create<AppState & {
         revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
         
         // --- Automatic Daily Stock Reduction ---
-        const today = startOfDay(new Date());
-        const lastUpdate = revivedState.lastStockUpdate ? startOfDay(new Date(revivedState.lastStockUpdate)) : null;
+        // Only perform stock reduction if the call is not from a remote update
+        if (!options?.fromRemote) {
+            const today = startOfDay(new Date());
+            const lastUpdate = revivedState.lastStockUpdate ? startOfDay(new Date(revivedState.lastStockUpdate)) : null;
 
-        if (lastUpdate && lastUpdate < today) {
-            const totalDucks = revivedState.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-            if (totalDucks > 0) {
-                const totalFeedPerDayKg = revivedState.feed.reduce((sum, item) => {
-                    const consumptionPerFeed = (totalDucks * item.schema) / 1000; // in kg
-                    return sum + consumptionPerFeed;
-                }, 0);
+            if (lastUpdate && lastUpdate < today) {
+                const totalDucks = revivedState.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+                if (totalDucks > 0) {
+                    const totalFeedPerDayKg = revivedState.feed.reduce((sum, item) => {
+                        const consumptionPerFeed = (totalDucks * item.schema) / 1000; // in kg
+                        return sum + consumptionPerFeed;
+                    }, 0);
 
-                if (totalFeedPerDayKg > 0) {
-                    const totalOriginalStock = revivedState.feed.reduce((sum, item) => sum + item.stock, 0);
-                    
-                    if (totalOriginalStock > 0) {
-                         revivedState.feed = revivedState.feed.map(item => {
-                            // Reduce stock based on its proportion to the total stock
-                            const proportion = item.stock / totalOriginalStock;
-                            const reduction = totalFeedPerDayKg * proportion;
-                            const newStock = Math.max(0, item.stock - reduction);
-                            return { ...item, stock: newStock };
-                        });
-                        revivedState.isDirty = true;
+                    if (totalFeedPerDayKg > 0) {
+                        const totalOriginalStock = revivedState.feed.reduce((sum, item) => sum + item.stock, 0);
+                        
+                        if (totalOriginalStock > 0) {
+                            revivedState.feed = revivedState.feed.map(item => {
+                                // Reduce stock based on its proportion to the total stock
+                                const proportion = item.stock / totalOriginalStock;
+                                const reduction = totalFeedPerDayKg * proportion;
+                                const newStock = Math.max(0, item.stock - reduction);
+                                return { ...item, stock: newStock };
+                            });
+                            revivedState.isDirty = true;
+                        }
                     }
                 }
+                revivedState.lastStockUpdate = today.toISOString();
+            } else if (!lastUpdate) {
+                revivedState.lastStockUpdate = today.toISOString();
             }
-            revivedState.lastStockUpdate = today.toISOString();
-        } else if (!lastUpdate) {
-            revivedState.lastStockUpdate = today.toISOString();
         }
         // --- End of Stock Reduction Logic ---
 
@@ -472,10 +485,26 @@ export const useAppStore = create<AppState & {
       // Recalculate monthly production on load to ensure consistency
       revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
       set({...revivedState, isDirty: true});
+      // Notify other tabs that the state has changed
+      channel?.postMessage({ type: 'state-updated' });
   },
 
   resetState: () => {
       set({...getInitialState(), isDirty: true});
+      // Also notify other tabs about the reset
+      get().saveState();
   },
 
 }));
+
+
+// Listen for messages from other tabs
+if (channel) {
+    channel.onmessage = (event) => {
+        if (event.data.type === 'state-updated') {
+            // Reload state from localStorage, but skip the stock reduction logic
+            // as the saving tab already handled it.
+            useAppStore.getState().loadState({ fromRemote: true });
+        }
+    };
+}
