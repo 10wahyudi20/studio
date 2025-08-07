@@ -129,7 +129,7 @@ const personalAssistantFlow = ai.defineFlow(
     
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
     const keyword = "hallo bebek";
-    let userPrompt = input.prompt;
+    let userPrompt = input.prompt || "";
     let systemPrompt: string;
     let toolsToUse: any[] = [];
     
@@ -179,6 +179,13 @@ Tanggal hari ini adalah ${currentDate}.`;
     }
     if (userPrompt) {
         currentPromptParts.push({ text: userPrompt });
+    } else if (input.imageDataUri) {
+        // If there's an image but no text, add a default prompt for the model
+        currentPromptParts.push({ text: "Terangkan gambar apa ini?" });
+    }
+    
+    if (currentPromptParts.length === 0) {
+        return { response: "Maaf, saya tidak menerima pesan apa pun. Silakan coba lagi." };
     }
 
     const response = await ai.generate({
