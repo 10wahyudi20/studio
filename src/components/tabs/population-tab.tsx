@@ -257,7 +257,7 @@ export default function PopulationTab() {
                   <TableHead className="text-center">Kandang</TableHead>
                   <TableHead className="text-center">Jumlah Bebek</TableHead>
                   <TableHead className="text-center">Bebek Mati</TableHead>
-                  <TableHead className="text-center">Masuk</TableHead>
+                  <TableHead className="text-center">Tanggal Masuk</TableHead>
                   <TableHead className="text-center">Usia (Bulan)</TableHead>
                   <TableHead className="text-center">Status</TableHead>
                   <TableHead className="text-center">Ukuran Kandang</TableHead>

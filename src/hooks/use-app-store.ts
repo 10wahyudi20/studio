@@ -375,17 +375,17 @@ export const useAppStore = create<AppState & {
         const serializedState = JSON.stringify(stateToSave);
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
-        // Send a simple message. The listener in other tabs will just reload state.
-        channel?.postMessage({ type: 'state-changed' });
+        // Send a message that forces other tabs to reload state.
+        channel?.postMessage({ type: 'state-changed', payload: serializedState });
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
     }
   },
 
-  loadState: () => {
+  loadState: (newState?: string) => {
     try {
       const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
-      const savedState = localStorage.getItem('clucksmart-state');
+      const savedState = newState || localStorage.getItem('clucksmart-state');
       const savedTab = localStorage.getItem('clucksmart-activeTab');
 
       if (savedState) {
@@ -486,9 +486,9 @@ export const useAppStore = create<AppState & {
 if (channel) {
     channel.onmessage = (event) => {
         const { loadState } = useAppStore.getState();
-        // If the message indicates a state change, reload the state from localStorage
+        // When state changes in another tab, load it directly from the message payload
         if (event.data?.type === 'state-changed') {
-            loadState();
+            loadState(event.data.payload);
         }
         // Handle auth status sync
         if (event.data?.type === 'auth-changed') {
