@@ -1,8 +1,9 @@
 
 "use client";
 import React, {useRef, useEffect} from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { useRouter } from "next/navigation";
-import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send } from "lucide-react";
+import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -15,6 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
+  DialogPortal,
+  DialogOverlay,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -48,11 +51,13 @@ const PersonalAssistant = () => {
 
     // Effect to focus the input when dialog opens or after a message is sent
     useEffect(() => {
-        // We use a small timeout to ensure the input is rendered and visible before focusing
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 100);
-    }, [isLoading]); // Reruns when isLoading changes, e.g., after a response is received.
+        if (!isLoading) {
+             // We use a small timeout to ensure the input is rendered and visible before focusing
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
+        }
+    }, [isLoading]);
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -90,7 +95,7 @@ const PersonalAssistant = () => {
     };
 
     return (
-        <div className="flex flex-col h-[70vh]">
+        <div className="flex flex-col h-[70vh] p-6">
             <DialogHeader>
                 <DialogTitle>Asisten AI Pribadi</DialogTitle>
                 <DialogDescription>
@@ -403,9 +408,20 @@ export default function Header() {
                         <span className="sr-only">Asisten AI</span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-xl p-0">
-                   <PersonalAssistant />
-                </DialogContent>
+                 <DialogPortal>
+                    <DialogOverlay />
+                    <DialogPrimitive.Content
+                    className={cn(
+                        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-xl translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]"
+                    )}
+                    >
+                    <PersonalAssistant />
+                    <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Close</span>
+                    </DialogPrimitive.Close>
+                    </DialogPrimitive.Content>
+                </DialogPortal>
             </Dialog>
             <Dialog>
                 <DialogTrigger asChild>
@@ -437,3 +453,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
