@@ -47,7 +47,7 @@ const personalAssistantFlow = ai.defineFlow(
       content: [{text: msg.content}],
     }));
 
-    const {output} = await ai.generate({
+    const response = await ai.generate({
       model: ai.model,
       history: formattedHistory,
       prompt: prompt,
@@ -74,6 +74,6 @@ const personalAssistantFlow = ai.defineFlow(
       },
     });
 
-    return {response: output!};
+    return {response: response.text ?? ""};
   }
 );
