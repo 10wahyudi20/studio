@@ -75,7 +75,8 @@ export default function ClientPage() {
         </Tabs>
       </main>
       <Footer />
-      <Toaster />
+      {/* Using a random key to prevent hydration mismatch on the Toaster's aria-label */}
+      <Toaster key={Math.random()} />
     </div>
   );
 }
