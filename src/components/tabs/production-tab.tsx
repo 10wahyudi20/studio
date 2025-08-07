@@ -247,7 +247,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                   </div>
                   <div className="space-y-2">
                       <Label htmlFor="description">Keterangan</Label>
-                      <Textarea id="description" {...register("description")} />
+                      <Input id="description" {...register("description")} />
                       {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
                   </div>
                    <div className="space-y-2">
