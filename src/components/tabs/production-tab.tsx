@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { format, startOfMonth, endOfMonth, addDays, getDate, getDay, getDaysInMonth, lastDayOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, addDays, getDate, getDay, getDaysInMonth, lastDayOfMonth, add, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -26,10 +26,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 
 const getWeekOfMonth = (date: Date) => {
-  const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-  const day = startOfMonth.getDay();
-  const diff = date.getDate() + day - 1;
-  return Math.ceil(diff / 7);
+  const start = startOfWeek(startOfMonth(date));
+  const end = endOfWeek(date);
+  const weekNumber = Math.ceil(eachDayOfInterval({start, end}).length / 7);
+  return weekNumber;
 };
 
 // Daily Data Form
@@ -281,38 +281,20 @@ export default function ProductionTab() {
   
   const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
     const firstDayOfMonth = new Date(year, month, 1);
-    const lastDay = lastDayOfMonth(firstDayOfMonth);
-    const dayOfWeek = firstDayOfMonth.getDay(); // Sunday - 0, Saturday - 6
+    let firstSunday = new Date(firstDayOfMonth);
     
-    // Find the first Sunday of the month
-    let firstSunday = 1;
-    if (dayOfWeek !== 0) { // if not Sunday
-        firstSunday = 1 + (7 - dayOfWeek);
-    }
-    
-    let startDate, endDate;
-    
-    if (weekNumber === 1) {
-        startDate = firstDayOfMonth;
-        endDate = new Date(year, month, firstSunday - 1);
-    } else {
-        // Adjust week number because our first week might be partial
-        const adjustedWeek = weekNumber - 2;
-        const startDay = firstSunday + (adjustedWeek * 7);
-        
-        startDate = new Date(year, month, startDay);
-        endDate = new Date(year, month, startDay + 6);
-    }
-    
-    // Clamp dates to the month
-    if (startDate > lastDay) {
-        startDate = lastDay;
-    }
-    if (endDate > lastDay) {
-        endDate = lastDay;
-    }
+    // Find the first Sunday of the calendar month view
+    firstSunday.setDate(1 - firstDayOfMonth.getDay());
 
-    return { startDate, endDate };
+    const startDate = addDays(firstSunday, (weekNumber - 1) * 7);
+    const endDate = addDays(startDate, 6);
+
+    // Clamp dates to the actual month
+    const realStartDate = startDate < firstDayOfMonth ? firstDayOfMonth : startDate;
+    const lastDayOfMonthDate = lastDayOfMonth(firstDayOfMonth);
+    const realEndDate = endDate > lastDayOfMonthDate ? lastDayOfMonthDate : endDate;
+
+    return { startDate: realStartDate, endDate: realEndDate };
   };
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (

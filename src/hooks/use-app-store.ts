@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
-import { format, getMonth, getYear, parse, startOfDay, subMonths } from 'date-fns';
+import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 // Create a BroadcastChannel for cross-tab communication.
@@ -476,7 +476,7 @@ export const useAppStore = create<AppState & {
 // Listen for messages from other tabs
 if (channel) {
     channel.onmessage = (event) => {
-      const { loadState, setActiveTab } = useAppStore.getState();
+        const { loadState, setActiveTab } = useAppStore.getState();
         if (event.data.type === 'state-updated' || event.data.type === 'auth-changed') {
             loadState();
         }

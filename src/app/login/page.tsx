@@ -44,8 +44,9 @@ export default function LoginPage() {
     setIsMounted(true);
   }, []);
 
+  // If user is already authenticated (e.g., via another tab), redirect them.
+  // This check is simple and relies on the AuthWrapper to handle the initial redirect.
   useEffect(() => {
-      // If user is already authenticated (e.g., hits back button), redirect them
       if (isMounted && isAuthenticated) {
           router.replace('/');
       }
@@ -67,15 +68,9 @@ export default function LoginPage() {
       setIsLoading(false);
     }, 500); // Simulate network delay
   };
-
-  // Only render the login form if the component has mounted and the user is not authenticated.
-  // This prevents rendering the form while the initial auth check is happening.
-  if (!isMounted || isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <div className="text-2xl font-semibold text-primary">Memuat...</div>
-      </div>
-    );
+  
+  if (!isMounted) {
+    return null; // Return null or a minimal loader, AuthWrapper will handle the main loading screen
   }
 
   const backgroundStyle = companyInfo.loginBackground ? { backgroundImage: `url(${companyInfo.loginBackground})` } : {};
