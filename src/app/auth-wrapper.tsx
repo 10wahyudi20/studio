@@ -11,6 +11,11 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const loadState = useAppStore(state => state.loadState);
   const router = useRouter();
   const [isAuthCheckComplete, setIsAuthCheckComplete] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   React.useEffect(() => {
     // This effect runs only once on mount to load state.
@@ -34,8 +39,8 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-2xl font-semibold text-primary">Memuat...</div>
-        {/* Using a random key to prevent hydration mismatch on the Toaster's aria-label */}
-        <Toaster key={Math.random()} />
+        {/* Defer toaster rendering to client-side only */}
+        {isMounted && <Toaster />}
       </div>
     );
   }

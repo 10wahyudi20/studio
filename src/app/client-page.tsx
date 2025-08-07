@@ -81,8 +81,8 @@ export default function ClientPage() {
         </Tabs>
       </main>
       <Footer />
-      {/* Using a random key to prevent hydration mismatch on the Toaster's aria-label */}
-      <Toaster key={Math.random()} />
+      {/* Defer Toaster rendering to client-side only */}
+      {isMounted && <Toaster />}
     </div>
   );
 }
