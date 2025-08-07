@@ -177,6 +177,7 @@ Tanggal hari ini adalah ${currentDate}.`;
     if (input.imageDataUri) {
         currentPromptParts.push({ media: { url: input.imageDataUri } });
     }
+    // Add user prompt text only if it's not empty after trimming the keyword.
     if (userPrompt) {
         currentPromptParts.push({ text: userPrompt });
     } else if (input.imageDataUri) {
@@ -189,7 +190,7 @@ Tanggal hari ini adalah ${currentDate}.`;
     }
 
     const response = await ai.generate({
-      model: ai.model,
+      model: 'googleai/gemini-2.0-flash', // Use a capable model
       system: systemPrompt,
       history: formattedHistory,
       prompt: currentPromptParts,
