@@ -15,8 +15,6 @@ import {Part, Role} from 'genkit/model';
 import {z} from 'genkit';
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Duck, EggProduction, Feed, Transaction } from '@/lib/types';
-
 
 // Define Zod schemas for the application data types to be used in tools
 const DuckSchema = z.object({
@@ -29,9 +27,57 @@ const DuckSchema = z.object({
   cageSize: z.string(),
   cageSystem: z.enum(['baterai', 'umbaran']),
 });
-const EggProductionSchema = z.any(); // Using z.any() for complex nested objects for now
-const FeedSchema = z.any();
-const TransactionSchema = z.any();
+
+const DailyProductionSchema = z.object({
+    date: z.string(),
+    totalEggs: z.number(),
+    productivity: z.number(),
+});
+const WeeklyProductionSchema = z.object({
+    startDate: z.string(),
+    endDate: z.string(),
+    buyer: z.string(),
+    gradeA: z.number(),
+    gradeB: z.number(),
+    gradeC: z.number(),
+    consumption: z.number(),
+    totalEggs: z.number(),
+    totalValue: z.number(),
+});
+const MonthlyProductionSchema = z.object({
+    month: z.string(),
+    gradeA: z.number(),
+    gradeB: z.number(),
+    gradeC: z.number(),
+    consumption: z.number(),
+    totalEggs: z.number(),
+});
+const EggProductionSchema = z.object({
+    daily: z.array(DailyProductionSchema),
+    weekly: z.array(WeeklyProductionSchema),
+    monthly: z.array(MonthlyProductionSchema),
+});
+
+const FeedSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  supplier: z.string(),
+  lastUpdated: z.string(),
+  stock: z.number().describe("Stok pakan dalam Kg"),
+  pricePerBag: z.number(),
+  pricePerKg: z.number(),
+  schema: z.number().describe("Skema pakan dalam gram per ekor per hari"),
+});
+
+const TransactionSchema = z.object({
+  id: z.number(),
+  date: z.string(),
+  description: z.string(),
+  quantity: z.number(),
+  unitPrice: z.number(),
+  total: z.number(),
+  type: z.enum(['debit', 'credit']),
+});
 
 
 // Define the structure for a single message in the history
@@ -234,3 +280,5 @@ Tanggal hari ini adalah ${currentDate}.`;
     return {response: response.text ?? ""};
   }
 );
+
+    
