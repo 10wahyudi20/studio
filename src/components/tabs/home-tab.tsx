@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays } from "lucide-react";
+import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users } from "lucide-react";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -104,7 +104,7 @@ export default function HomeTab() {
         <StatCard 
             title="Total Bebek" 
             value={totalDucks.toLocaleString('id-ID')} 
-            icon={Egg} 
+            icon={Users} 
             footer={
                  <div className="w-full pt-2 text-xs">
                     <div className="flex justify-between items-center text-red-500 font-medium">
@@ -121,7 +121,7 @@ export default function HomeTab() {
                 'text-green-600 dark:text-green-500': productionDifference > 0,
                 'text-red-600 dark:text-red-500': productionDifference < 0,
             })}
-            icon={BarChart}
+            icon={Egg}
             footer={
                 productionYesterdayRecord && (
                     <div className={cn('flex items-center w-full pt-2 text-xs', {
@@ -172,7 +172,7 @@ export default function HomeTab() {
         <StatCard 
             title="Biaya Pakan/Hari" 
             value={`Rp ${dailyFeedCost.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
-            icon={DollarSign}
+            icon={Wheat}
             footer={
                 <div className="w-full pt-2">
                     <div className="flex justify-between">
@@ -236,3 +236,5 @@ export default function HomeTab() {
     </div>
   );
 }
+
+    
