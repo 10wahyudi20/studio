@@ -169,13 +169,17 @@ export const useAppStore = create<AppState & {
     set(state => ({
       ducks: state.ducks.map(d => {
         if (d.cage === cage) {
-          const newEntryDate = updatedDuck.entryDate || d.entryDate;
+          const updated = { ...d, ...updatedDuck };
+          
+          const newEntryDate = updated.entryDate;
           const ageMonths = calculateAge(newEntryDate);
           const status = calculateDuckStatus(ageMonths);
-          const cageSizeLength = updatedDuck.cageSizeLength ?? d.cageSize.split('x')[0].replace('m', '').trim();
-          const cageSizeWidth = updatedDuck.cageSizeWidth ?? d.cageSize.split('x')[1].replace('m', '').trim();
+          
+          const cageSizeLength = updatedDuck.cageSizeLength ?? (d.cageSize?.split('x')[0].replace(/m/g, '').trim() || '0');
+          const cageSizeWidth = updatedDuck.cageSizeWidth ?? (d.cageSize?.split('x')[1]?.replace(/m/g, '').trim() || '0');
           const cageSize = `${cageSizeLength}m x ${cageSizeWidth}m`;
-          return { ...d, ...updatedDuck, entryDate: newEntryDate, ageMonths, status, cageSize };
+
+          return { ...updated, entryDate: newEntryDate, ageMonths, status, cageSize };
         }
         return d;
       }),
@@ -372,7 +376,7 @@ export const useAppStore = create<AppState & {
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
         // Send a simple message. The listener in other tabs will just reload state.
-        channel?.postMessage('state-changed');
+        channel?.postMessage({ type: 'state-changed' });
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
     }
@@ -482,10 +486,13 @@ export const useAppStore = create<AppState & {
 if (channel) {
     channel.onmessage = (event) => {
         const { loadState } = useAppStore.getState();
-        // If the message is 'state-changed', it means another tab has updated the data.
-        // Or if auth status changes, reload.
-        if (event.data === 'state-changed' || event.data?.type === 'auth-changed') {
+        // If the message indicates a state change, reload the state from localStorage
+        if (event.data?.type === 'state-changed') {
             loadState();
+        }
+        // Handle auth status sync
+        if (event.data?.type === 'auth-changed') {
+            useAppStore.setState({ isAuthenticated: event.data.payload.isAuthenticated });
         }
         // Handle active tab sync
         if (event.data?.type === 'tab-changed') {
