@@ -21,6 +21,7 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogClose,
+  DialogPortal,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -119,7 +120,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
                 <Input id="deaths" type="number" {...register("deaths")} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Tgl. Masuk</Label>
+                <Label className="text-right">Tanggal Masuk</Label>
                 <Controller
                     control={control}
                     name="entryDate"
@@ -137,14 +138,16 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
                                 {field.value ? format(field.value, "dd/MM/yyyy") : <span>Pilih tanggal</span>}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                initialFocus
-                                />
-                            </PopoverContent>
+                            <DialogPortal>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                    initialFocus
+                                    />
+                                </PopoverContent>
+                            </DialogPortal>
                         </Popover>
                     )}
                 />
