@@ -126,4 +126,33 @@ body {
   input[type=number] {
     -moz-appearance: textfield;
   }
+
+  /* AI Loading Border */
+  .ai-dialog[data-loading='true'] {
+    position: relative;
+    border-color: transparent;
+  }
+  .ai-dialog[data-loading='true']::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit; /* Use the parent's border radius */
+      padding: 2px; /* Border width */
+      background: conic-gradient(from var(--gradient-angle, 0deg), #e81cff, #40c9ff, #e81cff);
+      -webkit-mask: 
+          linear-gradient(#fff 0 0) content-box, 
+          linear-gradient(#fff 0 0);
+      mask: 
+          linear-gradient(#fff 0 0) content-box, 
+          linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: border-rainbow 2s linear infinite;
+  }
+
+  @keyframes border-rainbow {
+      to {
+          --gradient-angle: 360deg;
+      }
+  }
 }
