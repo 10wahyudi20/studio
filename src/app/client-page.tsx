@@ -19,11 +19,13 @@ import { Separator } from "@/components/ui/separator";
 import { Home, Users, Egg, Wheat, DollarSign, FileText, Sparkles, Settings } from "lucide-react";
 
 export default function ClientPage() {
-  const loadState = useAppStore(state => state.loadState);
+  const { activeTab, setActiveTab } = useAppStore(state => ({
+    activeTab: state.activeTab,
+    setActiveTab: state.setActiveTab,
+  }));
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
-    // No need to call loadState here as AuthWrapper does it.
     setIsMounted(true);
   }, []);
 
@@ -46,7 +48,11 @@ export default function ClientPage() {
     <div className="flex flex-col min-h-screen bg-background font-body">
       <Header />
       <main className="flex-grow">
-        <Tabs defaultValue="home" className="w-full">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab} 
+          className="w-full"
+        >
           <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2 bg-background/80 backdrop-blur-sm">
             <div className="px-4 sm:px-6 lg:px-8">
                 <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0 gap-y-2">

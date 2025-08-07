@@ -90,4 +90,5 @@ export interface AppState {
     isDirty: boolean;
     isAuthenticated: boolean;
     lastStockUpdate: string | null;
+    activeTab: string;
 }

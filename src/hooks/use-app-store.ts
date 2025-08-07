@@ -35,6 +35,7 @@ const getInitialState = (): AppState => ({
   isDirty: false,
   isAuthenticated: false, // Default to not authenticated
   lastStockUpdate: null,
+  activeTab: 'home',
 });
 
 const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
@@ -90,6 +91,7 @@ export const useAppStore = create<AppState & {
   login: (username: string, password: string) => boolean;
   logout: () => void;
   setDirty: () => void;
+  setActiveTab: (tab: string) => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
   updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status'>>) => void;
@@ -135,6 +137,12 @@ export const useAppStore = create<AppState & {
 
   setDirty: () => set({ isDirty: true }),
   
+  setActiveTab: (tab) => {
+    set({ activeTab: tab });
+    localStorage.setItem('clucksmart-activeTab', tab);
+    channel?.postMessage({ type: 'tab-changed', payload: tab });
+  },
+
   getInitialState: getInitialState,
 
   updateCompanyInfo: (info) => {
@@ -353,7 +361,7 @@ export const useAppStore = create<AppState & {
         const serializedState = JSON.stringify(stateToSave);
         localStorage.setItem('clucksmart-state', serializedState);
         set({ isDirty: false });
-        // Notify other tabs that the state has changed
+        // Notify other tabs that the data state has changed
         channel?.postMessage({ type: 'state-updated' });
     } catch (error) {
         console.error("Failed to save state to localStorage", error);
@@ -362,16 +370,17 @@ export const useAppStore = create<AppState & {
 
   loadState: () => {
     try {
-      // Check session storage first for auth state
       const isAuthenticated = sessionStorage.getItem('clucksmart-auth') === 'true';
-      
       const savedState = localStorage.getItem('clucksmart-state');
+      const savedTab = localStorage.getItem('clucksmart-activeTab');
+
       if (savedState) {
         const parsedState = JSON.parse(savedState);
         const revivedState: AppState = {
-            ...getInitialState(), // Start with defaults
+            ...getInitialState(), 
             ...parsedState,
-            isAuthenticated, // Use the value from session storage
+            isAuthenticated,
+            activeTab: savedTab || 'home',
             companyInfo: {
               ...getInitialState().companyInfo,
               ...parsedState.companyInfo,
@@ -388,13 +397,11 @@ export const useAppStore = create<AppState & {
             lastStockUpdate: parsedState.lastStockUpdate || null,
         };
         
-        // Recalculate monthly production on load to ensure consistency
         revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
         
         set(revivedState);
       } else {
-        // If no saved state, just set the auth status
-        set({ isAuthenticated });
+        set({ isAuthenticated, activeTab: savedTab || 'home' });
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
@@ -408,6 +415,7 @@ export const useAppStore = create<AppState & {
     delete st.login;
     delete st.logout;
     delete st.setDirty;
+    delete st.setActiveTab;
     delete st.updateCompanyInfo;
     delete st.addDuck;
     delete st.updateDuck;
@@ -446,16 +454,15 @@ export const useAppStore = create<AppState & {
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)}))
         };
-      // Recalculate monthly production on load to ensure consistency
       revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
       set({...revivedState, isDirty: true});
-      get().saveState(); // Save and broadcast change
+      get().saveState(); 
   },
 
   resetState: () => {
-      set({...getInitialState(), isDirty: true});
-      // Also save and notify other tabs about the reset
-      get().saveState();
+    const initialState = get().getInitialState();
+    set(initialState);
+    get().saveState();
   },
 
 }));
@@ -467,7 +474,9 @@ if (channel) {
         if (event.data.type === 'state-updated') {
             useAppStore.getState().loadState();
         }
+        if (event.data.type === 'tab-changed') {
+            set({ activeTab: event.data.payload });
+            localStorage.setItem('clucksmart-activeTab', event.data.payload);
+        }
     };
 }
-
-    
