@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
+import ClientOnly from '@/components/client-only';
 
 export const metadata: Metadata = {
   title: 'CluckSmart',
@@ -21,14 +22,16 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <ClientOnly>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </ClientOnly>
       </body>
     </html>
   );
