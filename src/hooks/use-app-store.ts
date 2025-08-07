@@ -477,12 +477,12 @@ export const useAppStore = create<AppState & {
 // Listen for messages from other tabs
 if (channel) {
     channel.onmessage = (event) => {
-      const { set, loadState } = useAppStore.getState();
+      const { loadState, setActiveTab } = useAppStore.getState();
         if (event.data.type === 'state-updated') {
             loadState();
         }
         if (event.data.type === 'tab-changed') {
-            set({ activeTab: event.data.payload });
+            setActiveTab(event.data.payload);
         }
     };
 }
