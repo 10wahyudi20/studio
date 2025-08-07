@@ -4,7 +4,7 @@ import React, {useRef, useEffect} from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { useRouter } from "next/navigation";
 import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send, X, Paperclip, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
