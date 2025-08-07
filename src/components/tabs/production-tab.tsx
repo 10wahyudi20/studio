@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal } from "lucide-react";
+import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon } from "lucide-react";
 import { format, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -25,6 +25,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 
 
 // Daily Data Form
@@ -306,11 +308,81 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   );
 };
 
+const CHART_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"];
+
+const MonthlyChart = ({ data }: { data: any[] }) => {
+    const pieData = [
+        { name: "Grade A", value: data.reduce((sum, item) => sum + item.gradeA, 0) },
+        { name: "Grade B", value: data.reduce((sum, item) => sum + item.gradeB, 0) },
+        { name: "Grade C", value: data.reduce((sum, item) => sum + item.gradeC, 0) },
+        { name: "Konsumsi", value: data.reduce((sum, item) => sum + item.consumption, 0) },
+    ].filter(item => item.value > 0);
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+            <Card>
+                <CardHeader><CardTitle>Total Produksi per Bulan</CardTitle></CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" fontSize={12} />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
+                            <Bar dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
+                            <Bar dataKey="gradeC" stackId="a" fill={CHART_COLORS[2]} name="Grade C" />
+                            <Bar dataKey="consumption" stackId="a" fill={CHART_COLORS[3]} name="Konsumsi" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader><CardTitle>Tren Produksi per Grade</CardTitle></CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" fontSize={12} />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
+                            <Line type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
+                            <Line type="monotone" dataKey="gradeC" stroke={CHART_COLORS[2]} name="Grade C" />
+                            <Line type="monotone" dataKey="consumption" stroke={CHART_COLORS[3]} name="Konsumsi" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+                <CardHeader><CardTitle>Komposisi Total Produksi</CardTitle></CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
+                                 {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
+
+
 export default function ProductionTab() {
   const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
+  const [showChart, setShowChart] = React.useState(false);
 
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -458,11 +530,20 @@ export default function ProductionTab() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Tabel Produksi</CardTitle>
+           {activeTab === 'monthly' && (
+              <Button variant="outline" size="icon" onClick={() => setShowChart(!showChart)}>
+                <BarChartIcon className="h-4 w-4" />
+                <span className="sr-only">Tampilkan Grafik</span>
+              </Button>
+           )}
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="daily" onValueChange={setActiveTab}>
+        {showChart && activeTab === 'monthly' ? (
+                <MonthlyChart data={eggProduction.monthly} />
+            ) : (
+          <Tabs defaultValue="daily" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
                 <TabsList>
                     <TabsTrigger value="daily">Harian</TabsTrigger>
@@ -721,9 +802,9 @@ export default function ProductionTab() {
                 </div>
             </TabsContent>
           </Tabs>
+        )}
         </CardContent>
       </Card>
     </div>
   );
 }
-
