@@ -27,7 +27,8 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="text-2xl font-semibold text-primary">Memuat...</div>
-        <Toaster />
+        {/* Using a random key to prevent hydration mismatch on the Toaster's aria-label */}
+        <Toaster key={Math.random()} />
       </div>
     );
   }
