@@ -339,6 +339,15 @@ export default function ProductionTab() {
     },
     { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0 }
   );
+  
+  const GradeCell = ({ amount, price }: { amount: number; price: number }) => (
+    <TableCell className="text-center">
+        <div>{amount.toLocaleString('id-ID')}</div>
+        <div className="text-xs text-muted-foreground">
+            Rp {price.toLocaleString('id-ID')}
+        </div>
+    </TableCell>
+  );
 
   return (
     <div className="space-y-6">
@@ -458,25 +467,15 @@ export default function ProductionTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead rowSpan={2} className="align-bottom">Minggu</TableHead>
-                      <TableHead rowSpan={2} className="align-bottom">Pembeli</TableHead>
-                      <TableHead colSpan={2} className="text-center border-l">Grade A</TableHead>
-                      <TableHead colSpan={2} className="text-center border-l">Grade B</TableHead>
-                      <TableHead colSpan={2} className="text-center border-l">Grade C</TableHead>
-                      <TableHead colSpan={2} className="text-center border-l">Konsumsi</TableHead>
-                      <TableHead rowSpan={2} className="align-bottom border-l">Total Telur</TableHead>
-                      <TableHead rowSpan={2} className="align-bottom border-l">Total Harga</TableHead>
-                      <TableHead rowSpan={2} className="align-bottom border-l">Aksi</TableHead>
-                    </TableRow>
-                    <TableRow>
-                      <TableHead className="text-center border-l">Jumlah</TableHead>
-                      <TableHead className="text-center">Harga</TableHead>
-                      <TableHead className="text-center border-l">Jumlah</TableHead>
-                      <TableHead className="text-center">Harga</TableHead>
-                      <TableHead className="text-center border-l">Jumlah</TableHead>
-                      <TableHead className="text-center">Harga</TableHead>
-                      <TableHead className="text-center border-l">Jumlah</TableHead>
-                      <TableHead className="text-center">Harga</TableHead>
+                      <TableHead>Minggu</TableHead>
+                      <TableHead>Pembeli</TableHead>
+                      <TableHead className="text-center">Grade A</TableHead>
+                      <TableHead className="text-center">Grade B</TableHead>
+                      <TableHead className="text-center">Grade C</TableHead>
+                      <TableHead className="text-center">Konsumsi</TableHead>
+                      <TableHead>Total Telur</TableHead>
+                      <TableHead>Total Harga</TableHead>
+                      <TableHead>Aksi</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -501,17 +500,13 @@ export default function ProductionTab() {
                               <TableRow key={week.id}>
                                   <TableCell>{week.week}</TableCell>
                                   <TableCell>{week.buyer}</TableCell>
-                                  <TableCell className="border-l">{week.gradeA.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell>Rp {week.priceA.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.gradeB.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell>Rp {week.priceB.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.gradeC.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell>Rp {week.priceC.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.consumption.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell>Rp {week.priceConsumption.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">{week.totalEggs.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
-                                  <TableCell className="border-l">
+                                  <GradeCell amount={week.gradeA} price={week.priceA} />
+                                  <GradeCell amount={week.gradeB} price={week.priceB} />
+                                  <GradeCell amount={week.gradeC} price={week.priceC} />
+                                  <GradeCell amount={week.consumption} price={week.priceConsumption} />
+                                  <TableCell>{week.totalEggs.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell>Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell>
                                     <div className="flex gap-1">
                                         <WeeklyDataForm
                                             production={week}
@@ -547,17 +542,13 @@ export default function ProductionTab() {
                           ))}
                           <TableRow className="bg-secondary/50 font-bold">
                             <TableCell colSpan={2}>Subtotal Minggu {weekNumber}</TableCell>
-                            <TableCell className="border-l">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="text-center">{subtotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="text-center">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="text-center">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="text-center">{subtotal.consumption.toLocaleString('id-ID')}</TableCell>
+                            <TableCell>{subtotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                            <TableCell>Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
                             <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
-                            <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
-                            <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.consumption.toLocaleString('id-ID')}</TableCell>
-                            <TableCell></TableCell>
-                            <TableCell className="border-l">{subtotal.totalEggs.toLocaleString('id-ID')}</TableCell>
-                            <TableCell className="border-l">Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
-                            <TableCell className="border-l"></TableCell>
                           </TableRow>
                         </React.Fragment>
                       );
@@ -566,17 +557,13 @@ export default function ProductionTab() {
                    <TableFooter>
                     <TableRow className="bg-primary/20 font-extrabold text-lg">
                       <TableCell colSpan={2}>Grand Total</TableCell>
-                      <TableCell className="border-l">{weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">{weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">{weeklyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
+                      <TableCell>{weeklyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                      <TableCell>Rp {weeklyGrandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
                       <TableCell></TableCell>
-                      <TableCell className="border-l">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
-                      <TableCell></TableCell>
-                      <TableCell className="border-l">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
-                      <TableCell></TableCell>
-                      <TableCell className="border-l">{weeklyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
-                      <TableCell></TableCell>
-                      <TableCell className="border-l">{weeklyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
-                      <TableCell className="border-l">Rp {weeklyGrandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
-                      <TableCell className="border-l"></TableCell>
                     </TableRow>
                   </TableFooter>
                 </Table>
@@ -626,3 +613,4 @@ export default function ProductionTab() {
     </div>
   );
 }
+
