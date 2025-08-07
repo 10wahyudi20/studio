@@ -118,7 +118,7 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
                     <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted"/>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="schema">Skema Pakan (gram)</Label>
+                    <Label htmlFor="schema">Skema Pakan (%)</Label>
                     <Input id="schema" type="number" {...register("schema")} className="text-green-700 dark:text-green-400 font-semibold"/>
                     {errors.schema && <p className="text-sm text-destructive">{errors.schema.message}</p>}
                   </div>
@@ -198,7 +198,7 @@ export default function FeedTab() {
                   <TableHead>Stok (Kg)</TableHead>
                   <TableHead>Harga/50 Kg</TableHead>
                   <TableHead>Harga/Kg</TableHead>
-                  <TableHead className="text-center">Skema Pakan (g)</TableHead>
+                  <TableHead className="text-center">Skema Pakan (%)</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
@@ -211,7 +211,7 @@ export default function FeedTab() {
                     <TableCell>{item.stock.toLocaleString('id-ID')}</TableCell>
                     <TableCell>Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
                     <TableCell>Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
-                    <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema}</TableCell>
+                    <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema}%</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
