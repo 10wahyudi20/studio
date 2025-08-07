@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
-import { format, getMonth, getYear, parse, startOfDay } from 'date-fns';
+import { format, getMonth, getYear, parse, startOfDay, subMonths } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 const getInitialState = (): AppState => ({
@@ -12,8 +12,8 @@ const getInitialState = (): AppState => ({
     email: "email@peternakan.com",
     logo: "",
     ttsVoice: "algenib",
-    username: "admin",
-    password: "password",
+    username: "",
+    password: "",
     loginBackground: "",
   },
   ducks: [],
@@ -351,8 +351,7 @@ export const useAppStore = create<AppState & {
     try {
       // Check session storage first for auth state
       const isAuthenticated = sessionStorage.getItem('clucksmart-auth') === 'true';
-      set({ isAuthenticated });
-
+      
       const savedState = localStorage.getItem('clucksmart-state');
       if (savedState) {
         const parsedState = JSON.parse(savedState);
@@ -413,6 +412,9 @@ export const useAppStore = create<AppState & {
         // --- End of Stock Reduction Logic ---
 
         set(revivedState);
+      } else {
+        // If no saved state, just set the auth status
+        set({ isAuthenticated });
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
@@ -474,3 +476,5 @@ export const useAppStore = create<AppState & {
   },
 
 }));
+
+    
