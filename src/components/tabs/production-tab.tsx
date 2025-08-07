@@ -357,7 +357,20 @@ export default function ProductionTab() {
   };
 
   const weeklyDataForMonth = eggProduction.weekly
-    .filter(w => new Date(w.startDate).getMonth() === currentDate.getMonth() && new Date(w.startDate).getFullYear() === currentDate.getFullYear())
+    .filter(w => {
+        if (!w || !w.startDate || !w.endDate) return false;
+        const startDate = new Date(w.startDate);
+        const endDate = new Date(w.endDate);
+        const selectedMonth = currentDate.getMonth();
+        const selectedYear = currentDate.getFullYear();
+        // Return true if the week's period overlaps with the selected month
+        return (startDate.getMonth() === selectedMonth && startDate.getFullYear() === selectedYear) ||
+               (endDate.getMonth() === selectedMonth && endDate.getFullYear() === selectedYear) ||
+               (startDate.getFullYear() < selectedYear && endDate.getFullYear() > selectedYear) ||
+               (startDate.getFullYear() === selectedYear && endDate.getFullYear() > selectedYear) ||
+               (startDate.getFullYear() < selectedYear && endDate.getFullYear() === selectedYear) ||
+               (startDate.getFullYear() === selectedYear && startDate.getMonth() < selectedMonth && endDate.getMonth() > selectedMonth);
+    })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   
   const weeklyDataByPeriod = weeklyDataForMonth.reduce((acc, current) => {
