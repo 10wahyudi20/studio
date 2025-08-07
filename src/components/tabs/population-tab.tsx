@@ -53,13 +53,23 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
   const [open, setOpen] = React.useState(false);
   const { ducks } = useAppStore();
   const { toast } = useToast();
+  
+  const parseCageSize = (cageSize?: string) => {
+    if (!cageSize) return { length: 0, width: 0 };
+    // Handles both "5m x 5m" and "5x5m"
+    const parts = cageSize.replace(/m/g, '').split('x').map(p => p.trim());
+    return {
+        length: Number(parts[0]) || 0,
+        width: Number(parts[1]) || 0
+    };
+  };
 
   const defaultValues = duck
     ? {
         ...duck,
         entryDate: new Date(duck.entryDate),
-        cageSizeLength: duck.cageSize ? Number(duck.cageSize.split("m")[0].trim()) : 0,
-        cageSizeWidth: duck.cageSize ? Number(duck.cageSize.split("x")[1]?.replace('m','').trim()) : 0,
+        cageSizeLength: parseCageSize(duck.cageSize).length,
+        cageSizeWidth: parseCageSize(duck.cageSize).width,
       }
     : {
         cage: ducks.length > 0 ? Math.max(...ducks.map(d => d.cage)) + 1 : 1,
@@ -77,10 +87,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
   });
 
   const onSubmit = (data: DuckFormData) => {
-    const saveData = {
-        ...data,
-        cageSize: `${data.cageSizeLength}m x ${data.cageSizeWidth}m`,
-    };
+    const saveData = { ...data };
     onSave(saveData);
     setOpen(false);
     toast({
@@ -343,4 +350,5 @@ export default function PopulationTab() {
     </div>
   );
 }
+
 

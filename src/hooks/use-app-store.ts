@@ -93,8 +93,8 @@ export const useAppStore = create<AppState & {
   setDirty: () => void;
   setActiveTab: (tab: string) => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
-  addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status'>) => void;
-  updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status'>>) => void;
+  addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'> & { cageSizeLength: number, cageSizeWidth: number }) => void;
+  updateDuck: (cage: number, duck: Partial<Omit<Duck, 'cage' | 'ageMonths' | 'status' | 'cageSize'>> & { cageSizeLength?: number, cageSizeWidth?: number }) => void;
   removeDuck: (cage: number) => void;
   resetDuck: (cage: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
@@ -159,7 +159,8 @@ export const useAppStore = create<AppState & {
     set(state => {
       const ageMonths = calculateAge(duck.entryDate);
       const status = calculateDuckStatus(ageMonths);
-      const newDuck = { ...duck, ageMonths, status };
+      const cageSize = `${duck.cageSizeLength}m x ${duck.cageSizeWidth}m`;
+      const newDuck = { ...duck, ageMonths, status, cageSize };
       return { ducks: [...state.ducks, newDuck], isDirty: true };
     });
   },
@@ -171,7 +172,10 @@ export const useAppStore = create<AppState & {
           const newEntryDate = updatedDuck.entryDate || d.entryDate;
           const ageMonths = calculateAge(newEntryDate);
           const status = calculateDuckStatus(ageMonths);
-          return { ...d, ...updatedDuck, entryDate: newEntryDate, ageMonths, status };
+          const cageSizeLength = updatedDuck.cageSizeLength ?? d.cageSize.split('x')[0].replace('m', '').trim();
+          const cageSizeWidth = updatedDuck.cageSizeWidth ?? d.cageSize.split('x')[1].replace('m', '').trim();
+          const cageSize = `${cageSizeLength}m x ${cageSizeWidth}m`;
+          return { ...d, ...updatedDuck, entryDate: newEntryDate, ageMonths, status, cageSize };
         }
         return d;
       }),
