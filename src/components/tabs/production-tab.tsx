@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { format, startOfMonth, endOfMonth, addDays, getDate, getDay, getDaysInMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, addDays, getDate, getDay, getDaysInMonth, lastDayOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -280,36 +280,39 @@ export default function ProductionTab() {
   };
   
   const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
-    const totalDays = getDaysInMonth(new Date(year, month));
-    const weeks: { week: number; dates: Date[] }[] = [];
-    let currentWeek = 1;
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDay = lastDayOfMonth(firstDayOfMonth);
+    const dayOfWeek = firstDayOfMonth.getDay(); // Sunday - 0, Saturday - 6
     
-    // Group all dates in the month by their calendar week number
-    for (let day = 1; day <= totalDays; day++) {
-        const date = new Date(year, month, day);
-        const dayOfWeek = date.getDay(); // 0 for Sunday
-        const weekOfYear = Math.ceil((day + new Date(year, month, 1).getDay()) / 7);
-
-        let weekEntry = weeks.find(w => w.week === weekOfYear);
-        if (!weekEntry) {
-            weekEntry = { week: weekOfYear, dates: [] };
-            weeks.push(weekEntry);
-        }
-        weekEntry.dates.push(date);
+    // Find the first Sunday of the month
+    let firstSunday = 1;
+    if (dayOfWeek !== 0) { // if not Sunday
+        firstSunday = 1 + (7 - dayOfWeek);
+    }
+    
+    let startDate, endDate;
+    
+    if (weekNumber === 1) {
+        startDate = firstDayOfMonth;
+        endDate = new Date(year, month, firstSunday - 1);
+    } else {
+        // Adjust week number because our first week might be partial
+        const adjustedWeek = weekNumber - 2;
+        const startDay = firstSunday + (adjustedWeek * 7);
+        
+        startDate = new Date(year, month, startDay);
+        endDate = new Date(year, month, startDay + 6);
+    }
+    
+    // Clamp dates to the month
+    if (startDate > lastDay) {
+        startDate = lastDay;
+    }
+    if (endDate > lastDay) {
+        endDate = lastDay;
     }
 
-    // Sort weeks and re-assign week numbers to be 1, 2, 3, ...
-    const sortedWeeks = weeks.sort((a, b) => a.dates[0].getTime() - b.dates[0].getTime());
-    const weekData = sortedWeeks[weekNumber - 1];
-
-    if (!weekData || weekData.dates.length === 0) {
-        return { startDate: new Date(), endDate: new Date() }; // Fallback
-    }
-
-    return {
-        startDate: weekData.dates[0],
-        endDate: weekData.dates[weekData.dates.length - 1],
-    };
+    return { startDate, endDate };
   };
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (
