@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown } from "lucide-react";
-import { format, startOfMonth, endOfMonth, addDays, getDate } from "date-fns";
+import { format, startOfMonth, endOfMonth, addDays, getDate, getDay } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -282,13 +282,22 @@ export default function ProductionTab() {
   const getWeekDateRange = (weekNumber: number, year: number, month: number) => {
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
-    const firstDayOfWeek = (weekNumber - 1) * 7 + 1 - (firstDayOfMonth.getDay() % 7);
     
-    let startDate = new Date(year, month, firstDayOfWeek);
-    let endDate = new Date(year, month, firstDayOfWeek + 6);
+    // Calculate the date of the first day of the target week.
+    // The week starts on Sunday (day 0).
+    const dayOfWeek = firstDayOfMonth.getDay();
+    let firstDayOfWeekDate = 1 + (weekNumber - 1) * 7 - dayOfWeek;
 
-    if (startDate < firstDayOfMonth) startDate = firstDayOfMonth;
-    if (endDate > lastDayOfMonth) endDate = lastDayOfMonth;
+    let startDate = new Date(year, month, firstDayOfWeekDate);
+    let endDate = addDays(startDate, 6);
+
+    // Clamp dates to the current month
+    if (startDate < firstDayOfMonth) {
+        startDate = firstDayOfMonth;
+    }
+    if (endDate > lastDayOfMonth) {
+        endDate = lastDayOfMonth;
+    }
 
     return { startDate, endDate };
   };
@@ -638,3 +647,6 @@ export default function ProductionTab() {
 
 
 
+
+
+    
