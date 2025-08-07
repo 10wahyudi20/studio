@@ -1,10 +1,9 @@
 
 "use client";
-import React, {useRef, useEffect} from "react";
-import * as DialogPrimitive from "@radix-ui/react-dialog"
+import React from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Bot, User, Trash2, Send, X, Paperclip, Loader2 } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
@@ -15,16 +14,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogPortal,
-  DialogOverlay,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { personalAssistant, Message } from "@/ai/flows/personal-assistant-flow";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import PersonalAssistant from "@/components/layout/personal-assistant";
 
 
 // Duck Icon SVG
@@ -38,190 +31,6 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M11.372 13.061C11.12 12.56 10.636 12 10.001 12c-.552 0-1 .448-1 1s.449 1 1 1c.552 0 1.135-.448 1.499-1.24.331.144.69.24 1.059.24 1.381 0 2.5-1.119 2.5-2.5s-1.119-2.5-2.5-2.5c-1.282 0-2.343.967-2.484 2.212C12.19 11.08 12 10.562 12 10c0-1.339 1.01-2.433 2.288-2.494C14.624 5.438 16.657 4 19.001 4c2.761 0 5 2.239 5 5s-2.239 5-5 5c-1.636 0-3.111-.79-4.029-2.035a3.465 3.465 0 0 1-1.21.285c-1.112 0-2.11-.539-2.73-1.378a3.53 3.53 0 0 1-.66.814C4.249 13.921 2 14.058 2 12.5c0-.663.486-1.22 1.123-1.428.21-.069.428-.103.649-.103.422 0 .821.143 1.145.404.223.18.423.388.599.615a4.52 4.52 0 0 0 .543.61c.45.494 1.066.8 1.741.8.498 0 .97-.158 1.372-.439z" />
     </svg>
   );
-
-// Personal AI Assistant Component
-const PersonalAssistant = ({ isLoading, setIsLoading }: { isLoading: boolean, setIsLoading: (loading: boolean) => void }) => {
-    const { ducks, eggProduction, feed, finance } = useAppStore();
-    const [history, setHistory] = React.useState<Message[]>([]);
-    const [prompt, setPrompt] = React.useState('');
-    const [imageDataUri, setImageDataUri] = React.useState<string | null>(null);
-    const [error, setError] = React.useState<string | null>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const viewportRef = useRef<HTMLDivElement>(null);
-
-    // Effect to focus the input when dialog opens or after a message is sent
-    useEffect(() => {
-        if (!isLoading) {
-             // We use a small timeout to ensure the input is rendered and visible before focusing
-            setTimeout(() => {
-                inputRef.current?.focus();
-            }, 100);
-        }
-    }, [isLoading]);
-    
-    // Effect to scroll to the bottom of the chat history when new messages are added
-    useEffect(() => {
-        if (viewportRef.current) {
-            viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
-        }
-    }, [history]);
-    
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setImageDataUri(event.target?.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSend = async () => {
-        if (!prompt.trim() && !imageDataUri) return;
-
-        const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri ?? undefined };
-        setHistory(prev => [...prev, newUserMessage]);
-        
-        const currentPrompt = prompt;
-        const currentImageDataUri = imageDataUri;
-
-        setPrompt('');
-        setImageDataUri(null);
-        if(fileInputRef.current) fileInputRef.current.value = '';
-
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            // Pass the current state of the farm data to the AI
-            const result = await personalAssistant({
-                history,
-                prompt: currentPrompt,
-                imageDataUri: currentImageDataUri ?? undefined,
-                ducks: ducks.map(d => ({...d, entryDate: d.entryDate.toISOString()})),
-                eggProduction: {
-                    daily: eggProduction.daily.map(d => ({...d, date: d.date.toISOString()})),
-                    weekly: eggProduction.weekly.map(w => ({
-                        ...w, 
-                        startDate: new Date(w.startDate).toISOString(), 
-                        endDate: new Date(w.endDate).toISOString()
-                    })),
-                    monthly: eggProduction.monthly,
-                },
-                feed: feed.map(f => ({...f, lastUpdated: new Date(f.lastUpdated).toISOString()})),
-                finance: finance.map(t => ({...t, date: new Date(t.date).toISOString()})),
-            });
-            const aiResponse: Message = { role: 'model', content: result.response };
-            setHistory(prev => [...prev, aiResponse]);
-        } catch (e) {
-            console.error("AI Assistant Error:", e);
-            setError("Maaf, terjadi kesalahan saat menghubungi asisten AI. Silakan coba lagi.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleClear = () => {
-        setHistory([]);
-        setError(null);
-        setImageDataUri(null);
-        if(fileInputRef.current) fileInputRef.current.value = '';
-    };
-
-    return (
-        <div className="flex flex-col h-[70vh] p-6">
-            <DialogHeader>
-                <DialogTitle>Asisten AI Pribadi</DialogTitle>
-                <DialogDescription>
-                    Ketik "hallo bebek" untuk memulai analisis peternakan Anda. Riwayat obrolan hanya sementara.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="flex-grow my-4 overflow-hidden">
-                <ScrollArea className="h-full pr-4" viewportRef={viewportRef}>
-                    <div className="space-y-4">
-                        {history.length === 0 && !imageDataUri && (
-                            <div className="text-center text-muted-foreground py-8">
-                                <Bot className="mx-auto h-12 w-12" />
-                                <p className="mt-2">Bagaimana saya bisa membantu Anda hari ini?</p>
-                            </div>
-                        )}
-                        {history.map((msg, index) => (
-                            <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
-                                {msg.role === 'model' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
-                                <div className={cn("p-3 rounded-lg max-w-sm", msg.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
-                                    {msg.imageUrl && <Image src={msg.imageUrl} alt="Lampiran" width={200} height={200} className="rounded-md mb-2" />}
-                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                </div>
-                                {msg.role === 'user' && <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
-                            </div>
-                        ))}
-                         {isLoading && (
-                            <div className="flex items-start gap-3">
-                                <Bot className="h-6 w-6 text-primary flex-shrink-0" />
-                                <div className="p-3 rounded-lg bg-muted">
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </ScrollArea>
-            </div>
-            {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
-            
-            <div className="space-y-2">
-                 {imageDataUri && (
-                    <div className="relative w-fit">
-                        <Image src={imageDataUri} alt="Pratinjau" width={80} height={80} className="rounded-md object-cover" />
-                        <Button
-                            variant="destructive" size="icon"
-                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
-                            onClick={() => {
-                                setImageDataUri(null);
-                                if(fileInputRef.current) fileInputRef.current.value = '';
-                            }}
-                        >
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                )}
-                <DialogFooter>
-                    <Button variant="ghost" size="icon" onClick={handleClear} className="absolute left-4 bottom-4">
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Hapus Obrolan</span>
-                    </Button>
-                    <div className="relative flex-grow flex items-center">
-                         <label htmlFor="file-upload" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "absolute left-1.5 h-8 w-8 text-muted-foreground cursor-pointer")}>
-                            <Paperclip className="h-4 w-4" />
-                            <span className="sr-only">Lampirkan file</span>
-                        </label>
-                        <Input id="file-upload" type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange}/>
-                        <Input
-                            ref={inputRef}
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="Ketik pesan Anda..."
-                            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                            disabled={isLoading}
-                            className="pl-12 pr-12"
-                        />
-                        <Button
-                            type="submit"
-                            size="icon"
-                            onClick={handleSend}
-                            disabled={isLoading || (!prompt.trim() && !imageDataUri)}
-                            className="absolute right-1.5 h-8 w-8"
-                        >
-                            <Send className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </DialogFooter>
-            </div>
-        </div>
-    );
-};
-
 
 // Simple Calculator Component
 const SimpleCalculator = () => {
@@ -412,8 +221,6 @@ export default function Header() {
     const { companyInfo, isDirty, saveState, logout } = useAppStore();
     const { toast } = useToast();
     const router = useRouter();
-    const [aiDialogOpen, setAiDialogOpen] = React.useState(false);
-    const [isLoading, setIsLoading] = React.useState(false);
 
     const handleSave = () => {
         saveState();
@@ -462,32 +269,9 @@ export default function Header() {
                 <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
                 <span className="sr-only">Simpan Data</span>
             </Button>
-            <Dialog open={aiDialogOpen} onOpenChange={setAiDialogOpen}>
-                <DialogTrigger asChild>
-                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                        <Sparkles className="h-5 w-5 text-purple-500" />
-                        <span className="sr-only">Asisten AI</span>
-                    </Button>
-                </DialogTrigger>
-                 <DialogPortal>
-                    <DialogOverlay />
-                    <DialogPrimitive.Content
-                         ref={React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>>((props, ref) => (
-                           <DialogContent {...props} ref={ref} />
-                         ))}
-                        className={cn(
-                            "ai-dialog fixed left-[50%] top-[50%] z-50 grid w-full max-w-xl translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-0 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg"
-                        )}
-                        data-loading={isLoading}
-                    >
-                      <PersonalAssistant isLoading={isLoading} setIsLoading={setIsLoading} />
-                       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-                          <X className="h-4 w-4" />
-                          <span className="sr-only">Close</span>
-                        </DialogPrimitive.Close>
-                    </DialogPrimitive.Content>
-                </DialogPortal>
-            </Dialog>
+            
+            <PersonalAssistant />
+
             <Dialog>
                 <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
