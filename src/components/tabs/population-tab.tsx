@@ -168,8 +168,8 @@ const deathRecordSchema = z.object({
 });
 type DeathRecordFormData = z.infer<typeof deathRecordSchema>;
 
-const DeathLog = () => {
-    const { ducks, deathRecords, addDeathRecord } = useAppStore();
+const RecordDeathForm = () => {
+    const { ducks, addDeathRecord } = useAppStore();
     const [isRecordOpen, setIsRecordOpen] = React.useState(false);
     const { toast } = useToast();
 
@@ -185,96 +185,93 @@ const DeathLog = () => {
         toast({ title: `Catatan Kematian Disimpan`, description: `${data.quantity} bebek mati di kandang ${data.cage} telah dicatat.` });
     };
 
-    const sortedRecords = [...deathRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
     return (
-        <div className="flex flex-col items-center justify-center gap-1">
-            <span>Bebek Mati</span>
-            <div className="flex items-center gap-1">
-                 <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-7 px-2">
-                           <Notebook className="h-3 w-3 mr-1" /> Lihat Catatan
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle>Catatan Bebek Mati</DialogTitle>
-                        </DialogHeader>
-                        <ScrollArea className="h-96">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Tanggal</TableHead>
-                                        <TableHead>Kandang</TableHead>
-                                        <TableHead>Jumlah</TableHead>
-                                        <TableHead>Catatan</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {sortedRecords.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={4} className="text-center text-muted-foreground">Belum ada catatan kematian.</TableCell>
-                                        </TableRow>
-                                    ) : sortedRecords.map(record => (
-                                        <TableRow key={record.id}>
-                                            <TableCell>{format(new Date(record.date), "dd/MM/yyyy")}</TableCell>
-                                            <TableCell>{record.cage}</TableCell>
-                                            <TableCell>{record.quantity}</TableCell>
-                                            <TableCell>{record.notes || '-'}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </ScrollArea>
-                    </DialogContent>
-                </Dialog>
-                <Dialog open={isRecordOpen} onOpenChange={setIsRecordOpen}>
-                    <DialogTrigger asChild>
-                         <Button variant="destructive" size="sm" className="h-7 px-2">
-                            <Pencil className="h-3 w-3 mr-1" /> Catat
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader><DialogTitle>Catat Bebek Mati</DialogTitle></DialogHeader>
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
-                            <div className="space-y-2">
-                                <Label>Kandang</Label>
-                                <Controller 
-                                    name="cage" 
-                                    control={control}
-                                    render={({ field }) => (
-                                        <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
-                                            <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
-                                            <SelectContent>
-                                                {ducks.map(d => <SelectItem key={d.cage} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    )}
-                                />
-                                {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="quantity">Jumlah</Label>
-                                <Input id="quantity" type="number" {...register("quantity")} />
-                                {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="notes">Catatan (Opsional)</Label>
-                                <Textarea id="notes" {...register("notes")} placeholder="cth: Sakit, stress, dll."/>
-                            </div>
-                            <DialogFooter>
-                                <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
-                                <Button type="submit">Simpan</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-            </div>
-        </div>
+        <Dialog open={isRecordOpen} onOpenChange={setIsRecordOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8">
+                    <Pencil className="h-3 w-3 mr-1" /> Catat
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader><DialogTitle>Catat Bebek Mati</DialogTitle></DialogHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+                    <div className="space-y-2">
+                        <Label>Kandang</Label>
+                        <Controller 
+                            name="cage" 
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                                    <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {ducks.map(d => <SelectItem key={d.cage} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                        {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="quantity">Jumlah</Label>
+                        <Input id="quantity" type="number" {...register("quantity")} />
+                        {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="notes">Catatan (Opsional)</Label>
+                        <Textarea id="notes" {...register("notes")} placeholder="cth: Sakit, stress, dll."/>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
+                        <Button type="submit">Simpan</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
 
+const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => {
+    const { deathRecords } = useAppStore();
+    const sortedRecords = [...deathRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader className="flex flex-row justify-between items-center pr-10">
+                    <DialogTitle>Catatan Bebek Mati</DialogTitle>
+                    <RecordDeathForm />
+                </DialogHeader>
+                <ScrollArea className="h-96">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Tanggal</TableHead>
+                                <TableHead>Kandang</TableHead>
+                                <TableHead>Jumlah</TableHead>
+                                <TableHead>Catatan</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {sortedRecords.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center text-muted-foreground">Belum ada catatan kematian.</TableCell>
+                                </TableRow>
+                            ) : sortedRecords.map(record => (
+                                <TableRow key={record.id}>
+                                    <TableCell>{format(new Date(record.date), "dd/MM/yyyy")}</TableCell>
+                                    <TableCell>{record.cage}</TableCell>
+                                    <TableCell>{record.quantity}</TableCell>
+                                    <TableCell>{record.notes || '-'}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 export default function PopulationTab() {
   const { ducks, addDuck, updateDuck, removeDuck, resetDuck } = useAppStore();
@@ -360,7 +357,11 @@ export default function PopulationTab() {
                 <TableRow>
                   <TableHead className="text-center">Kandang</TableHead>
                   <TableHead className="text-center">Jumlah Bebek</TableHead>
-                  <TableHead className="text-center"><DeathLog /></TableHead>
+                  <TableHead className="text-center">
+                    <ViewDeathRecordsDialog>
+                        <Button variant="link" className="p-0 h-auto text-muted-foreground hover:text-primary">Bebek Mati</Button>
+                    </ViewDeathRecordsDialog>
+                  </TableHead>
                   <TableHead className="text-center">Tanggal Masuk</TableHead>
                   <TableHead className="text-center">Usia (Bulan)</TableHead>
                   <TableHead className="text-center">Status</TableHead>
