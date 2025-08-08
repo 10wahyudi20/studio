@@ -599,24 +599,24 @@ export default function ProductionTab() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!scrollContainerRef.current) return;
-    const scrollAmount = 50;
+    const scrollAmount = 100; // Increase scroll amount for faster navigation
     
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
-        scrollContainerRef.current.scrollLeft -= scrollAmount;
+        scrollContainerRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
         break;
       case 'ArrowRight':
         e.preventDefault();
-        scrollContainerRef.current.scrollLeft += scrollAmount;
+        scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         break;
       case 'ArrowUp':
         e.preventDefault();
-        scrollContainerRef.current.scrollTop -= scrollAmount;
+        scrollContainerRef.current.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
         break;
       case 'ArrowDown':
         e.preventDefault();
-        scrollContainerRef.current.scrollTop += scrollAmount;
+        scrollContainerRef.current.scrollBy({ top: scrollAmount, behavior: 'smooth' });
         break;
     }
   };
@@ -627,7 +627,7 @@ export default function ProductionTab() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard 
             title="Produksi Hari Ini" 
-            value={todayProduction} 
+            value={todayProduction.toLocaleString('id-ID')} 
             icon={Egg} 
             valueClassName={cn({
                 'text-green-600 dark:text-green-500': productionDifference > 0,
@@ -649,7 +649,7 @@ export default function ProductionTab() {
         />
         <StatCard 
             title="Produksi Terbaik" 
-            value={bestProduction} 
+            value={bestProduction.toLocaleString('id-ID')} 
             icon={Trophy} 
             valueClassName="text-yellow-500" 
             iconClassName="text-yellow-500"
@@ -674,7 +674,7 @@ export default function ProductionTab() {
             }
         />
         <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
-        <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction} icon={CalendarDays} />
+        <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction.toLocaleString('id-ID')} icon={CalendarDays} />
       </div>
 
       <Card>
@@ -745,7 +745,7 @@ export default function ProductionTab() {
             
             <TabsContent value="daily">
               <div 
-                  className="overflow-auto w-full"
+                  className="w-full overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   tabIndex={0}
                   ref={scrollContainerRef}
                   onKeyDown={handleKeyDown}
@@ -754,8 +754,7 @@ export default function ProductionTab() {
                       style={{ 
                           transform: `scale(${zoomLevel})`, 
                           transformOrigin: 'top left',
-                          width: `${100 / zoomLevel}%`,
-                          height: `${100 / zoomLevel}%`,
+                          width: '100%',
                        }}
                   >
                       <Table>
@@ -769,7 +768,7 @@ export default function ProductionTab() {
                               <TableHead key={duck.id} className="text-center p-2">
                                 <div className="flex flex-col items-center justify-center h-full whitespace-nowrap">
                                   <div>Kdg {duck.cage}</div>
-                                  <div className="font-normal text-xs text-muted-foreground whitespace-nowrap">{duck.quantity} ekor</div>
+                                  <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
                                 </div>
                               </TableHead>
                             ))}
