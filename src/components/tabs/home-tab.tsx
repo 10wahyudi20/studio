@@ -206,29 +206,30 @@ export default function HomeTab() {
         </CardHeader>
         <CardContent>
             <div className="h-80 w-full">
-                <ChartContainer config={{
-                    "Produksi Telur": {
-                        label: "Produksi Telur",
-                        theme: {
-                            light: "#3b82f6", // blue-500
-                            dark: "#ffffff",
+                <ChartContainer
+                    config={{
+                        'Produksi Telur': {
+                            label: 'Produksi Telur',
+                            theme: {
+                                light: '#3b82f6', // blue-500
+                                dark: '#ffffff',
+                            },
                         },
-                    },
-                    "Produktifitas (%)": {
-                        label: "Produktifitas (%)",
-                        color: "#f97316", // orange-500
-                    },
+                        'Produktifitas (%)': {
+                            label: 'Produktifitas (%)',
+                            color: '#f97316', // orange-500
+                        },
                     }}
                 >
                   <RechartsBarChart data={chartData}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                    <YAxis yAxisId="left" orientation="left" stroke="var(--color-Produksi Telur)" />
-                    <YAxis yAxisId="right" orientation="right" stroke="var(--color-Produktifitas \(\%\))" />
+                    <YAxis yAxisId="left" stroke="var(--color-Produksi_Telur)" />
+                    <YAxis yAxisId="right" orientation="right" stroke="var(--color-Produktifitas_%)" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} />
-                    <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} />
+                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} fill="var(--color-Produksi_Telur)" />
+                    <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} fill="var(--color-Produktifitas_%)" />
                   </RechartsBarChart>
                 </ChartContainer>
             </div>
