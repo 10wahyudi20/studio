@@ -755,7 +755,6 @@ export default function ProductionTab() {
                       style={{ 
                           transform: `scale(${zoomLevel})`, 
                           transformOrigin: 'top left',
-                          width: '100%',
                        }}
                   >
                       <Table>
