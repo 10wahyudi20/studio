@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy } from "lucide-react";
+import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown } from "lucide-react";
 import { format, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -486,12 +486,20 @@ export default function ProductionTab() {
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
   const productivity = totalDucks > 0 ? (todayProduction / totalDucks * 100) : 0;
   
-  const monthProduction = eggProduction.daily
-    .filter(d => {
-        const dDate = new Date(d.date);
-        return dDate.getMonth() === currentDate.getMonth() && dDate.getFullYear() === currentDate.getFullYear();
-    })
-    .reduce((sum, d) => sum + d.totalEggs, 0);
+  const monthlyProductionData = eggProduction.daily.filter(d => {
+    const dDate = new Date(d.date);
+    return dDate.getMonth() === currentDate.getMonth() && dDate.getFullYear() === currentDate.getFullYear();
+  });
+
+  const monthProduction = monthlyProductionData.reduce((sum, d) => sum + d.totalEggs, 0);
+
+  const bestProductionRecord = monthlyProductionData.length > 0
+    ? monthlyProductionData.reduce((best, current) => current.totalEggs > best.totalEggs ? current : best)
+    : null;
+
+  const worstProductionRecord = monthlyProductionData.length > 0
+    ? monthlyProductionData.reduce((worst, current) => current.totalEggs < worst.totalEggs ? current : worst)
+    : null;
   
   const getProductivityColor = (p: number) => {
     if (p > 100) return 'bg-blue-400 text-black';
@@ -591,27 +599,25 @@ export default function ProductionTab() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const scrollAmount = 50;
-    const container = e.currentTarget;
-    const tableContainer = scrollContainerRef.current;
-
-    if (!tableContainer) return;
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
-        tableContainer.scrollLeft -= scrollAmount;
+        container.scrollLeft -= scrollAmount;
         break;
       case 'ArrowRight':
         e.preventDefault();
-        tableContainer.scrollLeft += scrollAmount;
+        container.scrollLeft += scrollAmount;
         break;
       case 'ArrowUp':
         e.preventDefault();
-        tableContainer.scrollTop -= scrollAmount;
+        container.scrollTop -= scrollAmount;
         break;
       case 'ArrowDown':
         e.preventDefault();
-        tableContainer.scrollTop += scrollAmount;
+        container.scrollTop += scrollAmount;
         break;
     }
   };
@@ -648,6 +654,25 @@ export default function ProductionTab() {
             icon={Trophy} 
             valueClassName="text-yellow-500" 
             iconClassName="text-yellow-500"
+            footer={
+                 <div className="w-full pt-2 space-y-1">
+                    <div className="font-semibold">Riwayat Bulan Ini:</div>
+                    <div className="flex justify-between items-center">
+                        <span className="flex items-center">
+                            <TrendingUp className="h-3 w-3 mr-1 text-green-500"/>
+                            Terbaik ({bestProductionRecord ? format(new Date(bestProductionRecord.date), 'dd/MM') : '-'}):
+                        </span>
+                        <span className="font-semibold">{bestProductionRecord?.totalEggs ?? 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="flex items-center">
+                            <TrendingDown className="h-3 w-3 mr-1 text-red-500"/>
+                            Terendah ({worstProductionRecord ? format(new Date(worstProductionRecord.date), 'dd/MM') : '-'}):
+                        </span>
+                        <span className="font-semibold">{worstProductionRecord?.totalEggs ?? 0}</span>
+                    </div>
+                </div>
+            }
         />
         <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
         <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction} icon={CalendarDays} />
@@ -953,4 +978,5 @@ export default function ProductionTab() {
     
 
     
+
 
