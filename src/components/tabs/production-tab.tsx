@@ -588,45 +588,33 @@ export default function ProductionTab() {
     </TableCell>
   );
 
-  React.useEffect(() => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if (document.activeElement !== container) {
-            return;
-        }
-
-        const scrollAmount = 50; // pixels to scroll
-        
-        switch (e.key) {
-          case 'ArrowLeft':
-            e.preventDefault();
-            container.scrollLeft -= scrollAmount;
-            break;
-          case 'ArrowRight':
-            e.preventDefault();
-            container.scrollLeft += scrollAmount;
-            break;
-          case 'ArrowUp':
-            e.preventDefault();
-            container.scrollTop -= scrollAmount;
-            break;
-          case 'ArrowDown':
-            e.preventDefault();
-            container.scrollTop += scrollAmount;
-            break;
-          default:
-            break;
-        }
-    };
+    const scrollAmount = 50; // pixels to scroll
     
-    document.addEventListener('keydown', handleKeyDown);
-    
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        container.scrollLeft -= scrollAmount;
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        container.scrollLeft += scrollAmount;
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        container.scrollTop -= scrollAmount;
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        container.scrollTop += scrollAmount;
+        break;
+      default:
+        break;
+    }
+  };
 
 
   return (
@@ -719,6 +707,7 @@ export default function ProductionTab() {
               <div 
                 ref={scrollContainerRef}
                 tabIndex={0}
+                onKeyDown={handleKeyDown}
                 className="overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
               >
                 <Table>
@@ -942,5 +931,7 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
 
     
