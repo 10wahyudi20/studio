@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -31,6 +32,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const duckSchema = z.object({
   cage: z.number().min(1),
@@ -168,6 +170,22 @@ export default function PopulationTab() {
   const tuaCount = ducks.filter(d => d.status === 'Bebek Tua').reduce((acc, duck) => acc + duck.quantity, 0);
   const afkirCount = ducks.filter(d => d.status === 'Bebek Afkir').reduce((acc, duck) => acc + duck.quantity, 0);
   
+  const getStatusClasses = (status: Duck['status']) => {
+    const baseClasses = "px-3 py-1 text-xs font-medium rounded-md border text-center inline-block";
+    switch (status) {
+      case 'Bebek Bayah':
+        return cn(baseClasses, "bg-green-100/50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700");
+      case 'Bebek Petelur':
+        return cn(baseClasses, "bg-blue-100/50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700");
+      case 'Bebek Tua':
+        return cn(baseClasses, "bg-yellow-100/50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700");
+      case 'Bebek Afkir':
+        return cn(baseClasses, "bg-red-100/50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700");
+      default:
+        return cn(baseClasses, "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700");
+    }
+  };
+
   const StatCard = ({ title, value, icon: Icon, footer }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -242,7 +260,11 @@ export default function PopulationTab() {
                     <TableCell className="text-center align-middle">{duck.deaths}</TableCell>
                     <TableCell className="text-center align-middle">{format(new Date(duck.entryDate), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-center align-middle">{duck.ageMonths}</TableCell>
-                    <TableCell className="text-center align-middle">{duck.status}</TableCell>
+                    <TableCell className="text-center align-middle">
+                        <span className={getStatusClasses(duck.status)}>
+                            {duck.status}
+                        </span>
+                    </TableCell>
                     <TableCell className="text-center align-middle">{duck.cageSize}</TableCell>
                     <TableCell className="text-center align-middle">{duck.cageSystem}</TableCell>
                     <TableCell className="text-center align-middle">

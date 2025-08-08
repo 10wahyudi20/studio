@@ -36,14 +36,17 @@ const getInitialState = (): AppState => ({
 });
 
 const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
-  if (ageMonths <= 5) return 'Bebek Bayah';
-  if (ageMonths <= 12) return 'Bebek Petelur';
-  if (ageMonths <= 18) return 'Bebek Tua';
+  if (ageMonths < 6) return 'Bebek Bayah';
+  if (ageMonths < 13) return 'Bebek Petelur';
+  if (ageMonths < 19) return 'Bebek Tua';
   return 'Bebek Afkir';
 };
 
 const calculateAge = (entryDate: Date): number => {
-    return Math.floor((new Date().getTime() - new Date(entryDate).getTime()) / (1000 * 60 * 60 * 24 * 30.44));
+    const now = new Date();
+    const diff = now.getTime() - new Date(entryDate).getTime();
+    const ageInDays = diff / (1000 * 60 * 60 * 24);
+    return parseFloat((ageInDays / 30.44).toFixed(1)); // Return age with one decimal place
 };
 
 const recalculateMonthlyProduction = (weeklyData: WeeklyProduction[]): MonthlyProduction[] => {
