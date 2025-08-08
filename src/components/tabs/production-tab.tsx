@@ -58,10 +58,17 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
         perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
     };
 
-    const { control, handleSubmit, register, formState: { errors } } = useForm<DailyFormData>({
+    const { control, handleSubmit, register, watch, formState: { errors } } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
         defaultValues,
     });
+
+    const perCageValues = watch("perCage");
+    const totalEggs = React.useMemo(() => {
+        if (!perCageValues) return 0;
+        return Object.values(perCageValues).reduce((sum, count) => sum + (Number(count) || 0), 0);
+    }, [perCageValues]);
+
 
     const onSubmit = (data: DailyFormData) => {
         onSave(production ? new Date(production.date) : data.date, data);
@@ -112,9 +119,14 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                         </div>
                     </div>
 
-                    <DialogFooter>
-                        <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
-                        <Button type="submit">Simpan</Button>
+                    <DialogFooter className="justify-between">
+                        <div className="font-bold text-lg">
+                           Total: {totalEggs}
+                        </div>
+                        <div className="flex gap-2">
+                            <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
+                            <Button type="submit">Simpan</Button>
+                        </div>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -670,7 +682,7 @@ export default function ProductionTab() {
                       <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
                       <TableHead className="text-center align-middle">Produktifitas</TableHead>
                       {ducks.map(duck => (
-                        <TableHead key={duck.cage} className="text-center">
+                        <TableHead key={duck.id} className="text-center">
                           <div className="flex flex-col items-center justify-center h-full">
                             <div>Kdg {duck.cage}</div>
                             <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
@@ -701,7 +713,7 @@ export default function ProductionTab() {
                                 ? (production / duck.quantity * 100)
                                 : 0;
                             return (
-                                <TableCell key={duck.cage} className="p-0 text-center align-middle">
+                                <TableCell key={duck.id} className="p-0 text-center align-middle">
                                     <div className="pt-4 pb-2">{production ?? '-'}</div>
                                     <div className={cn("text-xs py-0.5 w-1/2 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
