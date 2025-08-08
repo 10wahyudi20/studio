@@ -590,22 +590,25 @@ export default function ProductionTab() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const scrollAmount = 50;
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
-        e.currentTarget.scrollLeft -= scrollAmount;
+        container.scrollLeft -= scrollAmount;
         break;
       case 'ArrowRight':
         e.preventDefault();
-        e.currentTarget.scrollLeft += scrollAmount;
+        container.scrollLeft += scrollAmount;
         break;
       case 'ArrowUp':
         e.preventDefault();
-        e.currentTarget.scrollTop -= scrollAmount;
+        container.scrollTop -= scrollAmount;
         break;
       case 'ArrowDown':
         e.preventDefault();
-        e.currentTarget.scrollTop += scrollAmount;
+        container.scrollTop += scrollAmount;
         break;
     }
   };
@@ -698,12 +701,12 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div
-                tabIndex={0}
-                onKeyDown={handleKeyDown}
-                className="overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
-              >
-                <Table>
+               <div
+                  tabIndex={0}
+                  onKeyDown={handleKeyDown}
+                  className="rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                <Table ref={scrollContainerRef}>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-center align-middle">Tanggal</TableHead>
@@ -924,3 +927,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
