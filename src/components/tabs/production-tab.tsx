@@ -593,9 +593,12 @@ export default function ProductionTab() {
     if (!container) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const scrollAmount = 50; // pixels to scroll
+        if (document.activeElement !== container) {
+            return;
+        }
 
-      if (container.contains(document.activeElement)) {
+        const scrollAmount = 50; // pixels to scroll
+        
         switch (e.key) {
           case 'ArrowLeft':
             e.preventDefault();
@@ -616,7 +619,6 @@ export default function ProductionTab() {
           default:
             break;
         }
-      }
     };
     
     document.addEventListener('keydown', handleKeyDown);
