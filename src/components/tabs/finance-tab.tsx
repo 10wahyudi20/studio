@@ -31,7 +31,7 @@ const transactionSchema = z.object({
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
 
-const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, onSave: (data: any) => void }) => {
+const TransactionForm = ({ transaction, onSave, defaultType }: { transaction?: Transaction, onSave: (data: any) => void, defaultType: "debit" | "credit" }) => {
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   
@@ -42,7 +42,7 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
       description: "",
       quantity: 0,
       unitPrice: 0,
-      type: "debit",
+      type: defaultType,
     },
   });
 
@@ -64,6 +64,8 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
     toast({ title: `Transaksi ${transaction ? 'diperbarui' : 'ditambahkan'}!`, description: `Transaksi "${data.description}" telah disimpan.` });
   };
   
+  const title = defaultType === 'debit' ? 'Pemasukan' : 'Pengeluaran';
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -73,12 +75,12 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
           </DropdownMenuItem>
         ) : (
           <Button>
-            <PlusCircle className="mr-2 h-4 w-4" /> Input Data
+            <PlusCircle className="mr-2 h-4 w-4" /> Input {title}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader><DialogTitle>{transaction ? 'Edit' : 'Input'} Data Keuangan</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{transaction ? 'Edit' : 'Input'} Data {title}</DialogTitle></DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="date">Tgl</Label>
@@ -103,24 +105,6 @@ const TransactionForm = ({ transaction, onSave }: { transaction?: Transaction, o
                 </div>
             </div>
             <p className="text-sm font-medium">Total: Rp {(watch("quantity") * watch("unitPrice") || 0).toLocaleString('id-ID')}</p>
-            <div className="space-y-2">
-                <Label>Jenis Transaksi</Label>
-                <Controller
-                    control={control} name="type"
-                    render={({ field }) => (
-                        <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4 pt-1">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="debit" id="debit" />
-                                <Label htmlFor="debit" className="font-normal text-green-700 dark:text-green-400">Pemasukan (Debit)</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="credit" id="credit" />
-                                <Label htmlFor="credit" className="font-normal text-red-700 dark:text-red-400">Pengeluaran (Kredit)</Label>
-                            </div>
-                        </RadioGroup>
-                    )} 
-                />
-            </div>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
             <Button type="submit">Simpan</Button>
@@ -153,32 +137,70 @@ export default function FinanceTab() {
     </Card>
   );
 
-  const TransactionRow = ({ t }: { t: Transaction }) => (
-    <TableRow key={t.id} className={t.type === 'debit' ? "bg-green-100/50 dark:bg-green-900/20" : "bg-red-100/50 dark:bg-red-900/20"}>
-      <TableCell>{format(new Date(t.date), "dd/MM/yyyy")}</TableCell>
-      <TableCell>{t.description}</TableCell>
-      <TableCell className={t.type === 'debit' ? 'text-green-700 dark:text-green-400 font-semibold' : 'text-red-700 dark:text-red-400 font-semibold'}>{t.quantity.toLocaleString('id-ID')}</TableCell>
-      <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
-      <TableCell>Rp {t.total.toLocaleString('id-ID')}</TableCell>
-      <TableCell className="text-right">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <TransactionForm transaction={t} onSave={(updated) => updateTransaction(t.id, updated)} />
-            <AlertDialog>
-              <AlertDialogTrigger asChild><DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600"><Trash2 className="mr-2 h-4 w-4" /><span>Hapus</span></DropdownMenuItem></AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader><AlertDialogTitle>Yakin ingin menghapus transaksi ini?</AlertDialogTitle><AlertDialogDescription>"{t.description}" akan dihapus permanen.</AlertDialogDescription></AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => { removeTransaction(t.id); toast({ variant: 'destructive', title: 'Transaksi Dihapus!' }) }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </TableCell>
-    </TableRow>
+  const TransactionTable = ({ 
+    title, 
+    transactions, 
+    type 
+  }: { 
+    title: string, 
+    transactions: Transaction[], 
+    type: "debit" | "credit" 
+  }) => (
+      <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{title}</CardTitle>
+            <TransactionForm onSave={addTransaction} defaultType={type} />
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tgl</TableHead>
+                    <TableHead>Uraian</TableHead>
+                    <TableHead>Jumlah</TableHead>
+                    <TableHead>Harga Satuan</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                  <TableBody>
+                    {transactions.length === 0 ? (
+                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data {type === 'debit' ? 'pemasukan' : 'pengeluaran'}.</TableCell></TableRow>
+                    ) : (
+                      transactions.map((t) => (
+                        <TableRow key={t.id}>
+                          <TableCell>{format(new Date(t.date), "dd/MM/yyyy")}</TableCell>
+                          <TableCell>{t.description}</TableCell>
+                          <TableCell>{t.quantity.toLocaleString('id-ID')}</TableCell>
+                          <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
+                          <TableCell>Rp {t.total.toLocaleString('id-ID')}</TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <TransactionForm transaction={t} onSave={(updated) => updateTransaction(t.id, updated)} defaultType={type} />
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild><DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-red-500 focus:text-red-600"><Trash2 className="mr-2 h-4 w-4" /><span>Hapus</span></DropdownMenuItem></AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader><AlertDialogTitle>Yakin ingin menghapus transaksi ini?</AlertDialogTitle><AlertDialogDescription>"{t.description}" akan dihapus permanen.</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => { removeTransaction(t.id); toast({ variant: 'destructive', title: 'Transaksi Dihapus!' }) }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
   );
 
   return (
@@ -190,52 +212,11 @@ export default function FinanceTab() {
         <StatCard title="Margin Keuntungan" value={`${profitMargin}%`} icon={Scale} />
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Pembukuan</CardTitle>
-          <TransactionForm onSave={addTransaction} />
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tgl</TableHead>
-                  <TableHead>Uraian</TableHead>
-                  <TableHead>Jumlah</TableHead>
-                  <TableHead>Harga Satuan</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-                <TableBody>
-                  <TableRow className="bg-green-100 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/30">
-                    <TableCell colSpan={6} className="font-bold text-green-700 dark:text-green-400">
-                      PEMASUKAN (DEBIT)
-                    </TableCell>
-                  </TableRow>
-                  {debitTransactions.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pemasukan.</TableCell></TableRow>
-                  ) : (
-                    debitTransactions.map((t) => <TransactionRow key={t.id} t={t} />)
-                  )}
-                </TableBody>
-                <TableBody>
-                  <TableRow className="bg-red-100 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/30">
-                    <TableCell colSpan={6} className="font-bold text-red-700 dark:text-red-400">
-                      PENGELUARAN (KREDIT)
-                    </TableCell>
-                  </TableRow>
-                  {creditTransactions.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data pengeluaran.</TableCell></TableRow>
-                  ) : (
-                    creditTransactions.map((t) => <TransactionRow key={t.id} t={t} />)
-                  )}
-                </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid lg:grid-cols-2 gap-6">
+        <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
+        <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
+      </div>
+
     </div>
   );
 }
