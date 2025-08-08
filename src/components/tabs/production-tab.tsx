@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -65,7 +66,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
     const allValues = watch();
     const totalEggs = React.useMemo(() => {
         const perCageValues = allValues.perCage;
-        if (!perCageValues) return 0;
+        if (!perCageValues || typeof perCageValues !== 'object') return 0;
         return Object.values(perCageValues).reduce((sum, count) => sum + (Number(count) || 0), 0);
     }, [allValues]);
 
@@ -715,7 +716,7 @@ export default function ProductionTab() {
                             return (
                                 <TableCell key={duck.id} className="p-0 text-center align-middle">
                                     <div className="pt-4 pb-2">{production ?? '-'}</div>
-                                    <div className={cn("text-xs py-0.5 w-1/2 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
+                                    <div className={cn("text-xs py-0.5 w-full mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
                                       {productivity.toFixed(1)}%
                                     </div>
                                 </TableCell>
