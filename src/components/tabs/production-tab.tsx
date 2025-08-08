@@ -25,7 +25,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 
 
@@ -395,7 +395,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                 <CardHeader><CardTitle>Total Produksi dan Harga per Minggu</CardTitle></CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={chartData}>
+                        <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="period" fontSize={12} />
                             <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
@@ -407,7 +407,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                             <Bar yAxisId="left" dataKey="gradeC" stackId="a" fill={CHART_COLORS[2]} name="Grade C" />
                             <Bar yAxisId="left" dataKey="consumption" stackId="a" fill={CHART_COLORS[3]} name="Konsumsi" />
                             <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="#e85d04" name="Total (Rp)" />
-                        </BarChart>
+                        </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
