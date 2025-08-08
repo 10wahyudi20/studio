@@ -143,12 +143,21 @@ export default function FeedTab() {
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   const totalFeedPerDay = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) : 0), 0);
   const totalStockValue = feed.reduce((sum, item) => sum + (item.stock * item.pricePerKg), 0);
+  
+  const getFeedStockStyling = (stock: number) => {
+    if (stock <= 100) return { value: 'text-red-500', icon: 'text-red-500 animate-pulse' };
+    if (stock <= 300) return { value: 'text-yellow-500', icon: 'text-yellow-500' };
+    if (stock <= 500) return { value: 'text-green-500', icon: 'text-green-500' };
+    return { value: 'text-blue-500', icon: 'text-blue-500' };
+  };
 
-  const StatCard = ({ title, value, icon: Icon, valueClassName, footer }: { title: string, value: string, icon: React.ElementType, valueClassName?: string, footer?: React.ReactNode }) => (
+  const feedStockStyling = getFeedStockStyling(totalStock);
+
+  const StatCard = ({ title, value, icon: Icon, valueClassName, iconClassName, footer }: { title: string, value: string, icon: React.ElementType, valueClassName?: string, iconClassName?: string, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
       </CardHeader>
       <CardContent className="flex-grow"><div className={cn("text-2xl font-bold", valueClassName)}>{value}</div></CardContent>
        {footer && (
@@ -166,6 +175,8 @@ export default function FeedTab() {
             title="Total Stok Pakan" 
             value={`${totalStock.toLocaleString('id-ID')} Kg`} 
             icon={Package} 
+            valueClassName={feedStockStyling.value}
+            iconClassName={feedStockStyling.icon}
             footer={
                  <div className="w-full pt-2 text-xs">
                     {feed.map(item => (

@@ -79,12 +79,20 @@ export default function HomeTab() {
   const worstProductionThisMonth = Math.min(...monthlyProductionData.map(d => d.totalEggs), Infinity);
   
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
+  
+  const getFeedStockStyling = (stock: number) => {
+    if (stock <= 100) return { value: 'text-red-500', icon: 'text-red-500 animate-pulse' };
+    if (stock <= 300) return { value: 'text-yellow-500', icon: 'text-yellow-500' };
+    if (stock <= 500) return { value: 'text-green-500', icon: 'text-green-500' };
+    return { value: 'text-blue-500', icon: 'text-blue-500' };
+  };
+  const feedStockStyling = getFeedStockStyling(feedStock);
 
-  const StatCard = ({ title, value, valueClassName, icon: Icon, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, description?: React.ReactNode, footer?: React.ReactNode }) => (
+  const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
       </CardHeader>
       <CardContent className="flex-grow">
         <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
@@ -158,6 +166,8 @@ export default function HomeTab() {
             title="Stok Pakan (Kg)" 
             value={feedStock.toLocaleString('id-ID')} 
             icon={Package} 
+            valueClassName={feedStockStyling.value}
+            iconClassName={feedStockStyling.icon}
             footer={
                 <div className="w-full pt-2 text-xs">
                     {feed.map(item => (
@@ -236,5 +246,3 @@ export default function HomeTab() {
     </div>
   );
 }
-
-    
