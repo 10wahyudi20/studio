@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users } from "lucide-react";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, Trophy } from "lucide-react";
 import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
@@ -82,6 +82,14 @@ export default function HomeTab() {
   };
   const feedStockStyling = getFeedStockStyling(feedStock);
 
+  const weeklyDataForMonth = eggProduction.weekly.filter(w => {
+    const startDate = new Date(w.startDate);
+    return startDate.getMonth() === currentMonth && startDate.getFullYear() === currentYear;
+  });
+
+  const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
+  const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
+
   const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -139,9 +147,11 @@ export default function HomeTab() {
             }
         />
         <StatCard 
-            title="Telur Satu Bulan" 
-            value={monthProduction.toLocaleString('id-ID')} 
-            icon={CalendarDays} 
+            title="Produksi Terbaik" 
+            value={bestProductionRecord?.totalEggs.toLocaleString('id-ID') ?? '0'} 
+            icon={Trophy} 
+            valueClassName="text-yellow-500"
+            iconClassName="text-yellow-500"
             footer={
                  <div className="w-full pt-2 space-y-1">
                     <div className="font-semibold">Riwayat Bulan Ini:</div>
@@ -196,7 +206,16 @@ export default function HomeTab() {
                 </div>
             }
         />
-        <StatCard title="Laba Bersih Bulan Ini" value={`Rp ${netProfit.toLocaleString('id-ID')}`} icon={Wallet} />
+        <StatCard title="Laba Bersih Bulan Ini" 
+          value={`Rp ${netProfit.toLocaleString('id-ID')}`} 
+          icon={Wallet}
+          footer={
+            <div className="w-full flex justify-between pt-2 text-xs">
+              <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
+              <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
+            </div>
+          }
+        />
       </div>
 
       <Card>
@@ -228,4 +247,3 @@ export default function HomeTab() {
     </div>
   );
 }
-
