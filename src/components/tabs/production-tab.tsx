@@ -399,14 +399,14 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="period" fontSize={12} />
                             <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                            <YAxis yAxisId="right" orientation="right" stroke="#e85d04" />
+                            <YAxis yAxisId="right" orientation="right" stroke="#42A5F5" />
                             <Tooltip />
                             <Legend />
                             <Bar yAxisId="left" dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
                             <Bar yAxisId="left" dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
                             <Bar yAxisId="left" dataKey="gradeC" stackId="a" fill={CHART_COLORS[2]} name="Grade C" />
                             <Bar yAxisId="left" dataKey="consumption" stackId="a" fill={CHART_COLORS[3]} name="Konsumsi" />
-                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="#e85d04" name="Total (Rp)" />
+                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="#42A5F5" name="Total (Rp)" />
                         </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
