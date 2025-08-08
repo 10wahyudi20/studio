@@ -588,42 +588,27 @@ export default function ProductionTab() {
     </TableCell>
   );
 
-  React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const container = scrollContainerRef.current;
-      if (!container || document.activeElement !== container) return;
-
-      const scrollAmount = 50;
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          container.scrollLeft -= scrollAmount;
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          container.scrollLeft += scrollAmount;
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          container.scrollTop -= scrollAmount;
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          container.scrollTop += scrollAmount;
-          break;
-        default:
-          break;
-      }
-    };
-    
-    const container = scrollContainerRef.current;
-    container?.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      container?.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const scrollAmount = 50;
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        e.currentTarget.scrollLeft -= scrollAmount;
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        e.currentTarget.scrollLeft += scrollAmount;
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        e.currentTarget.scrollTop -= scrollAmount;
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        e.currentTarget.scrollTop += scrollAmount;
+        break;
+    }
+  };
 
 
   return (
@@ -714,8 +699,8 @@ export default function ProductionTab() {
             
             <TabsContent value="daily">
               <div
-                ref={scrollContainerRef}
                 tabIndex={0}
+                onKeyDown={handleKeyDown}
                 className="overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
               >
                 <Table>
