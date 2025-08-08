@@ -164,7 +164,7 @@ export default function HomeTab() {
         />
         <StatCard 
             title="Stok Pakan (Kg)" 
-            value={feedStock.toLocaleString('id-ID')} 
+            value={`${feedStock.toLocaleString('id-ID')} Kg`} 
             icon={Package} 
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
