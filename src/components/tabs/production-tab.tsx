@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut } from "lucide-react";
+import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy } from "lucide-react";
 import { format, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -472,7 +472,7 @@ export default function ProductionTab() {
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
   const [zoomLevel, setZoomLevel] = React.useState(1);
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const scrollContainerRef = React.useRef<HTMLTableElement>(null);
 
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -591,45 +591,30 @@ export default function ProductionTab() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const scrollAmount = 50;
-    const container = scrollContainerRef.current;
-    if (!container) return;
+    const container = e.currentTarget;
+    const tableContainer = scrollContainerRef.current;
 
-    if (
-      document.activeElement === container ||
-      container.contains(document.activeElement)
-    ) {
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          container.scrollLeft -= scrollAmount;
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          container.scrollLeft += scrollAmount;
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          container.scrollTop -= scrollAmount;
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          container.scrollTop += scrollAmount;
-          break;
-      }
+    if (!tableContainer) return;
+
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        tableContainer.scrollLeft -= scrollAmount;
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        tableContainer.scrollLeft += scrollAmount;
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        tableContainer.scrollTop -= scrollAmount;
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        tableContainer.scrollTop += scrollAmount;
+        break;
     }
   };
-
-  React.useEffect(() => {
-    const currentRef = scrollContainerRef.current;
-    if (currentRef) {
-      currentRef.addEventListener('keydown', handleKeyDown as any);
-    }
-    return () => {
-       if (currentRef) {
-          currentRef.removeEventListener('keydown', handleKeyDown as any);
-       }
-    };
-  }, [handleKeyDown]);
 
 
   return (
@@ -657,7 +642,7 @@ export default function ProductionTab() {
                 )
             }
         />
-        <StatCard title="Produksi Terbaik" value={bestProduction} icon={TrendingUp} />
+        <StatCard title="Produksi Terbaik" value={bestProduction} icon={Trophy} />
         <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
         <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction} icon={CalendarDays} />
       </div>
@@ -730,13 +715,12 @@ export default function ProductionTab() {
             
             <TabsContent value="daily">
                <div
-                  ref={scrollContainerRef}
                   tabIndex={0}
-                  className="relative w-full overflow-auto rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="relative w-full rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   onKeyDown={handleKeyDown}
                 >
                 <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}>
-                    <Table>
+                    <Table ref={scrollContainerRef}>
                       <TableHeader>
                         <TableRow>
                           <TableHead className="text-center align-middle">Tanggal</TableHead>
