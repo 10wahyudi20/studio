@@ -64,6 +64,14 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
     };
   };
 
+  const getNextCageNumber = () => {
+    if (ducks.length === 0) {
+        return 1;
+    }
+    const maxCageNumber = Math.max(...ducks.map(d => d.cage));
+    return maxCageNumber + 1;
+  };
+
   const defaultValues = duck
     ? {
         ...duck,
@@ -72,7 +80,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
         cageSizeWidth: parseCageSize(duck.cageSize).width,
       }
     : {
-        cage: ducks.length > 0 ? Math.max(...ducks.map(d => d.cage)) + 1 : 1,
+        cage: getNextCageNumber(),
         quantity: 0,
         deaths: 0,
         entryDate: format(new Date(), "yyyy-MM-dd"),
@@ -109,7 +117,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cage" className="text-right">Kandang</Label>
-                <Input id="cage" {...register("cage", { valueAsNumber: true })} className="col-span-3" />
+                <Input id="cage" {...register("cage", { valueAsNumber: true })} readOnly={!duck} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
