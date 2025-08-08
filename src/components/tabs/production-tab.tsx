@@ -750,6 +750,7 @@ export default function ProductionTab() {
                   tabIndex={0}
                   ref={scrollContainerRef}
                   onKeyDown={handleKeyDown}
+                  onFocus={() => scrollContainerRef.current?.focus()}
               >
                   <div 
                       style={{ 
