@@ -300,14 +300,14 @@ export default function PopulationTab() {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, footer }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode }) => (
+  const StatCard = ({ title, value, icon: Icon, footer, valueClassName }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode, valueClassName?: string }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="flex-grow">
-        <div className="text-2xl font-bold">{value}</div>
+        <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
       </CardContent>
        {footer && (
           <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
@@ -333,7 +333,12 @@ export default function PopulationTab() {
                 </div>
             }
           />
-          <StatCard title="Bebek Mati" value={totalDeaths} icon={TrendingDown}/>
+          <StatCard 
+            title="Bebek Mati" 
+            value={totalDeaths} 
+            icon={TrendingDown} 
+            valueClassName={totalDeaths > 0 ? "text-blue-500" : ""}
+          />
           <StatCard title="Bebek Bayah" value={bayahCount} icon={Layers}/>
           <StatCard title="Bebek Petelur" value={petelurCount} icon={ArrowRightLeft}/>
           <StatCard title="Bebek Tua" value={tuaCount} icon={Users}/>
