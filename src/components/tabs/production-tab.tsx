@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -63,11 +62,12 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
         defaultValues,
     });
 
-    const perCageValues = watch("perCage");
+    const allValues = watch();
     const totalEggs = React.useMemo(() => {
+        const perCageValues = allValues.perCage;
         if (!perCageValues) return 0;
         return Object.values(perCageValues).reduce((sum, count) => sum + (Number(count) || 0), 0);
-    }, [perCageValues]);
+    }, [allValues]);
 
 
     const onSubmit = (data: DailyFormData) => {
