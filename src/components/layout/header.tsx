@@ -218,15 +218,27 @@ const SimpleCalculator = () => {
 };
 
 export default function Header() {
-    const { companyInfo, isDirty, saveState, logout } = useAppStore();
+    const { companyInfo, isDirty, saveState, logout, getFullState } = useAppStore();
     const { toast } = useToast();
     const router = useRouter();
 
     const handleSave = () => {
+        // 1. Save to localStorage (internal persistence)
         saveState();
+
+        // 2. Trigger local file download (backup)
+        const state = getFullState();
+        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+          JSON.stringify(state, null, 2)
+        )}`;
+        const link = document.createElement("a");
+        link.href = jsonString;
+        link.download = `clucksmart_backup_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
         toast({
             title: "Data Disimpan!",
-            description: "Semua perubahan telah disimpan di browser.",
+            description: "Perubahan disimpan di browser & file backup telah diunduh.",
         });
     };
 
