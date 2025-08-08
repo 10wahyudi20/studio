@@ -337,8 +337,8 @@ export default function PopulationTab() {
             title="Bebek Mati" 
             value={totalDeaths} 
             icon={TrendingDown} 
-            valueClassName={cn(totalDeaths > 0 && "text-blue-500")}
-            iconClassName={cn(totalDeaths > 0 && "text-blue-500")}
+            valueClassName={cn(totalDeaths > 0 && "text-red-500")}
+            iconClassName={cn(totalDeaths > 0 && "text-red-500")}
           />
           <StatCard 
             title="Bebek Bayah" 
@@ -489,3 +489,4 @@ export default function PopulationTab() {
     </div>
   );
 }
+
