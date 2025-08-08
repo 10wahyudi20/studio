@@ -265,7 +265,7 @@ export default function SettingsTab() {
                     <Input id="import" type="file" accept=".json" className="hidden" onChange={handleImport} />
                 </Label>
             </Button>
-            <Button variant="outline" disabled>
+            <Button variant="outline" onClick={handleExport}>
               <Cloud className="mr-2 h-4 w-4" /> Simpan ke Mega Cloud
             </Button>
             <AlertDialog>
