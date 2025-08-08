@@ -375,7 +375,7 @@ export default function PopulationTab() {
                   <TableRow key={duck.cage}>
                     <TableCell className="text-center align-middle">{duck.cage}</TableCell>
                     <TableCell className="text-center align-middle">{duck.quantity}</TableCell>
-                    <TableCell className="text-center align-middle">{duck.deaths}</TableCell>
+                    <TableCell className="text-center align-middle text-red-500 font-semibold">{duck.deaths}</TableCell>
                     <TableCell className="text-center align-middle">{format(new Date(duck.entryDate), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-center align-middle">{duck.ageMonths}</TableCell>
                     <TableCell className="text-center align-middle">
