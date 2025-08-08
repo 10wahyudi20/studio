@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, TrendingUp, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy } from "lucide-react";
+import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy } from "lucide-react";
 import { format, addDays, startOfMonth, endOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -507,11 +507,11 @@ export default function ProductionTab() {
     return '';
   };
   
-  const StatCard = ({ title, value, valueClassName, icon: Icon, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, footer?: React.ReactNode }) => (
+  const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, footer }: { title: string, value: string | number, valueClassName?: string, icon: React.ElementType, iconClassName?: string, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
       </CardHeader>
       <CardContent className="flex-grow">
         <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
@@ -642,7 +642,13 @@ export default function ProductionTab() {
                 )
             }
         />
-        <StatCard title="Produksi Terbaik" value={bestProduction} icon={Trophy} />
+        <StatCard 
+            title="Produksi Terbaik" 
+            value={bestProduction} 
+            icon={Trophy} 
+            valueClassName="text-yellow-500" 
+            iconClassName="text-yellow-500"
+        />
         <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
         <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction} icon={CalendarDays} />
       </div>
@@ -947,3 +953,4 @@ export default function ProductionTab() {
     
 
     
+
