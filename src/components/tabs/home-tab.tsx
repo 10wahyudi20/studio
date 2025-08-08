@@ -220,8 +220,8 @@ export default function HomeTab() {
                   <RechartsBarChart data={chartData}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                    <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" />
-                    <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--accent))" />
+                    <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--chart-1))" />
+                    <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--chart-2))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
                     <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} />
