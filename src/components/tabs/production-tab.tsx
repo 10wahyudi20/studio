@@ -471,6 +471,7 @@ export default function ProductionTab() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
+  const [zoomLevel, setZoomLevel] = React.useState(1);
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
@@ -690,12 +691,19 @@ export default function ProductionTab() {
                     )}
 
                     {activeTab === 'daily' && (
+                        <>
+                        <div className="flex items-center gap-1">
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.1))}><ZoomOut className="h-4 w-4"/></Button>
+                            <span className="text-sm font-medium w-16 text-center">{Math.round(zoomLevel * 100)}%</span>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(2, prev + 0.1))}><ZoomIn className="h-4 w-4"/></Button>
+                        </div>
                         <DailyDataForm onSave={handleDailySave}>
                             <Button>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Input Data Harian
                             </Button>
                         </DailyDataForm>
+                        </>
                     )}
                     {activeTab === 'weekly' && (
                         <WeeklyDataForm onSave={addWeeklyProduction}>
@@ -706,7 +714,18 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div className="w-full overflow-auto">
+              <div 
+                className="w-full overflow-auto"
+                style={{ maxHeight: '60vh' }}
+              >
+                  <div 
+                    style={{ 
+                      width: `${100 / zoomLevel}%`,
+                      height: `${100 / zoomLevel}%`,
+                      transform: `scale(${zoomLevel})`,
+                      transformOrigin: 'top left',
+                    }}
+                  >
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -758,6 +777,7 @@ export default function ProductionTab() {
                       ))}
                     </TableBody>
                   </Table>
+                  </div>
               </div>
             </TabsContent>
             <TabsContent value="weekly">
