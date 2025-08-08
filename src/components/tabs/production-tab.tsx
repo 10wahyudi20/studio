@@ -471,6 +471,7 @@ export default function ProductionTab() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -587,6 +588,47 @@ export default function ProductionTab() {
     </TableCell>
   );
 
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const scrollAmount = 50; // pixels to scroll
+
+      if (document.activeElement === container || container.contains(document.activeElement)) {
+        switch (e.key) {
+          case 'ArrowLeft':
+            e.preventDefault();
+            container.scrollLeft -= scrollAmount;
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            container.scrollLeft += scrollAmount;
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            container.scrollTop -= scrollAmount;
+            break;
+          case 'ArrowDown':
+            e.preventDefault();
+            container.scrollTop += scrollAmount;
+            break;
+          default:
+            break;
+        }
+      }
+    };
+    
+    // We listen on the document because the div itself won't capture keydown unless it's the active element.
+    // This allows scrolling as long as the user has interacted with the component.
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []); // Empty dependency array means this effect runs once on mount.
+
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -674,7 +716,11 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div className="overflow-x-auto">
+              <div 
+                ref={scrollContainerRef}
+                tabIndex={0}
+                className="overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
+              >
                 <Table>
                   <TableHeader>
                     <TableRow>
