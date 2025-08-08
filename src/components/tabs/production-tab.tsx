@@ -594,6 +594,11 @@ export default function ProductionTab() {
 
     const scrollAmount = 50; // pixels to scroll
     
+    // Check if the focused element is the container itself
+    if (document.activeElement !== container) {
+      return;
+    }
+
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
@@ -931,6 +936,8 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
 
     
 
