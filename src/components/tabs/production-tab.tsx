@@ -594,25 +594,37 @@ export default function ProductionTab() {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        e.preventDefault();
-        container.scrollLeft -= scrollAmount;
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        container.scrollLeft += scrollAmount;
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        container.scrollTop -= scrollAmount;
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        container.scrollTop += scrollAmount;
-        break;
+    if (
+      document.activeElement === container ||
+      container.contains(document.activeElement)
+    ) {
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          container.scrollLeft -= scrollAmount;
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          container.scrollLeft += scrollAmount;
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          container.scrollTop -= scrollAmount;
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          container.scrollTop += scrollAmount;
+          break;
+      }
     }
   };
+
+  React.useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown as any);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown as any);
+    };
+  }, [handleKeyDown]);
 
 
   return (
@@ -715,7 +727,6 @@ export default function ProductionTab() {
                <div
                   ref={scrollContainerRef}
                   tabIndex={0}
-                  onKeyDown={handleKeyDown}
                   className="relative w-full overflow-auto rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                 <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}>
@@ -784,7 +795,7 @@ export default function ProductionTab() {
                       <TableHead className="text-center">Grade B</TableHead>
                       <TableHead className="text-center">Grade C</TableHead>
                       <TableHead className="text-center">Konsumsi</TableHead>
-                      <TableHead>Total Telur</TableHead>
+                      <TableHead className="text-center">Total Telur</TableHead>
                       <TableHead>Total Harga</TableHead>
                       <TableHead className="text-right">Aksi</TableHead>
                     </TableRow>
@@ -821,7 +832,7 @@ export default function ProductionTab() {
                                   <GradeCell amount={week.gradeB} price={week.priceB} />
                                   <GradeCell amount={week.gradeC} price={week.priceC} />
                                   <GradeCell amount={week.consumption} price={week.priceConsumption} />
-                                  <TableCell>{week.totalEggs.toLocaleString('id-ID')}</TableCell>
+                                  <TableCell className="text-center">{week.totalEggs.toLocaleString('id-ID')}</TableCell>
                                   <TableCell>Rp {week.totalValue.toLocaleString('id-ID')}</TableCell>
                                   <TableCell className="text-right">
                                     <DropdownMenu>
@@ -873,7 +884,7 @@ export default function ProductionTab() {
                             <TableCell className="text-center">{subtotal.gradeB.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.gradeC.toLocaleString('id-ID')}</TableCell>
                             <TableCell className="text-center">{subtotal.consumption.toLocaleString('id-ID')}</TableCell>
-                            <TableCell>{subtotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                            <TableCell className="text-center">{subtotal.totalEggs.toLocaleString('id-ID')}</TableCell>
                             <TableCell>Rp {subtotal.totalValue.toLocaleString('id-ID')}</TableCell>
                             <TableCell></TableCell>
                           </TableRow>
@@ -888,7 +899,7 @@ export default function ProductionTab() {
                       <TableCell className="text-center">{weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">{weeklyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
-                      <TableCell>{weeklyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">{weeklyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
                       <TableCell>Rp {weeklyGrandTotal.totalValue.toLocaleString('id-ID')}</TableCell>
                       <TableCell></TableCell>
                     </TableRow>
@@ -902,33 +913,33 @@ export default function ProductionTab() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Bulan</TableHead>
-                                <TableHead>Grade A</TableHead>
-                                <TableHead>Grade B</TableHead>
-                                <TableHead>Grade C</TableHead>
-                                <TableHead>Konsumsi</TableHead>
-                                <TableHead>Total Telur</TableHead>
+                                <TableHead className="text-center">Grade A</TableHead>
+                                <TableHead className="text-center">Grade B</TableHead>
+                                <TableHead className="text-center">Grade C</TableHead>
+                                <TableHead className="text-center">Konsumsi</TableHead>
+                                <TableHead className="text-center">Total Telur</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                            {eggProduction.monthly.map((month, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{month.month}</TableCell>
-                                    <TableCell>{month.gradeA.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>{month.gradeB.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>{month.gradeC.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>{month.consumption.toLocaleString('id-ID')}</TableCell>
-                                    <TableCell>{month.totalEggs.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell className="text-center">{month.gradeA.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell className="text-center">{month.gradeB.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell className="text-center">{month.gradeC.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell className="text-center">{month.consumption.toLocaleString('id-ID')}</TableCell>
+                                    <TableCell className="text-center">{month.totalEggs.toLocaleString('id-ID')}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                          <TableFooter>
                             <TableRow className="bg-primary/20 font-extrabold text-lg">
                                 <TableCell>Grand Total</TableCell>
-                                <TableCell>{monthlyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
-                                <TableCell>{monthlyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
-                                <TableCell>{monthlyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
-                                <TableCell>{monthlyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
-                                <TableCell>{monthlyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
+                                <TableCell className="text-center">{monthlyGrandTotal.gradeA.toLocaleString('id-ID')}</TableCell>
+                                <TableCell className="text-center">{monthlyGrandTotal.gradeB.toLocaleString('id-ID')}</TableCell>
+                                <TableCell className="text-center">{monthlyGrandTotal.gradeC.toLocaleString('id-ID')}</TableCell>
+                                <TableCell className="text-center">{monthlyGrandTotal.consumption.toLocaleString('id-ID')}</TableCell>
+                                <TableCell className="text-center">{monthlyGrandTotal.totalEggs.toLocaleString('id-ID')}</TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>
@@ -941,3 +952,6 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+
+    
