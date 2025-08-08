@@ -109,7 +109,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cage" className="text-right">Kandang</Label>
-                <Input id="cage" {...register("cage", { valueAsNumber: true })} className="col-span-3" readOnly />
+                <Input id="cage" {...register("cage", { valueAsNumber: true })} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
@@ -204,7 +204,7 @@ const RecordDeathForm = () => {
                                 <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                                     <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
                                     <SelectContent>
-                                        {ducks.map(d => <SelectItem key={d.cage} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
+                                        {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
                             )}
@@ -402,7 +402,7 @@ export default function PopulationTab() {
               </TableHeader>
               <TableBody>
                 {ducks.map((duck) => (
-                  <TableRow key={duck.cage}>
+                  <TableRow key={duck.id}>
                     <TableCell className="text-center align-middle">{duck.cage}</TableCell>
                     <TableCell className="text-center align-middle">{duck.quantity}</TableCell>
                     <TableCell className="text-center align-middle text-red-500 font-semibold">{duck.deaths}</TableCell>
@@ -424,7 +424,7 @@ export default function PopulationTab() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                           <DuckForm duck={duck} onSave={(updatedDuck) => updateDuck(duck.cage, updatedDuck)}>
+                           <DuckForm duck={duck} onSave={(updatedDuck) => updateDuck(duck.id, updatedDuck)}>
                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                <Edit className="mr-2 h-4 w-4 text-green-500" />
                                <span className="text-green-500">Edit</span>
@@ -447,7 +447,7 @@ export default function PopulationTab() {
                                     <AlertDialogFooter>
                                     <AlertDialogCancel>Batal</AlertDialogCancel>
                                     <AlertDialogAction onClick={() => {
-                                      resetDuck(duck.cage);
+                                      resetDuck(duck.id);
                                       toast({ title: `Kandang ${duck.cage} direset!` });
                                     }} className="bg-yellow-500 hover:bg-yellow-600">Reset</AlertDialogAction>
                                     </AlertDialogFooter>
@@ -470,7 +470,7 @@ export default function PopulationTab() {
                                     <AlertDialogFooter>
                                     <AlertDialogCancel>Batal</AlertDialogCancel>
                                     <AlertDialogAction onClick={() => {
-                                      removeDuck(duck.cage);
+                                      removeDuck(duck.id);
                                       toast({ variant: 'destructive', title: `Kandang ${duck.cage} dihapus!` });
                                     }} className="bg-destructive hover:bg-destructive/90">Hapus</AlertDialogAction>
                                     </AlertDialogFooter>
@@ -489,4 +489,3 @@ export default function PopulationTab() {
     </div>
   );
 }
-

@@ -12,6 +12,7 @@ export interface CompanyInfo {
 }
 
 export interface Duck {
+    id: number;
     cage: number;
     quantity: number;
     deaths: number;
