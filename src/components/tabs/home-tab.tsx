@@ -68,13 +68,6 @@ export default function HomeTab() {
     "Produktifitas (%)": totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
   }));
   
-  const pieChartData = [
-    { name: 'Produktif', value: ducks.filter(d => d.status === 'Bebek Petelur').reduce((s, d) => s + d.quantity, 0) },
-    { name: 'Bayah', value: ducks.filter(d => d.status === 'Bebek Bayah').reduce((s, d) => s + d.quantity, 0) },
-    { name: 'Tua', value: ducks.filter(d => d.status === 'Bebek Tua').reduce((s, d) => s + d.quantity, 0) },
-    { name: 'Afkir', value: ducks.filter(d => d.status === 'Bebek Afkir').reduce((s, d) => s + d.quantity, 0) },
-  ];
-
   const bestProductionRecord = monthlyProductionData.length > 0
     ? monthlyProductionData.reduce((best, current) => current.totalEggs > best.totalEggs ? current : best)
     : null;
@@ -212,46 +205,39 @@ export default function HomeTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Grafik Produksi 30 Hari Terakhir dan Populasi</CardTitle>
+          <CardTitle>Grafik Produksi 30 Hari Terakhir</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="bar">
-            <TabsList>
-              <TabsTrigger value="bar">Grafik Batang (Produksi)</TabsTrigger>
-              <TabsTrigger value="pie">Grafik Pie (Populasi)</TabsTrigger>
-            </TabsList>
-            <TabsContent value="bar">
-              <ChartContainer config={{}} className="h-80 w-full">
+            <ChartContainer 
+                config={{
+                    "Produksi Telur": {
+                        theme: {
+                            light: "hsl(var(--primary))",
+                            dark: "hsl(var(--primary))"
+                        }
+                    },
+                    "Produktifitas (%)": {
+                        theme: {
+                            light: "hsl(var(--accent))",
+                            dark: "hsl(var(--accent))"
+                        }
+                    }
+                }} 
+                className="h-80 w-full"
+            >
                 <ResponsiveContainer>
                   <RechartsBarChart data={chartData}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
                     <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" />
-                    <YAxis yAxisId="right" orientation="right" stroke="#e85d04" />
+                    <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--accent))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="Produksi Telur" fill="hsl(var(--primary))" radius={4} />
-                    <Bar yAxisId="right" dataKey="Produktifitas (%)" fill="#e85d04" radius={4} />
+                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} />
+                    <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} />
                   </RechartsBarChart>
                 </ResponsiveContainer>
               </ChartContainer>
-            </TabsContent>
-            <TabsContent value="pie">
-                <ChartContainer config={{}} className="h-80 w-full">
-                    <ResponsiveContainer>
-                        <RechartsPieChart>
-                            <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} label>
-                                {pieChartData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                            <ChartLegend content={<ChartLegendContent />} />
-                        </RechartsPieChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-            </TabsContent>
-          </Tabs>
         </CardContent>
       </Card>
     </div>
