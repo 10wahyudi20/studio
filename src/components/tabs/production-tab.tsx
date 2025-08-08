@@ -599,7 +599,7 @@ export default function ProductionTab() {
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (!scrollContainerRef.current) return;
-    const scrollAmount = 100; // Increase scroll amount for faster navigation
+    const scrollAmount = 100;
     
     switch (e.key) {
       case 'ArrowLeft':
@@ -704,6 +704,7 @@ export default function ProductionTab() {
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.1))}>
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
+                            <span className="text-sm font-semibold w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(2, prev + 0.1))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
@@ -765,8 +766,8 @@ export default function ProductionTab() {
                             <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
                             <TableHead className="text-center align-middle">Produktifitas</TableHead>
                             {ducks.map(duck => (
-                              <TableHead key={duck.id} className="text-center p-2">
-                                <div className="flex flex-col items-center justify-center h-full whitespace-nowrap">
+                              <TableHead key={duck.id} className="text-center p-2 align-top">
+                                <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
                                   <div>Kdg {duck.cage}</div>
                                   <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
                                 </div>
@@ -987,6 +988,8 @@ export default function ProductionTab() {
 
 
 
+
+    
 
     
 
