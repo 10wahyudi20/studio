@@ -392,7 +392,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
             <Card>
-                <CardHeader><CardTitle>Total Produksi per Minggu</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Total Produksi dan Harga per Minggu</CardTitle></CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={chartData}>
