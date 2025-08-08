@@ -588,38 +588,42 @@ export default function ProductionTab() {
     </TableCell>
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const container = scrollContainerRef.current;
+      if (!container || document.activeElement !== container) return;
 
-    const scrollAmount = 50; // pixels to scroll
+      const scrollAmount = 50;
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          container.scrollLeft -= scrollAmount;
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          container.scrollLeft += scrollAmount;
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          container.scrollTop -= scrollAmount;
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          container.scrollTop += scrollAmount;
+          break;
+        default:
+          break;
+      }
+    };
     
-    // Check if the focused element is the container itself
-    if (document.activeElement !== container) {
-      return;
-    }
+    const container = scrollContainerRef.current;
+    container?.addEventListener('keydown', handleKeyDown);
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        e.preventDefault();
-        container.scrollLeft -= scrollAmount;
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        container.scrollLeft += scrollAmount;
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        container.scrollTop -= scrollAmount;
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        container.scrollTop += scrollAmount;
-        break;
-      default:
-        break;
-    }
-  };
+    return () => {
+      container?.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
 
   return (
@@ -709,10 +713,9 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div 
+              <div
                 ref={scrollContainerRef}
                 tabIndex={0}
-                onKeyDown={handleKeyDown}
                 className="overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
               >
                 <Table>
@@ -936,9 +939,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
-
-    
-
-    
