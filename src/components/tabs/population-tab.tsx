@@ -38,7 +38,7 @@ import { Textarea } from "../ui/textarea";
 import { ScrollArea } from "../ui/scroll-area";
 
 const duckSchema = z.object({
-  cage: z.number().min(1),
+  cage: z.coerce.number().min(1),
   quantity: z.coerce.number().min(0),
   deaths: z.coerce.number().min(0),
   entryDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Tanggal tidak valid" }),
@@ -54,45 +54,43 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
   const { ducks } = useAppStore();
   const { toast } = useToast();
   
-  const parseCageSize = (cageSize?: string) => {
-    if (!cageSize) return { length: 0, width: 0 };
-    // Handles both "5m x 5m" and "5x5m"
-    const parts = cageSize.replace(/m/g, '').split('x').map(p => p.trim());
-    return {
-        length: Number(parts[0]) || 0,
-        width: Number(parts[1]) || 0
-    };
-  };
-
-  const getNextCageNumber = () => {
-    if (ducks.length === 0) {
-        return 1;
-    }
-    const maxCageNumber = Math.max(...ducks.map(d => d.cage));
-    return maxCageNumber + 1;
-  };
-
-  const defaultValues = duck
-    ? {
-        ...duck,
-        entryDate: format(new Date(duck.entryDate), "yyyy-MM-dd"),
-        cageSizeLength: parseCageSize(duck.cageSize).length,
-        cageSizeWidth: parseCageSize(duck.cageSize).width,
-      }
-    : {
-        cage: getNextCageNumber(),
-        quantity: 0,
-        deaths: 0,
-        entryDate: format(new Date(), "yyyy-MM-dd"),
-        cageSizeLength: 0,
-        cageSizeWidth: 0,
-        cageSystem: "umbaran" as "baterai" | "umbaran",
-    };
-    
-  const { register, handleSubmit, control, formState: { errors } } = useForm<DuckFormData>({
+  const { register, handleSubmit, control, formState: { errors }, reset } = useForm<DuckFormData>({
     resolver: zodResolver(duckSchema),
-    defaultValues
   });
+
+  React.useEffect(() => {
+    if (open) {
+      const getNextCageNumber = () => {
+        if (ducks.length === 0) return 1;
+        const maxCageNumber = Math.max(...ducks.map(d => d.cage));
+        return maxCageNumber + 1;
+      };
+      
+      const parseCageSize = (cageSize?: string) => {
+        if (!cageSize) return { length: 0, width: 0 };
+        const parts = cageSize.replace(/m/g, '').split('x').map(p => p.trim());
+        return { length: Number(parts[0]) || 0, width: Number(parts[1]) || 0 };
+      };
+
+      const defaultValues = duck
+        ? {
+            ...duck,
+            entryDate: format(new Date(duck.entryDate), "yyyy-MM-dd"),
+            cageSizeLength: parseCageSize(duck.cageSize).length,
+            cageSizeWidth: parseCageSize(duck.cageSize).width,
+          }
+        : {
+            cage: getNextCageNumber(),
+            quantity: 0,
+            deaths: 0,
+            entryDate: format(new Date(), "yyyy-MM-dd"),
+            cageSizeLength: 0,
+            cageSizeWidth: 0,
+            cageSystem: "umbaran" as "baterai" | "umbaran",
+        };
+      reset(defaultValues);
+    }
+  }, [open, duck, ducks, reset]);
 
   const onSubmit = (data: DuckFormData) => {
     // Convert string date back to Date object before saving
@@ -117,7 +115,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cage" className="text-right">Kandang</Label>
-                <Input id="cage" {...register("cage", { valueAsNumber: true })} readOnly={!duck} className="col-span-3" />
+                <Input id="cage" {...register("cage")} readOnly={!duck} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
