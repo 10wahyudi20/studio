@@ -3,15 +3,12 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { BarChart, PieChart, Egg, Package, DollarSign, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
-import { Bar, Pie, Cell, ResponsiveContainer, BarChart as RechartsBarChart, PieChart as RechartsPieChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users } from "lucide-react";
+import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-
-const COLORS = ["#64B5F6", "#81C784", "#FFB74D", "#E57373", "#BA68C8", "#7986CB"];
 
 export default function HomeTab() {
   const { ducks, eggProduction, feed, finance } = useAppStore();
@@ -208,36 +205,20 @@ export default function HomeTab() {
           <CardTitle>Grafik Produksi 30 Hari Terakhir</CardTitle>
         </CardHeader>
         <CardContent>
-            <ChartContainer 
-                config={{
-                    "Produksi Telur": {
-                        theme: {
-                            light: "hsl(var(--primary))",
-                            dark: "hsl(var(--primary))"
-                        }
-                    },
-                    "Produktifitas (%)": {
-                        theme: {
-                            light: "hsl(var(--accent))",
-                            dark: "hsl(var(--accent))"
-                        }
-                    }
-                }} 
-                className="h-80 w-full"
-            >
+            <div className="h-80 w-full">
                 <ResponsiveContainer>
                   <RechartsBarChart data={chartData}>
                     <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                     <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--primary))" />
                     <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--accent))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} />
-                    <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} />
+                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} fill="hsl(var(--primary))" />
+                    <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} fill="hsl(var(--accent))" />
                   </RechartsBarChart>
                 </ResponsiveContainer>
-              </ChartContainer>
+            </div>
         </CardContent>
       </Card>
     </div>
