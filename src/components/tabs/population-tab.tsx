@@ -300,11 +300,11 @@ export default function PopulationTab() {
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, footer, valueClassName }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode, valueClassName?: string }) => (
+  const StatCard = ({ title, value, icon: Icon, footer, valueClassName, iconClassName }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode, valueClassName?: string, iconClassName?: string }) => (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
+        <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
       </CardHeader>
       <CardContent className="flex-grow">
         <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
@@ -337,12 +337,37 @@ export default function PopulationTab() {
             title="Bebek Mati" 
             value={totalDeaths} 
             icon={TrendingDown} 
-            valueClassName={totalDeaths > 0 ? "text-blue-500" : ""}
+            valueClassName={cn(totalDeaths > 0 && "text-blue-500")}
+            iconClassName={cn(totalDeaths > 0 && "text-blue-500")}
           />
-          <StatCard title="Bebek Bayah" value={bayahCount} icon={Layers}/>
-          <StatCard title="Bebek Petelur" value={petelurCount} icon={ArrowRightLeft}/>
-          <StatCard title="Bebek Tua" value={tuaCount} icon={Users}/>
-          <StatCard title="Bebek Afkir" value={afkirCount} icon={ShieldOff}/>
+          <StatCard 
+            title="Bebek Bayah" 
+            value={bayahCount} 
+            icon={Layers}
+            valueClassName={cn(bayahCount > 0 && "text-green-500")}
+            iconClassName={cn(bayahCount > 0 && "text-green-500")}
+          />
+          <StatCard 
+            title="Bebek Petelur" 
+            value={petelurCount} 
+            icon={ArrowRightLeft}
+            valueClassName={cn(petelurCount > 0 && "text-blue-500")}
+            iconClassName={cn(petelurCount > 0 && "text-blue-500")}
+          />
+          <StatCard 
+            title="Bebek Tua" 
+            value={tuaCount} 
+            icon={Users}
+            valueClassName={cn(tuaCount > 0 && "text-yellow-500")}
+            iconClassName={cn(tuaCount > 0 && "text-yellow-500")}
+          />
+          <StatCard 
+            title="Bebek Afkir" 
+            value={afkirCount} 
+            icon={ShieldOff}
+            valueClassName={cn(afkirCount > 0 && "text-red-500")}
+            iconClassName={cn(afkirCount > 0 && "text-red-500")}
+          />
       </div>
       
       <Card>
