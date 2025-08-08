@@ -484,7 +484,7 @@ export default function ProductionTab() {
   const productionDifference = todayProduction - yesterdayProduction;
 
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
-  const productivity = totalDucks > 0 && todayProduction > 0 ? (todayProduction / totalDucks * 100).toFixed(2) : 0;
+  const productivity = totalDucks > 0 ? (todayProduction / totalDucks * 100) : 0;
   
   const monthProduction = eggProduction.daily
     .filter(d => {
@@ -620,9 +620,14 @@ export default function ProductionTab() {
   };
 
   React.useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown as any);
+    const currentRef = scrollContainerRef.current;
+    if (currentRef) {
+      currentRef.addEventListener('keydown', handleKeyDown as any);
+    }
     return () => {
-      document.removeEventListener('keydown', handleKeyDown as any);
+       if (currentRef) {
+          currentRef.removeEventListener('keydown', handleKeyDown as any);
+       }
     };
   }, [handleKeyDown]);
 
@@ -653,7 +658,7 @@ export default function ProductionTab() {
             }
         />
         <StatCard title="Produksi Terbaik" value={bestProduction} icon={TrendingUp} />
-        <StatCard title="Produktifitas" value={`${productivity}%`} icon={Percent} />
+        <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
         <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction} icon={CalendarDays} />
       </div>
 
@@ -728,6 +733,7 @@ export default function ProductionTab() {
                   ref={scrollContainerRef}
                   tabIndex={0}
                   className="relative w-full overflow-auto rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                  onKeyDown={handleKeyDown}
                 >
                 <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}>
                     <Table>
@@ -953,5 +959,7 @@ export default function ProductionTab() {
   );
 }
 
+
+    
 
     
