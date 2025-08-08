@@ -4,8 +4,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -209,21 +209,24 @@ export default function HomeTab() {
                 <ChartContainer config={{
                     "Produksi Telur": {
                         label: "Produksi Telur",
-                        color: "hsl(var(--chart-1))",
+                        theme: {
+                            light: "#3b82f6", // blue-500
+                            dark: "#ffffff",
+                        },
                     },
                     "Produktifitas (%)": {
                         label: "Produktifitas (%)",
-                        color: "hsl(var(--chart-2))",
+                        color: "#f97316", // orange-500
                     },
                     }}
                 >
                   <RechartsBarChart data={chartData}>
                     <CartesianGrid vertical={false} />
                     <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                    <YAxis yAxisId="left" orientation="left" stroke="hsl(var(--chart-1))" />
-                    <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--chart-2))" />
+                    <YAxis yAxisId="left" orientation="left" stroke="var(--color-Produksi Telur)" />
+                    <YAxis yAxisId="right" orientation="right" stroke="var(--color-Produktifitas \(\%\))" />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
+                    <ChartLegend content={<ChartLegendContent />} />
                     <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} />
                     <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} />
                   </RechartsBarChart>
