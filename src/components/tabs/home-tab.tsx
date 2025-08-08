@@ -75,8 +75,13 @@ export default function HomeTab() {
     { name: 'Afkir', value: ducks.filter(d => d.status === 'Bebek Afkir').reduce((s, d) => s + d.quantity, 0) },
   ];
 
-  const bestProductionThisMonth = Math.max(...monthlyProductionData.map(d => d.totalEggs), 0);
-  const worstProductionThisMonth = Math.min(...monthlyProductionData.map(d => d.totalEggs), Infinity);
+  const bestProductionRecord = monthlyProductionData.length > 0
+    ? monthlyProductionData.reduce((best, current) => current.totalEggs > best.totalEggs ? current : best)
+    : null;
+
+  const worstProductionRecord = monthlyProductionData.length > 0
+    ? monthlyProductionData.reduce((worst, current) => current.totalEggs < worst.totalEggs ? current : worst)
+    : null;
   
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
   
@@ -149,15 +154,21 @@ export default function HomeTab() {
             value={monthProduction.toLocaleString('id-ID')} 
             icon={CalendarDays} 
             footer={
-                <div className="w-full pt-2 space-y-2">
+                 <div className="w-full pt-2 space-y-1">
                     <div className="font-semibold">Riwayat Bulan Ini:</div>
                     <div className="flex justify-between items-center">
-                        <span className="flex items-center"><TrendingUp className="h-3 w-3 mr-1 text-green-500"/>Terbaik:</span>
-                        <span className="font-semibold">{bestProductionThisMonth}</span>
+                        <span className="flex items-center">
+                            <TrendingUp className="h-3 w-3 mr-1 text-green-500"/>
+                            Terbaik ({bestProductionRecord ? format(new Date(bestProductionRecord.date), 'dd/MM') : '-'}):
+                        </span>
+                        <span className="font-semibold">{bestProductionRecord?.totalEggs ?? 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="flex items-center"><TrendingDown className="h-3 w-3 mr-1 text-red-500"/>Terendah:</span>
-                        <span className="font-semibold">{worstProductionThisMonth === Infinity ? 0 : worstProductionThisMonth}</span>
+                        <span className="flex items-center">
+                            <TrendingDown className="h-3 w-3 mr-1 text-red-500"/>
+                            Terendah ({worstProductionRecord ? format(new Date(worstProductionRecord.date), 'dd/MM') : '-'}):
+                        </span>
+                        <span className="font-semibold">{worstProductionRecord?.totalEggs ?? 0}</span>
                     </div>
                 </div>
             }
