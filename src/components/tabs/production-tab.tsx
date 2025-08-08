@@ -413,20 +413,22 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
             </Card>
 
             <Card>
-                <CardHeader><CardTitle>Tren Produksi Mingguan</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Tren Produksi dan Harga Mingguan</CardTitle></CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={chartData}>
+                        <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="period" fontSize={12} />
-                            <YAxis />
+                            <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
+                            <YAxis yAxisId="right" orientation="right" stroke="#42A5F5" />
                             <Tooltip />
                             <Legend />
-                            <Line type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
-                            <Line type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
-                            <Line type="monotone" dataKey="gradeC" stroke={CHART_COLORS[2]} name="Grade C" />
-                            <Line type="monotone" dataKey="consumption" stroke={CHART_COLORS[3]} name="Konsumsi" />
-                        </LineChart>
+                            <Line yAxisId="left" type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
+                            <Line yAxisId="left" type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
+                            <Line yAxisId="left" type="monotone" dataKey="gradeC" stroke={CHART_COLORS[2]} name="Grade C" />
+                            <Line yAxisId="left" type="monotone" dataKey="consumption" stroke={CHART_COLORS[3]} name="Konsumsi" />
+                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="#42A5F5" name="Total (Rp)" />
+                        </ComposedChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
