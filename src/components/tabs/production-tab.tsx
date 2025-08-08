@@ -472,7 +472,7 @@ export default function ProductionTab() {
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
   const [zoomLevel, setZoomLevel] = React.useState(1);
-  const scrollContainerRef = React.useRef<HTMLTableElement>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -598,26 +598,25 @@ export default function ProductionTab() {
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!scrollContainerRef.current) return;
     const scrollAmount = 50;
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
+    
     switch (e.key) {
       case 'ArrowLeft':
         e.preventDefault();
-        container.scrollLeft -= scrollAmount;
+        scrollContainerRef.current.scrollLeft -= scrollAmount;
         break;
       case 'ArrowRight':
         e.preventDefault();
-        container.scrollLeft += scrollAmount;
+        scrollContainerRef.current.scrollLeft += scrollAmount;
         break;
       case 'ArrowUp':
         e.preventDefault();
-        container.scrollTop -= scrollAmount;
+        scrollContainerRef.current.scrollTop -= scrollAmount;
         break;
       case 'ArrowDown':
         e.preventDefault();
-        container.scrollTop += scrollAmount;
+        scrollContainerRef.current.scrollTop += scrollAmount;
         break;
     }
   };
@@ -750,8 +749,12 @@ export default function ProductionTab() {
                   className="relative w-full rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                   onKeyDown={handleKeyDown}
                 >
-                <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}>
-                    <Table ref={scrollContainerRef}>
+                <div 
+                    ref={scrollContainerRef}
+                    className="overflow-auto" 
+                    style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
+                >
+                    <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead className="text-center align-middle">Tanggal</TableHead>
@@ -759,10 +762,10 @@ export default function ProductionTab() {
                           <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
                           <TableHead className="text-center align-middle">Produktifitas</TableHead>
                           {ducks.map(duck => (
-                            <TableHead key={duck.id} className="text-center">
-                              <div className="flex flex-col items-center justify-center h-full">
+                            <TableHead key={duck.id} className="text-center p-2">
+                              <div className="flex flex-col items-center justify-center h-full whitespace-nowrap">
                                 <div>Kdg {duck.cage}</div>
-                                <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                                <div className="font-normal text-xs text-muted-foreground whitespace-nowrap">{duck.quantity} ekor</div>
                               </div>
                             </TableHead>
                           ))}
@@ -980,3 +983,6 @@ export default function ProductionTab() {
     
 
 
+
+
+    
