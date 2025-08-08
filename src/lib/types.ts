@@ -83,12 +83,21 @@ export interface Transaction {
     type: 'debit' | 'credit';
 }
 
+export interface DeathRecord {
+    id: number;
+    date: Date;
+    cage: number;
+    quantity: number;
+    notes?: string;
+}
+
 export interface AppState {
     companyInfo: CompanyInfo;
     ducks: Duck[];
     eggProduction: EggProduction;
     feed: Feed[];
     finance: Transaction[];
+    deathRecords: DeathRecord[];
     isDirty: boolean;
     isAuthenticated: boolean;
     lastStockUpdate: string | null;

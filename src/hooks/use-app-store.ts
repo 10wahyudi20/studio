@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction } from '@/lib/types';
+import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord } from '@/lib/types';
 import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
@@ -29,6 +29,7 @@ const getInitialState = (): AppState => ({
   },
   feed: [],
   finance: [],
+  deathRecords: [],
   isDirty: false,
   isAuthenticated: false, 
   lastStockUpdate: null,
@@ -85,6 +86,8 @@ type DailyProductionInput = {
 }
 
 type WeeklyProductionInput = Omit<WeeklyProduction, 'id' | 'totalEggs' | 'totalValue'>;
+type DeathRecordInput = Omit<DeathRecord, 'id' | 'date'>;
+
 
 export const useAppStore = create<AppState & {
   login: (username: string, password: string) => boolean;
@@ -107,6 +110,7 @@ export const useAppStore = create<AppState & {
   addFeed: (feed: Omit<Feed, 'id' | 'pricePerKg'>) => void;
   updateFeed: (id: number, feed: Partial<Omit<Feed, 'id' | 'pricePerKg'>>) => void;
   removeFeed: (id: number) => void;
+  addDeathRecord: (record: DeathRecordInput) => void;
   saveState: () => void;
   loadState: () => void;
   getFullState: () => Omit<AppState, 'isDirty' | 'isAuthenticated'>;
@@ -189,6 +193,7 @@ export const useAppStore = create<AppState & {
   removeDuck: (cage) => {
     set(state => ({
       ducks: state.ducks.filter(d => d.cage !== cage),
+      deathRecords: state.deathRecords.filter(r => r.cage !== cage),
       isDirty: true
     }));
   },
@@ -367,6 +372,28 @@ export const useAppStore = create<AppState & {
     }));
   },
 
+  addDeathRecord: (record) => {
+    set(state => {
+      const newRecord: DeathRecord = {
+        ...record,
+        id: Date.now(),
+        date: new Date(),
+      };
+      const updatedDucks = state.ducks.map(duck => {
+        if(duck.cage === record.cage) {
+            return { ...duck, deaths: duck.deaths + record.quantity };
+        }
+        return duck;
+      });
+
+      return {
+        deathRecords: [...state.deathRecords, newRecord],
+        ducks: updatedDucks,
+        isDirty: true,
+      };
+    });
+  },
+
   saveState: () => {
     try {
         const stateToSave = get().getFullState();
@@ -405,6 +432,7 @@ export const useAppStore = create<AppState & {
             },
             feed: parsedState.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
             finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)})),
+            deathRecords: (parsedState.deathRecords || []).map((r: any) => ({ ...r, date: new Date(r.date) })),
             lastStockUpdate: parsedState.lastStockUpdate || null,
         };
         
@@ -427,7 +455,7 @@ export const useAppStore = create<AppState & {
         "updateDuck", "removeDuck", "resetDuck", "addDailyProduction", "updateDailyProduction",
         "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
         "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
-        "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState"
+        "addDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState"
     ];
     functions.forEach(f => delete st[f]);
     return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;
@@ -444,7 +472,8 @@ export const useAppStore = create<AppState & {
                  monthly: state.eggProduction.monthly || [],
             },
             feed: state.feed.map((f: any) => ({...f, lastUpdated: new Date(f.lastUpdated)})),
-            finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)}))
+            finance: state.finance.map((t: any) => ({...t, date: new Date(t.date)})),
+            deathRecords: (state.deathRecords || []).map((r: any) => ({ ...r, date: new Date(r.date) })),
         };
       revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
       set({...revivedState, isDirty: true});
