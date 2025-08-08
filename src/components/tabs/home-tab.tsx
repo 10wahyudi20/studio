@@ -212,7 +212,7 @@ export default function HomeTab() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Statistik Produksi & Populasi</CardTitle>
+          <CardTitle>Grafik Produksi 30 Hari Terakhir dan Populasi</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="bar">
