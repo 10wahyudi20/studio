@@ -471,9 +471,6 @@ export default function ProductionTab() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
-  const [zoomLevel, setZoomLevel] = React.useState(1);
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
@@ -597,31 +594,6 @@ export default function ProductionTab() {
     </TableCell>
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!scrollContainerRef.current) return;
-    const scrollAmount = 100;
-    
-    switch (e.key) {
-      case 'ArrowLeft':
-        e.preventDefault();
-        scrollContainerRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        scrollContainerRef.current.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        scrollContainerRef.current.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-        break;
-    }
-  };
-
-
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -699,17 +671,6 @@ export default function ProductionTab() {
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
                  <div className="flex items-center gap-2">
-                    {activeTab === 'daily' && (
-                        <>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.1))}>
-                                <ZoomOut className="h-4 w-4" />
-                            </Button>
-                            <span className="text-sm font-semibold w-12 text-center">{Math.round(zoomLevel * 100)}%</span>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(2, prev + 0.1))}>
-                                <ZoomIn className="h-4 w-4" />
-                            </Button>
-                        </>
-                    )}
                     {activeTab !== 'monthly' && (
                         <Popover>
                             <PopoverTrigger asChild>
@@ -745,71 +706,58 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div 
-                  className="w-full overflow-auto focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
-                  tabIndex={0}
-                  ref={scrollContainerRef}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => scrollContainerRef.current?.focus()}
-              >
-                  <div 
-                      style={{ 
-                          transform: `scale(${zoomLevel})`, 
-                          transformOrigin: 'top left',
-                       }}
-                  >
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="text-center align-middle">Tanggal</TableHead>
-                            <TableHead className="text-center align-middle">Hari</TableHead>
-                            <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
-                            <TableHead className="text-center align-middle">Produktifitas</TableHead>
-                            {ducks.map(duck => (
-                              <TableHead key={duck.id} className="text-center p-2 align-top">
-                                <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
-                                  <div>Kdg {duck.cage}</div>
-                                  <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
-                                </div>
-                              </TableHead>
-                            ))}
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {[...eggProduction.daily]
-                            .filter(day => {
-                              const dayDate = new Date(day.date);
-                              return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
-                            })
-                            .reverse()
-                            .map((day, index) => (
-                            <TableRow key={index} onDoubleClick={() => {
-                                const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
-                                formTrigger?.click();
-                            }}>
-                              <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
-                              <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
-                              <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
-                              <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
-                              {ducks.map(duck => {
-                                  const production = day.perCage[duck.cage];
-                                  const productivity = duck.quantity > 0 && production != null
-                                      ? (production / duck.quantity * 100)
-                                      : 0;
-                                  return (
-                                      <TableCell key={duck.id} className="p-0 text-center align-middle">
-                                          <div className="pt-4 pb-2">{production ?? '-'}</div>
-                                          <div className={cn("text-xs py-0.5 w-full mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
-                                            {productivity.toFixed(1)}%
-                                          </div>
-                                      </TableCell>
-                                  );
-                              })}
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                  </div>
+              <div className="w-full overflow-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-center align-middle">Tanggal</TableHead>
+                        <TableHead className="text-center align-middle">Hari</TableHead>
+                        <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
+                        <TableHead className="text-center align-middle">Produktifitas</TableHead>
+                        {ducks.map(duck => (
+                          <TableHead key={duck.id} className="text-center p-2 align-top">
+                            <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
+                              <div>Kdg {duck.cage}</div>
+                              <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                            </div>
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {[...eggProduction.daily]
+                        .filter(day => {
+                          const dayDate = new Date(day.date);
+                          return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
+                        })
+                        .reverse()
+                        .map((day, index) => (
+                        <TableRow key={index} onDoubleClick={() => {
+                            const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
+                            formTrigger?.click();
+                        }}>
+                          <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
+                          <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
+                          <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
+                          <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
+                          {ducks.map(duck => {
+                              const production = day.perCage[duck.cage];
+                              const productivity = duck.quantity > 0 && production != null
+                                  ? (production / duck.quantity * 100)
+                                  : 0;
+                              return (
+                                  <TableCell key={duck.id} className="p-0 text-center align-middle">
+                                      <div className="pt-4 pb-2">{production ?? '-'}</div>
+                                      <div className={cn("text-xs py-0.5 w-full mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
+                                        {productivity.toFixed(1)}%
+                                      </div>
+                                  </TableCell>
+                              );
+                          })}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
               </div>
             </TabsContent>
             <TabsContent value="weekly">
@@ -988,6 +936,8 @@ export default function ProductionTab() {
 
 
 
+
+    
 
     
 
