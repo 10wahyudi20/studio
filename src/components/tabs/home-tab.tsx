@@ -9,6 +9,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Separator } from "../ui/separator";
+import { id as idLocale } from "date-fns/locale";
 
 const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card>
@@ -19,15 +20,12 @@ const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, des
         <CardContent>
             <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
             {description && <div className="text-xs text-muted-foreground">{description}</div>}
-            {footer && (
-              <>
-                <Separator className="my-2" />
-                <div className="text-xs text-muted-foreground">
-                    {footer}
-                </div>
-              </>
-            )}
         </CardContent>
+        {footer && (
+          <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
+              {footer}
+          </CardFooter>
+        )}
     </Card>
 );
 
@@ -151,29 +149,14 @@ export default function HomeTab() {
             }
         />
         <StatCard 
-            title="Produksi Terbaik" 
-            value={bestProductionRecord?.totalEggs.toLocaleString('id-ID') ?? '0'} 
-            icon={Trophy} 
-            valueClassName="text-yellow-500"
-            iconClassName="text-yellow-500"
+            title={`Telur Bulan ${format(new Date(), 'MMMM', { locale: idLocale })}`} 
+            value={monthProduction.toLocaleString('id-ID')}
+            icon={CalendarDays}
             footer={
-                 <div className="w-full space-y-1">
-                    <div className="font-semibold">Riwayat Bulan Ini:</div>
-                    <div className="flex justify-between items-center">
-                        <span className="flex items-center">
-                            <TrendingUp className="h-3 w-3 mr-1 text-green-500"/>
-                            Terbaik ({bestProductionRecord ? format(new Date(bestProductionRecord.date), 'dd/MM') : '-'}):
-                        </span>
-                        <span className="font-semibold">{bestProductionRecord?.totalEggs ?? 0}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="flex items-center">
-                            <TrendingDown className="h-3 w-3 mr-1 text-red-500"/>
-                            Terendah ({worstProductionRecord ? format(new Date(worstProductionRecord.date), 'dd/MM') : '-'}):
-                        </span>
-                        <span className="font-semibold">{worstProductionRecord?.totalEggs ?? 0}</span>
-                    </div>
-                </div>
+              <div className="w-full flex justify-between">
+                <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
+                <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
+              </div>
             }
         />
         <StatCard 
@@ -183,7 +166,7 @@ export default function HomeTab() {
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
             footer={
-                <div className="w-full space-y-1">
+                <div className="w-full space-y-1 pt-2">
                     {feed.map(item => (
                         <div key={item.id} className="flex justify-between">
                             <span>{item.name}:</span>
@@ -198,7 +181,7 @@ export default function HomeTab() {
             value={`Rp ${dailyFeedCost.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
             icon={Wheat}
             footer={
-                <div className="w-full space-y-1">
+                <div className="w-full space-y-1 pt-2">
                     <div className="flex justify-between">
                         <span>Konsumsi:</span>
                         <span>{dailyFeedConsumptionKg.toLocaleString('id-ID', {minimumFractionDigits: 1, maximumFractionDigits: 1})} Kg</span>
@@ -214,9 +197,15 @@ export default function HomeTab() {
           value={`Rp ${netProfit.toLocaleString('id-ID')}`} 
           icon={Wallet}
           footer={
-            <div className="w-full flex justify-between">
-              <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
-              <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
+            <div className="w-full pt-2 flex justify-between">
+              <div className="flex items-center text-green-500">
+                <TrendingUp className="h-4 w-4 mr-1"/>
+                <span>Rp {monthlyIncome.toLocaleString('id-ID')}</span>
+              </div>
+              <div className="flex items-center text-red-500">
+                 <TrendingDown className="h-4 w-4 mr-1"/>
+                <span>Rp {monthlyExpense.toLocaleString('id-ID')}</span>
+              </div>
             </div>
           }
         />
