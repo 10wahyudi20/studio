@@ -42,8 +42,14 @@ const AssistantDialogContent = () => {
   }, [isLoading]);
 
   useEffect(() => {
+    // Scroll to the bottom whenever the history changes
     if (viewportRef.current) {
-      viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+      // Use setTimeout to allow the DOM to update before scrolling
+      setTimeout(() => {
+        if (viewportRef.current) {
+            viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
+        }
+      }, 0);
     }
   }, [history]);
 
