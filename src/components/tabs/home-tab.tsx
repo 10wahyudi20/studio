@@ -8,6 +8,7 @@ import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, C
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Separator } from "../ui/separator";
 
 export default function HomeTab() {
   const { ducks, eggProduction, feed, finance } = useAppStore();
@@ -91,20 +92,20 @@ export default function HomeTab() {
   const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
-    <Card className="flex flex-col">
+    <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
             <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
         </CardHeader>
-        <CardContent className="flex-grow">
+        <CardContent>
             <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
-            {description && <div className="text-xs text-muted-foreground">{description}</div>}
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            {footer && (
+              <div className="mt-2 pt-2 text-xs text-muted-foreground border-t">
+                  {footer}
+              </div>
+            )}
         </CardContent>
-        {footer && (
-            <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
-                {footer}
-            </CardFooter>
-        )}
     </Card>
 );
 
@@ -132,9 +133,9 @@ export default function HomeTab() {
                 'text-red-600 dark:text-red-500': productionDifference < 0,
             })}
             icon={Egg}
-            footer={
+            description={
                 productionYesterdayRecord && (
-                    <div className={cn('flex items-center w-full pt-2 text-xs', {
+                    <div className={cn('flex items-center text-xs', {
                         'text-green-600 dark:text-green-500': productionDifference > 0,
                         'text-red-600 dark:text-red-500': productionDifference < 0,
                     })}>
@@ -179,7 +180,7 @@ export default function HomeTab() {
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
             footer={
-                <div className="w-full pt-2 text-xs">
+                <div className="w-full pt-2 text-xs space-y-1">
                     {feed.map(item => (
                         <div key={item.id} className="flex justify-between">
                             <span>{item.name}:</span>
@@ -194,7 +195,7 @@ export default function HomeTab() {
             value={`Rp ${dailyFeedCost.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
             icon={Wheat}
             footer={
-                <div className="w-full pt-2">
+                <div className="w-full pt-2 space-y-1">
                     <div className="flex justify-between">
                         <span>Konsumsi:</span>
                         <span>{dailyFeedConsumptionKg.toLocaleString('id-ID', {minimumFractionDigits: 1, maximumFractionDigits: 1})} Kg</span>
@@ -247,4 +248,5 @@ export default function HomeTab() {
     </div>
   );
 }
+
 
