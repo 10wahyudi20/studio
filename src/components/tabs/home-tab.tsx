@@ -134,9 +134,9 @@ export default function HomeTab() {
                 'text-red-600 dark:text-red-500': productionDifference < 0,
             })}
             icon={Egg}
-            description={
+            footer={
                 productionYesterdayRecord && (
-                    <div className={cn('flex items-center text-xs', {
+                    <div className={cn('flex items-center text-xs w-full pt-2', {
                         'text-green-600 dark:text-green-500': productionDifference > 0,
                         'text-red-600 dark:text-red-500': productionDifference < 0,
                     })}>
@@ -153,7 +153,7 @@ export default function HomeTab() {
             value={monthProduction.toLocaleString('id-ID')}
             icon={CalendarDays}
             footer={
-              <div className="w-full flex justify-between">
+              <div className="w-full flex justify-between pt-2">
                 <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
                 <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
               </div>
