@@ -12,7 +12,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { format, eachDayOfInterval, differenceInDays } from 'date-fns';
+import { format, eachDayOfInterval, differenceInDays, parse } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 
@@ -116,7 +116,7 @@ const predictEggProductionFlow = ai.defineFlow(
     // Ensure the output contains a prediction for every day in the range.
     const response = await ai.generate({
         model: 'googleai/gemini-2.0-flash',
-        prompt: predictEggProductionPrompt.compile(input),
+        prompt: predictEggProductionPrompt(input),
         output: {
             schema: PredictEggProductionOutputSchema,
             validate: (output) => {
