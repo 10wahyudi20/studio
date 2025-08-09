@@ -49,23 +49,34 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
     const [open, setOpen] = React.useState(false);
 
     const dailySchema = dailySchemaGenerator(ducks);
+    
+    // Set default values directly based on props. This is more reliable.
+    const defaultValues = React.useMemo(() => {
+        return production
+            ? {
+                  date: new Date(production.date),
+                  perCage: ducks.reduce(
+                      (acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }),
+                      {}
+                  ),
+              }
+            : {
+                  date: new Date(),
+                  perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
+              };
+    }, [production, ducks]);
 
     const { control, handleSubmit, register, watch, formState: { errors }, reset } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
+        defaultValues,
     });
     
+    // Reset the form whenever the dialog opens or the default values change
     React.useEffect(() => {
-        if(open) {
-            const defaultValues = production ? {
-                date: new Date(production.date),
-                perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }), {}),
-            } : {
-                date: new Date(),
-                perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
-            };
+        if (open) {
             reset(defaultValues);
         }
-    }, [open, production, ducks, reset]);
+    }, [open, defaultValues, reset]);
 
 
     const allValues = watch();
@@ -551,6 +562,8 @@ export default function ProductionTab() {
 
   const handleRowDoubleClick = (day: DailyProduction) => {
       setEditingProduction(day);
+      // We need a way to imperatively open the dialog.
+      // A simple way is to have a button and click it programmatically.
       document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`)?.click();
   };
 
@@ -615,18 +628,16 @@ export default function ProductionTab() {
       if (!container) return;
 
       const scrollAmount = 100; // pixels to scroll
+      
+      e.preventDefault(); // Prevent default browser behavior for arrow keys
 
       if (e.key === 'ArrowUp') {
-          e.preventDefault();
           container.scrollTop -= scrollAmount;
       } else if (e.key === 'ArrowDown') {
-          e.preventDefault();
           container.scrollTop += scrollAmount;
       } else if (e.key === 'ArrowLeft') {
-          e.preventDefault();
           container.scrollLeft -= scrollAmount;
       } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
           container.scrollLeft += scrollAmount;
       }
   };
@@ -807,18 +818,22 @@ export default function ProductionTab() {
                                                   </TableCell>
                                               );
                                           })}
-                                          {/* Hidden trigger for edit dialog */}
-                                          <td className="hidden">
-                                              <DailyDataForm onSave={handleDailySave} production={editingProduction}>
-                                                  <button id={`edit-daily-trigger-${day.date.toISOString()}`}></button>
-                                              </DailyDataForm>
-                                          </td>
                                       </TableRow>
                                   ))}
                           </TableBody>
                       </Table>
                   </div>
               </div>
+               {/* This is a bit of a hack to allow imperatively opening the dialog for editing */}
+              {editingProduction && (
+                 <DailyDataForm 
+                    key={editingProduction.date.toISOString()} // Force re-render
+                    production={editingProduction} 
+                    onSave={handleDailySave}
+                >
+                    <button id={`edit-daily-trigger-${editingProduction.date.toISOString()}`} className="hidden" />
+                 </DailyDataForm>
+              )}
             </TabsContent>
             <TabsContent value="weekly">
               <div className="overflow-x-auto">
