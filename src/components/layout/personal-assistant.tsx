@@ -112,11 +112,12 @@ const AssistantDialogContent = () => {
   return (
     <div
         className={cn(
-            "ai-dialog flex flex-col h-full p-6"
+            "ai-dialog flex flex-col h-full",
+            "p-0 sm:p-6"
         )}
         data-loading={isLoading}
     >
-        <DialogHeader>
+        <DialogHeader className="p-6 sm:p-0">
             <DialogTitle>Asisten AI Pribadi</DialogTitle>
             <DialogDescription>
             Tanyakan apa saja, atau minta analisis tentang data peternakan Anda.
@@ -124,7 +125,7 @@ const AssistantDialogContent = () => {
         </DialogHeader>
         <div className="flex-grow my-4 overflow-hidden">
             <ScrollArea className="h-full pr-4" viewportRef={viewportRef}>
-            <div className="space-y-4">
+            <div className="space-y-4 pr-2 sm:pr-0">
                 {history.length === 0 && !imageDataUri && (
                 <div className="text-center text-muted-foreground py-8">
                     <Bot className="mx-auto h-12 w-12" />
@@ -154,9 +155,9 @@ const AssistantDialogContent = () => {
         </div>
         {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
 
-        <div className="space-y-2">
+        <DialogFooter className="p-6 sm:p-0 pt-0">
             {imageDataUri && (
-            <div className="relative w-fit">
+            <div className="relative w-fit mb-2">
                 <Image src={imageDataUri} alt="Pratinjau" width={80} height={80} className="rounded-md object-cover" />
                 <Button
                 variant="destructive" size="icon"
@@ -170,13 +171,12 @@ const AssistantDialogContent = () => {
                 </Button>
             </div>
             )}
-            <DialogFooter>
-            <Button variant="ghost" size="icon" onClick={handleClear} className="absolute left-4 bottom-4">
-                <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Hapus Obrolan</span>
-            </Button>
-            <div className="relative flex-grow flex items-center">
-                <label htmlFor="file-upload" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "absolute left-1.5 h-8 w-8 text-muted-foreground cursor-pointer")}>
+            <div className="relative flex-grow flex items-center w-full">
+                <Button variant="ghost" size="icon" onClick={handleClear} className="absolute left-[-10px] bottom-0 text-muted-foreground">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Hapus Obrolan</span>
+                </Button>
+                <label htmlFor="file-upload" className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "absolute left-6 bottom-0 h-10 w-10 text-muted-foreground cursor-pointer")}>
                 <Paperclip className="h-4 w-4" />
                 <span className="sr-only">Lampirkan file</span>
                 </label>
@@ -188,20 +188,19 @@ const AssistantDialogContent = () => {
                 placeholder="Ketik pesan Anda..."
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
                 disabled={isLoading}
-                className="pl-12 pr-12"
+                className="pl-20 pr-12"
                 />
                 <Button
                 type="submit"
                 size="icon"
                 onClick={handleSend}
                 disabled={isLoading || (!prompt.trim() && !imageDataUri)}
-                className="absolute right-1.5 h-8 w-8"
+                className="absolute right-1.5 bottom-1 h-8 w-8"
                 >
                 <Send className="h-4 w-4" />
                 </Button>
             </div>
-            </DialogFooter>
-        </div>
+        </DialogFooter>
     </div>
   );
 }
@@ -223,7 +222,7 @@ export default function PersonalAssistant() {
         <DialogPrimitive.Content
             className={cn(
                 "fixed left-1/2 top-1/2 z-50 grid w-full max-w-xl -translate-x-1/2 -translate-y-1/2 gap-4 border-none bg-background p-0 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%]",
-                "h-[90vh]"
+                "h-full sm:h-[90vh] sm:rounded-lg"
             )}
         >
             <AssistantDialogContent />
