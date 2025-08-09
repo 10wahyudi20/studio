@@ -50,21 +50,19 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
 
     const dailySchema = dailySchemaGenerator(ducks);
 
-    const defaultValues = production ? {
-        date: new Date(production.date),
-        perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }), {}),
-    } : {
-        date: new Date(),
-        perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
-    };
-
     const { control, handleSubmit, register, watch, formState: { errors }, reset } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
-        defaultValues,
     });
     
     React.useEffect(() => {
         if(open) {
+            const defaultValues = production ? {
+                date: new Date(production.date),
+                perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }), {}),
+            } : {
+                date: new Date(),
+                perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
+            };
             reset(defaultValues);
         }
     }, [open, production, ducks, reset]);
@@ -483,11 +481,8 @@ export default function ProductionTab() {
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   
-  // State for handling the edit dialog
   const [editingProduction, setEditingProduction] = React.useState<DailyProduction | undefined>(undefined);
-  const [isEditFormOpen, setIsEditFormOpen] = React.useState(false);
-
-
+  
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
   const productionTodayRecord = eggProduction.daily.at(-1);
@@ -556,9 +551,7 @@ export default function ProductionTab() {
 
   const handleRowDoubleClick = (day: DailyProduction) => {
       setEditingProduction(day);
-      // We need a way to open the dialog programmatically. We'll use a state for that.
-      const trigger = document.getElementById(`edit-daily-trigger`);
-      trigger?.click();
+      document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`)?.click();
   };
 
   const weeklyDataForMonth = eggProduction.weekly
@@ -746,10 +739,6 @@ export default function ProductionTab() {
                                 Input Data Harian
                             </Button>
                         </DailyDataForm>
-                        {/* Hidden trigger for edit dialog */}
-                        <DailyDataForm onSave={handleDailySave} production={editingProduction}>
-                            <button id="edit-daily-trigger" className="hidden"></button>
-                        </DailyDataForm>
                         </>
                     )}
                     {activeTab === 'weekly' && (
@@ -798,8 +787,8 @@ export default function ProductionTab() {
                                       return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
                                   })
                                   .reverse()
-                                  .map((day, index) => (
-                                      <TableRow key={index} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
+                                  .map((day) => (
+                                      <TableRow key={day.date.toISOString()} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
                                           <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
                                           <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
                                           <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
@@ -818,6 +807,12 @@ export default function ProductionTab() {
                                                   </TableCell>
                                               );
                                           })}
+                                          {/* Hidden trigger for edit dialog */}
+                                          <td className="hidden">
+                                              <DailyDataForm onSave={handleDailySave} production={editingProduction}>
+                                                  <button id={`edit-daily-trigger-${day.date.toISOString()}`}></button>
+                                              </DailyDataForm>
+                                          </td>
                                       </TableRow>
                                   ))}
                           </TableBody>
@@ -993,20 +988,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-
-    
-
-    
-
-
-
-
-    
-
-    
-
-    
-
-    
-
