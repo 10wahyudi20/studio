@@ -6,7 +6,7 @@ import { id as idLocale } from 'date-fns/locale';
 
 let channel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined') {
-    channel = new BroadcastChannel('clucksmart-channel');
+    channel = new BroadcastChannel('clucksmart-sync');
 }
 
 
