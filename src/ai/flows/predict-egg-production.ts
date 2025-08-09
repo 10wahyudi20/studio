@@ -126,7 +126,7 @@ const predictEggProductionFlow = ai.defineFlow(
         },
     });
 
-    const output = response.output();
+    const output = response.output;
     if (!output) {
       throw new Error("AI tidak memberikan output yang valid.");
     }
