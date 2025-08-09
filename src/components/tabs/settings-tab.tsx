@@ -10,10 +10,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff } from "lucide-react";
+import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { cn } from "@/lib/utils";
@@ -36,59 +36,91 @@ const MegaCloudAuthDialog = () => {
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [isOpen, setIsOpen] = React.useState(false);
+    const [isAuthSuccessful, setIsAuthSuccessful] = React.useState(false);
 
     const isMegaConfigured = !!companyInfo.megaUsername && !!companyInfo.megaPassword;
 
-    const handleAuthenticatedOpen = () => {
+    const handleOpenChange = (open: boolean) => {
+        setIsOpen(open);
+        if (!open) {
+            // Reset state on close
+            setUsername('');
+            setPassword('');
+            setIsAuthSuccessful(false);
+        }
+    };
+
+    const handleInitialAuth = () => {
         if (!companyInfo.megaUsername || !companyInfo.megaPassword) {
             toast({ variant: "destructive", title: "Gagal", description: "Kredensial Mega Cloud belum diatur di Pengaturan." });
             return;
         }
 
         if (username === companyInfo.megaUsername && password === companyInfo.megaPassword) {
-            window.open('https://mega.nz/', '_blank');
-            setIsOpen(false);
-            setUsername('');
-            setPassword('');
-            toast({ title: "Berhasil!", description: "Membuka Mega Cloud di tab baru." });
+            setIsAuthSuccessful(true);
+            toast({ title: "Otentikasi Berhasil!", description: "Silakan periksa peringatan sebelum melanjutkan." });
         } else {
             toast({ variant: "destructive", title: "Gagal", description: "Username atau password Mega Cloud salah." });
         }
     };
     
+    const handleContinueToMega = () => {
+        window.open('https://mega.nz/', '_blank');
+        handleOpenChange(false);
+    };
+
     const buttonStyles = cn(
         "w-full",
         isMegaConfigured && "bg-green-600 hover:bg-green-700 text-white"
     );
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <Button variant={isMegaConfigured ? "default" : "outline"} className={buttonStyles}>
                     <Cloud className="mr-2 h-4 w-4" /> Buka Akun Mega Cloud
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Otentikasi Mega Cloud</DialogTitle>
-                    <CardDescription>Masukkan kredensial Anda untuk membuka Mega Cloud.</CardDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="mega-username">Username</Label>
-                        <Input id="mega-username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username Mega Anda" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="mega-password">Password</Label>
-                        <Input id="mega-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password Mega Anda" />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">Batal</Button>
-                    </DialogClose>
-                    <Button onClick={handleAuthenticatedOpen}>Buka</Button>
-                </DialogFooter>
+                 {!isAuthSuccessful ? (
+                     <>
+                        <DialogHeader>
+                            <DialogTitle>Otentikasi Mega Cloud</DialogTitle>
+                            <CardDescription>Masukkan kredensial Anda untuk membuka Mega Cloud.</CardDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="mega-username">Username</Label>
+                                <Input id="mega-username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username Mega Anda" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="mega-password">Password</Label>
+                                <Input id="mega-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password Mega Anda" />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button type="button" variant="secondary">Batal</Button>
+                            </DialogClose>
+                            <Button onClick={handleInitialAuth}>Verifikasi</Button>
+                        </DialogFooter>
+                     </>
+                 ) : (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                               <ShieldCheck className="h-6 w-6 text-green-500"/> Peringatan Keamanan
+                            </DialogTitle>
+                            <DialogDescription>
+                                Pastikan Anda sudah **keluar (logout)** dari akun Mega Cloud lain di browser Anda sebelum melanjutkan. Browser mungkin akan menampilkan akun yang sudah login sebelumnya.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                             <Button type="button" variant="secondary" onClick={() => setIsAuthSuccessful(false)}>Kembali</Button>
+                             <Button onClick={handleContinueToMega}>Lanjutkan ke Mega Cloud</Button>
+                        </DialogFooter>
+                    </>
+                 )}
             </DialogContent>
         </Dialog>
     );
@@ -181,9 +213,17 @@ export default function SettingsTab() {
     const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(state, null, 2))}`;
     const link = document.createElement("a");
     link.href = jsonString;
-    link.download = "clucksmart_backup.json";
+    link.download = `clucksmart_backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    toast({ title: "Data Diekspor", description: "File backup telah diunduh." });
+    
+    if (companyInfo.megaUsername && companyInfo.megaPassword) {
+        toast({ 
+            title: "Data Diekspor", 
+            description: "File backup telah diunduh. Jangan lupa unggah ke Mega Cloud untuk cadangan." 
+        });
+    } else {
+        toast({ title: "Data Diekspor", description: "File backup telah diunduh." });
+    }
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
