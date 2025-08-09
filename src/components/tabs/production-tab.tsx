@@ -58,10 +58,17 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
         perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
     };
 
-    const { control, handleSubmit, register, watch, formState: { errors } } = useForm<DailyFormData>({
+    const { control, handleSubmit, register, watch, formState: { errors }, reset } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
         defaultValues,
     });
+    
+    React.useEffect(() => {
+        if(open) {
+            reset(defaultValues);
+        }
+    }, [open, production, ducks, reset]);
+
 
     const allValues = watch();
     const totalEggs = React.useMemo(() => {
@@ -104,7 +111,8 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                         />
                         {errors.date && <p className="text-sm text-destructive mt-1">{errors.date.message}</p>}
 
-                        <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                        <ScrollArea className="h-60 pr-2">
+                        <div className="space-y-2">
                             <Label>Jumlah Telur per Kdg</Label>
                             {ducks.map(duck => (
                                 <div key={duck.cage} className="flex items-center justify-between">
@@ -118,6 +126,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                                 </div>
                             ))}
                         </div>
+                        </ScrollArea>
                     </div>
 
                     <DialogFooter className="justify-between">
@@ -473,7 +482,11 @@ export default function ProductionTab() {
   const [showChart, setShowChart] = React.useState(false);
   const [zoomLevel, setZoomLevel] = React.useState(1);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
-  const contentContainerRef = React.useRef<HTMLDivElement>(null);
+  
+  // State for handling the edit dialog
+  const [editingProduction, setEditingProduction] = React.useState<DailyProduction | undefined>(undefined);
+  const [isEditFormOpen, setIsEditFormOpen] = React.useState(false);
+
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
@@ -539,6 +552,13 @@ export default function ProductionTab() {
     } else {
         addDailyProduction(data);
     }
+  };
+
+  const handleRowDoubleClick = (day: DailyProduction) => {
+      setEditingProduction(day);
+      // We need a way to open the dialog programmatically. We'll use a state for that.
+      const trigger = document.getElementById(`edit-daily-trigger`);
+      trigger?.click();
   };
 
   const weeklyDataForMonth = eggProduction.weekly
@@ -726,6 +746,10 @@ export default function ProductionTab() {
                                 Input Data Harian
                             </Button>
                         </DailyDataForm>
+                        {/* Hidden trigger for edit dialog */}
+                        <DailyDataForm onSave={handleDailySave} production={editingProduction}>
+                            <button id="edit-daily-trigger" className="hidden"></button>
+                        </DailyDataForm>
                         </>
                     )}
                     {activeTab === 'weekly' && (
@@ -737,15 +761,14 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div
+             <div
                   ref={scrollContainerRef}
                   onKeyDown={handleKeyDown}
                   tabIndex={0}
-                  className="w-full overflow-auto outline-none"
+                  className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   style={{ maxHeight: '60vh' }}
               >
                   <div
-                      ref={contentContainerRef}
                       style={{
                           transform: `scale(${zoomLevel})`,
                           transformOrigin: 'top left',
@@ -776,10 +799,7 @@ export default function ProductionTab() {
                                   })
                                   .reverse()
                                   .map((day, index) => (
-                                      <TableRow key={index} onDoubleClick={() => {
-                                          const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
-                                          formTrigger?.click();
-                                      }}>
+                                      <TableRow key={index} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
                                           <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
                                           <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
                                           <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
