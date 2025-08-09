@@ -204,7 +204,24 @@ export default function FeedTab() {
                 </div>
             }
         />
-        <StatCard title="Total Nilai Stok" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
+        <StatCard 
+            title="Total Nilai Stok" 
+            value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
+            icon={Sigma} 
+            footer={
+                <div className="w-full pt-2 text-xs">
+                    {feed.map(item => {
+                        const itemValue = item.stock * item.pricePerKg;
+                        return (
+                            <div key={item.id} className="flex justify-between">
+                                <span>{item.name}:</span>
+                                <span>Rp {itemValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                            </div>
+                        )
+                    })}
+                </div>
+            }
+        />
         <StatCard 
             title="Total Pakan/Hari" 
             value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} 
@@ -299,3 +316,5 @@ export default function FeedTab() {
     </div>
   );
 }
+
+    
