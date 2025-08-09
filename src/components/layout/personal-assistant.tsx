@@ -79,18 +79,18 @@ const AssistantDialogContent = () => {
         history,
         prompt: currentPrompt,
         imageDataUri: currentImageDataUri ?? undefined,
-        ducks: ducks.map(d => ({...d, entryDate: new Date(d.entryDate).toISOString()})),
+        ducks: ducks.map(d => ({...d, entryDate: d.entryDate.toISOString()})),
         eggProduction: {
-            daily: eggProduction.daily.map(d => ({...d, date: new Date(d.date).toISOString()})),
+            daily: eggProduction.daily.map(d => ({...d, date: d.date.toISOString()})),
             weekly: eggProduction.weekly.map(w => ({
                 ...w, 
-                startDate: new Date(w.startDate).toISOString(), 
-                endDate: new Date(w.endDate).toISOString()
+                startDate: w.startDate.toISOString(), 
+                endDate: w.endDate.toISOString()
             })),
             monthly: eggProduction.monthly,
         },
-        feed: feed.map(f => ({...f, lastUpdated: new Date(f.lastUpdated).toISOString()})),
-        finance: finance.map(t => ({...t, date: new Date(t.date).toISOString()})),
+        feed: feed.map(f => ({...f, lastUpdated: f.lastUpdated.toISOString()})),
+        finance: finance.map(t => ({...t, date: t.date.toISOString()})),
       });
       const aiResponse: Message = { role: 'model', content: result.response };
       setHistory(prev => [...prev, aiResponse]);
@@ -112,7 +112,7 @@ const AssistantDialogContent = () => {
   return (
     <div
         className={cn(
-            "ai-dialog flex flex-col h-screen p-6"
+            "ai-dialog flex flex-col h-full p-6"
         )}
         data-loading={isLoading}
     >
@@ -222,7 +222,8 @@ export default function PersonalAssistant() {
         <DialogOverlay />
         <DialogPrimitive.Content
             className={cn(
-                "fixed left-1/2 top-0 z-50 grid w-full max-w-xl -translate-x-1/2 gap-4 border-none bg-background p-0 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%]"
+                "fixed left-1/2 top-1/2 z-50 grid w-full max-w-xl -translate-x-1/2 -translate-y-1/2 gap-4 border-none bg-background p-0 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-top-[2%] data-[state=open]:slide-in-from-top-[2%]",
+                "h-[90vh]"
             )}
         >
             <AssistantDialogContent />
