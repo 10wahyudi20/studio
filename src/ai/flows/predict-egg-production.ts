@@ -47,7 +47,7 @@ const PredictEggProductionInputSchema = z.object({
 export type PredictEggProductionInput = z.infer<typeof PredictEggProductionInputSchema>;
 
 const DailyPredictionSchema = z.object({
-    day: z.string().describe('Tanggal yang diprediksi (misal: 25 Juli 2024)'),
+    day: z.string().describe("Tanggal yang diprediksi (misal: 25 Juli 2024)"),
     predictedEggs: z.number().describe('Jumlah telur yang diprediksi untuk tanggal tersebut.'),
 });
 
@@ -115,8 +115,9 @@ const predictEggProductionFlow = ai.defineFlow(
 
     // Ensure the output contains a prediction for every day in the range.
     const response = await ai.generate({
+        prompt: predictEggProductionPrompt,
+        input,
         model: 'googleai/gemini-2.0-flash',
-        prompt: predictEggProductionPrompt(input),
         output: {
             schema: PredictEggProductionOutputSchema,
             validate: (output) => {
