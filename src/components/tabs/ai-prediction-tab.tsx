@@ -16,7 +16,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "../ui/input";
 
-const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[], columns: { header: string, accessor: string }[] }) => (
+const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[], columns: { header: string, accessor: string, format?: (value: any) => React.ReactNode }[] }) => (
     <div className="space-y-2">
         <h4 className="font-semibold text-sm">{title}</h4>
         <Card className="bg-muted/50">
@@ -31,7 +31,11 @@ const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[],
                         <tbody>
                             {data.map((item, index) => (
                                 <tr key={index} className="border-t">
-                                    {columns.map(col => <td key={col.accessor} className="p-1">{item[col.accessor]}</td>)}
+                                    {columns.map(col => (
+                                        <td key={col.accessor} className="p-1">
+                                            {col.format ? col.format(item[col.accessor]) : item[col.accessor]}
+                                        </td>
+                                    ))}
                                 </tr>
                             ))}
                         </tbody>
@@ -81,7 +85,8 @@ export default function AiPredictionTab() {
   
   const feedInfoForAI = feed.map(f => ({
       name: f.name,
-      schema: f.schema
+      schema: f.schema,
+      pricePerKg: f.pricePerKg
   }));
 
   const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0;
@@ -106,7 +111,7 @@ export default function AiPredictionTab() {
       const input: PredictEggProductionInput = {
         duckInfo: duckInfoForAI,
         productionInfo: productionInfoForAI,
-        feedInfo: feedInfoForAI,
+        feedInfo: feedInfoForAI.map(({pricePerKg, ...rest}) => rest), // Exclude pricePerKg from AI input
         housingInformation: housingInfo,
         predictionDays: predictionDays
       };
@@ -172,12 +177,17 @@ export default function AiPredictionTab() {
                         { header: "Produktifitas (%)", accessor: "productivity" },
                     ]}
                 />
-                    <DataDisplayCard
+                 <DataDisplayCard
                     title="Informasi Pakan"
                     data={feedInfoForAI}
                     columns={[
                         { header: "Nama Pakan", accessor: "name" },
                         { header: "Skema (g)", accessor: "schema" },
+                        { 
+                            header: "Harga/Kg", 
+                            accessor: "pricePerKg",
+                            format: (value) => `Rp ${value.toLocaleString('id-ID')}`
+                        },
                     ]}
                 />
                     <div className="space-y-2">
@@ -276,5 +286,3 @@ export default function AiPredictionTab() {
     </div>
   );
 }
-
-    
