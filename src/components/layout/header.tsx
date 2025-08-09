@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles } from "lucide-react";
+import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -18,6 +18,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import PersonalAssistant from "@/components/layout/personal-assistant";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
 // Duck Icon SVG
@@ -222,6 +223,9 @@ export default function Header() {
     const { toast } = useToast();
     const router = useRouter();
 
+    const isCloudConnected = !!companyInfo.megaUsername && !!companyInfo.megaPassword;
+
+
     const handleSave = () => {
         // 1. Save to localStorage (internal persistence)
         saveState();
@@ -301,6 +305,19 @@ export default function Header() {
                     <SimpleCalculator />
                 </DialogContent>
             </Dialog>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                      <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
+                      <span className="sr-only">Status Cloud</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Status Mega Cloud: {isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                 <Wifi className="h-5 w-5 text-green-500" />
                 <span className="sr-only">Online</span>
