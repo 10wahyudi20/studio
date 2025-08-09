@@ -472,6 +472,8 @@ export default function ProductionTab() {
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
   const [zoomLevel, setZoomLevel] = React.useState(1);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const contentContainerRef = React.useRef<HTMLDivElement>(null);
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
@@ -595,6 +597,27 @@ export default function ProductionTab() {
     </TableCell>
   );
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      const scrollAmount = 50; // pixels to scroll
+
+      if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          container.scrollTop -= scrollAmount;
+      } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          container.scrollTop += scrollAmount;
+      } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          container.scrollLeft -= scrollAmount;
+      } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          container.scrollLeft += scrollAmount;
+      }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -714,69 +737,73 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-              <div 
-                className="w-full overflow-auto"
-                style={{ maxHeight: '60vh' }}
+              <div
+                  ref={scrollContainerRef}
+                  onKeyDown={handleKeyDown}
+                  tabIndex={0}
+                  className="w-full overflow-auto outline-none"
+                  style={{ maxHeight: '60vh' }}
               >
-                  <div 
-                    style={{ 
-                      width: `${100 / zoomLevel}%`,
-                      height: `${100 / zoomLevel}%`,
-                      transform: `scale(${zoomLevel})`,
-                      transformOrigin: 'top left',
-                    }}
+                  <div
+                      ref={contentContainerRef}
+                      style={{
+                          transform: `scale(${zoomLevel})`,
+                          transformOrigin: 'top left',
+                          width: `${100 * zoomLevel}%`,
+                          height: `${100 * zoomLevel}%`,
+                      }}
                   >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="text-center align-middle">Tanggal</TableHead>
-                        <TableHead className="text-center align-middle">Hari</TableHead>
-                        <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
-                        <TableHead className="text-center align-middle">Produktifitas</TableHead>
-                        {ducks.map(duck => (
-                          <TableHead key={duck.id} className="text-center p-2 align-top">
-                            <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
-                              <div>Kdg {duck.cage}</div>
-                              <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
-                            </div>
-                          </TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {[...eggProduction.daily]
-                        .filter(day => {
-                          const dayDate = new Date(day.date);
-                          return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
-                        })
-                        .reverse()
-                        .map((day, index) => (
-                        <TableRow key={index} onDoubleClick={() => {
-                            const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
-                            formTrigger?.click();
-                        }}>
-                          <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
-                          <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
-                          <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
-                          <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
-                          {ducks.map(duck => {
-                              const production = day.perCage[duck.cage];
-                              const productivity = duck.quantity > 0 && production != null
-                                  ? (production / duck.quantity * 100)
-                                  : 0;
-                              return (
-                                  <TableCell key={duck.id} className="p-0 text-center align-middle">
-                                      <div className="pt-4 pb-2">{production ?? '-'}</div>
-                                      <div className={cn("text-xs py-0.5 w-full mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
-                                        {productivity.toFixed(1)}%
-                                      </div>
-                                  </TableCell>
-                              );
-                          })}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead className="text-center align-middle">Tanggal</TableHead>
+                                  <TableHead className="text-center align-middle">Hari</TableHead>
+                                  <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
+                                  <TableHead className="text-center align-middle">Produktifitas</TableHead>
+                                  {ducks.map(duck => (
+                                      <TableHead key={duck.id} className="text-center p-2 align-top">
+                                          <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
+                                              <div>Kdg {duck.cage}</div>
+                                              <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                                          </div>
+                                      </TableHead>
+                                  ))}
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {[...eggProduction.daily]
+                                  .filter(day => {
+                                      const dayDate = new Date(day.date);
+                                      return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
+                                  })
+                                  .reverse()
+                                  .map((day, index) => (
+                                      <TableRow key={index} onDoubleClick={() => {
+                                          const formTrigger = document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`);
+                                          formTrigger?.click();
+                                      }}>
+                                          <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
+                                          <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
+                                          <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
+                                          <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
+                                          {ducks.map(duck => {
+                                              const production = day.perCage[duck.cage];
+                                              const productivity = duck.quantity > 0 && production != null
+                                                  ? (production / duck.quantity * 100)
+                                                  : 0;
+                                              return (
+                                                  <TableCell key={duck.id} className="p-0 text-center align-middle">
+                                                      <div className="pt-4 pb-2">{production ?? '-'}</div>
+                                                      <div className={cn("text-xs py-0.5 w-full mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
+                                                          {productivity.toFixed(1)}%
+                                                      </div>
+                                                  </TableCell>
+                                              );
+                                          })}
+                                      </TableRow>
+                                  ))}
+                          </TableBody>
+                      </Table>
                   </div>
               </div>
             </TabsContent>
