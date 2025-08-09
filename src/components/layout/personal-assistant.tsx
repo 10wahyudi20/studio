@@ -25,7 +25,6 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const AssistantDialogContent = () => {
-  const { ducks, eggProduction, feed, finance } = useAppStore();
   const [history, setHistory] = React.useState<Message[]>([]);
   const [prompt, setPrompt] = React.useState('');
   const [imageDataUri, setImageDataUri] = React.useState<string | null>(null);
@@ -42,14 +41,12 @@ const AssistantDialogContent = () => {
   }, [isLoading]);
 
   useEffect(() => {
-    // Scroll to the bottom whenever the history changes
     if (viewportRef.current) {
-      // Use setTimeout to allow the DOM to update before scrolling
       setTimeout(() => {
         if (viewportRef.current) {
             viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
         }
-      }, 0);
+      }, 100);
     }
   }, [history]);
 
@@ -85,18 +82,6 @@ const AssistantDialogContent = () => {
         history,
         prompt: currentPrompt,
         imageDataUri: currentImageDataUri ?? undefined,
-        ducks: ducks.map(d => ({...d, entryDate: d.entryDate.toISOString()})),
-        eggProduction: {
-            daily: eggProduction.daily.map(d => ({...d, date: d.date.toISOString()})),
-            weekly: eggProduction.weekly.map(w => ({
-                ...w, 
-                startDate: w.startDate.toISOString(), 
-                endDate: w.endDate.toISOString()
-            })),
-            monthly: eggProduction.monthly,
-        },
-        feed: feed.map(f => ({...f, lastUpdated: f.lastUpdated.toISOString()})),
-        finance: finance.map(t => ({...t, date: t.date.toISOString()})),
       });
       const aiResponse: Message = { role: 'model', content: result.response };
       setHistory(prev => [...prev, aiResponse]);
@@ -125,7 +110,7 @@ const AssistantDialogContent = () => {
         <DialogHeader className="p-6 pb-2 flex-shrink-0">
             <DialogTitle>Asisten AI Pribadi</DialogTitle>
             <DialogDescription>
-            Tanyakan apa saja, atau minta analisis tentang data peternakan Anda.
+            Tanyakan apa saja. Asisten Anda memiliki wawasan yang luas.
             </DialogDescription>
         </DialogHeader>
         
