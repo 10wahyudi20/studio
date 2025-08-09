@@ -75,8 +75,10 @@ export default function AiPredictionTab() {
     to: addDays(new Date(), 6),
   });
 
-
-  const lastDailyRecord = eggProduction.daily.at(-1);
+  const productionHistoryForAI = eggProduction.daily.slice(-30).map(d => ({
+      date: format(new Date(d.date), 'yyyy-MM-dd'),
+      totalEggs: d.totalEggs,
+  }));
 
   const duckInfoForAI = ducks.map(d => ({
       cage: d.cage,
@@ -86,6 +88,7 @@ export default function AiPredictionTab() {
       cageSystem: d.cageSystem
   }));
 
+  const lastDailyRecord = eggProduction.daily.at(-1);
   const productionInfoForAI = lastDailyRecord ? Object.entries(lastDailyRecord.perCage).map(([cage, production]) => {
       const duckInCage = ducks.find(d => String(d.cage) === cage);
       const productivity = (duckInCage && duckInCage.quantity > 0) ? (production / duckInCage.quantity) * 100 : 0;
@@ -333,7 +336,7 @@ export default function AiPredictionTab() {
                                 <span className="sr-only">Putar Audio</span>
                             </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground">{prediction.reasoning}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{prediction.reasoning}</p>
                         {audioError && <Alert variant="destructive" className="mt-2"><AlertDescription>{audioError}</AlertDescription></Alert>}
                         {audio && (
                             <audio controls autoPlay className="w-full h-8 mt-2">
