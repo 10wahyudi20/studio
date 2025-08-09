@@ -79,9 +79,10 @@ const predictEggProductionPrompt = ai.definePrompt({
   2.  **Total Prediksi**: Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
   3.  **Analisis & Rekomendasi Mendalam (Sertakan di 'reasoning')**:
       a.  **Alasan Prediksi Telur**: Berikan alasan yang detail dan logis untuk prediksi Anda. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
-      b.  **Analisis Pakan**: Berikan analisis mendalam tentang penggunaan pakan. Jelaskan tentang pentingnya komposisi nutrisi.
-      c.  **Pakan Pabrikan vs. Mixing**: Berikan informasi tentang keuntungan dan kerugian menggunakan pakan pabrikan dibandingkan membuat pakan mixing sendiri (misalnya dari segi biaya, konsistensi nutrisi, dan tenaga kerja). Berikan tips praktis jika pengguna ingin mencoba membuat pakan mixing.
-      d.  **Rekomendasi**: Berikan rekomendasi konkret yang bisa ditindaklanjuti terkait manajemen pakan untuk optimasi biaya dan peningkatan produksi.
+      b.  **Analisis Pakan & Nutrisi**: Berikan analisis mendalam tentang penggunaan pakan saat ini. Jelaskan tentang pentingnya komposisi nutrisi (protein, energi, kalsium) untuk bebek petelur.
+      c.  **Pakan Pabrikan**: Sebutkan beberapa contoh merek pakan pabrikan yang populer di Indonesia (misalnya: Charoen Pokphand, Japfa Comfeed, New Hope). Jelaskan kelebihan pakan pabrikan seperti konsistensi nutrisi dan kepraktisan.
+      d.  **Pakan Mixing (Campuran Sendiri)**: Berikan informasi mendalam tentang pakan mixing. Jelaskan potensi keuntungan (biaya lebih rendah) dan kerugian (inkonsistensi nutrisi, butuh tenaga lebih). Berikan contoh resep dasar pakan mixing (misal: kombinasi dedak, jagung giling, konsentrat, dan mineral) dan tips untuk menjaga kualitasnya.
+      e.  **Vitamin & Mineral**: Jelaskan pentingnya suplemen vitamin (seperti Vitachick atau Neobro) dan mineral untuk kesehatan, daya tahan tubuh, dan kualitas cangkang telur. Berikan rekomendasi penggunaannya.
 
   **CONTOH FORMAT JSON OUTPUT YANG DIHARAPKAN:**
   Pastikan nama field di dalam array 'dailyPredictions' adalah **'predictedEggs'**.
@@ -91,7 +92,7 @@ const predictEggProductionPrompt = ai.definePrompt({
       { "day": "01 Januari 2025", "predictedEggs": 120 },
       { "day": "02 Januari 2025", "predictedEggs": 122 }
     ],
-    "reasoning": "Analisis prediksi telur...\n\n**Analisis dan Rekomendasi Pakan:**\nAnalisis penggunaan pakan saat ini...\n\n**Pakan Pabrikan vs. Mixing:**\nKeuntungan pakan pabrikan adalah... Namun, kerugiannya adalah...\nMembuat pakan mixing sendiri bisa lebih hemat biaya karena... Tips untuk memulai:...",
+    "reasoning": "Analisis prediksi telur...\n\n**Analisis Pakan & Nutrisi:**\nKomposisi nutrisi pakan saat ini adalah... Pentingnya protein adalah untuk...\n\n**Pakan Pabrikan:**\nBeberapa merek pakan pabrikan yang populer adalah... Kelebihannya adalah...\n\n**Pakan Mixing (Campuran Sendiri):**\nPakan mixing bisa menekan biaya karena... Namun, tantangannya adalah... Contoh resep dasar:...\n\n**Vitamin & Mineral:**\nPenggunaan Vitachick dapat membantu meningkatkan...",
     "totalPredictedProduction": 242
   }
   \`\`\`
@@ -159,3 +160,4 @@ const predictEggProductionFlow = ai.defineFlow(
     return { ...output, dailyPredictions: sortedPredictions };
   }
 );
+
