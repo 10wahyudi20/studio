@@ -334,28 +334,38 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   );
 };
 
-const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#0088FE", "#00C49F"];
+const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6"];
 
 const renderCustomizedLabel = (props: any) => {
-    const { cx, cy, midAngle, innerRadius, outerRadius, percent, value } = props;
+    const { cx, cy, midAngle, outerRadius, percent, value, name } = props;
     const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const radius = outerRadius + 25; // position label outside the pie
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const sin = Math.sin(-RADIAN * midAngle);
+    const cos = Math.cos(-RADIAN * midAngle);
+    const sx = cx + (outerRadius + 10) * cos;
+    const sy = cy + (outerRadius + 10) * sin;
+    const mx = cx + (outerRadius + 20) * cos;
+    const my = cy + (outerRadius + 20) * sin;
+    const ex = mx + (cos >= 0 ? 1 : -1) * 12;
+    const ey = my;
+    const textAnchor = cos >= 0 ? 'start' : 'end';
+
 
     if (percent === 0) return null;
 
     return (
-        <text
-            x={x}
-            y={y}
-            fill="white"
-            textAnchor={x > cx ? 'start' : 'end'}
-            dominantBaseline="central"
-            className="text-xs font-bold"
-        >
-            {`${value.toLocaleString('id-ID')} - ${(percent * 100).toFixed(0)}%`}
-        </text>
+        <g>
+            <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={props.fill} fill="none" />
+            <circle cx={ex} cy={ey} r={2} fill={props.fill} stroke="none" />
+            <text x={ex + (cos >= 0 ? 1 : -1) * 6} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" dy={-6} className="text-xs">
+                {name}
+            </text>
+            <text x={ex + (cos >= 0 ? 1 : -1) * 6} y={ey} textAnchor={textAnchor} fill="hsl(var(--foreground))" dy={6} className="text-xs font-bold">
+                {`${value.toLocaleString('id-ID')} (${(percent * 100).toFixed(0)}%)`}
+            </text>
+        </g>
     );
 };
 
@@ -412,12 +422,11 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
                 <CardHeader><CardTitle>Komposisi Total Produksi</CardTitle></CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <RechartsPieChart>
-                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
+                        <RechartsPieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
+                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <Tooltip />
-                            <Legend />
                         </RechartsPieChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -487,12 +496,11 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                 <CardHeader><CardTitle>Komposisi Total Produksi (Bulan Ini)</CardTitle></CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <RechartsPieChart>
-                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
+                        <RechartsPieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
+                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <Tooltip />
-                            <Legend />
                         </RechartsPieChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -1016,3 +1024,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
