@@ -15,7 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription, AlertTitle as AlertTitleComponent } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -442,3 +442,5 @@ export default function SettingsTab() {
     </div>
   );
 }
+
+    
