@@ -221,7 +221,13 @@ export default function FinanceTab() {
             valueClassName={netProfit < 0 ? 'text-red-500' : ''}
             iconClassName={netProfit < 0 ? 'text-red-500' : ''}
         />
-        <StatCard title="Margin Keuntungan" value={`${profitMargin}%`} icon={Scale} />
+        <StatCard 
+            title="Margin Keuntungan" 
+            value={`${profitMargin}%`} 
+            icon={Scale} 
+            valueClassName={netProfit < 0 ? 'text-red-500' : ''}
+            iconClassName={netProfit < 0 ? 'text-red-500' : ''}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
