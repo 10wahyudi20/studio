@@ -100,6 +100,7 @@ const predictEggProductionPrompt = ai.definePrompt({
   PERIODE PREDIKSI: Dari {{startDate}} hingga {{endDate}}.
   
   Berikan respons dalam format JSON.`,
+  model: 'googleai/gemini-2.0-flash',
 });
 
 const predictEggProductionFlow = ai.defineFlow(
@@ -113,13 +114,8 @@ const predictEggProductionFlow = ai.defineFlow(
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    // Ensure the output contains a prediction for every day in the range.
-    const response = await ai.generate({
-        prompt: predictEggProductionPrompt,
-        input,
-        model: 'googleai/gemini-2.0-flash',
+    const response = await predictEggProductionPrompt(input, {
         output: {
-            schema: PredictEggProductionOutputSchema,
             validate: (output) => {
                 const dayCount = differenceInDays(end, start) + 1;
                 if (output.dailyPredictions.length !== dayCount) {
