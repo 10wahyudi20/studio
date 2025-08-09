@@ -212,9 +212,12 @@ export default function FinanceTab() {
         <StatCard title="Margin Keuntungan" value={`${profitMargin}%`} icon={Scale} />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
-        <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Pembukuan</h2>
+        <div className="space-y-6">
+            <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
+            <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
+        </div>
       </div>
 
     </div>
