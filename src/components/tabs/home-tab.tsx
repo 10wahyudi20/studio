@@ -251,6 +251,3 @@ export default function HomeTab() {
     </div>
   );
 }
-
-    
-    
