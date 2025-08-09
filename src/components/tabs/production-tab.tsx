@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown } from "lucide-react";
-import { format, addDays, startOfMonth, endOfMonth } from "date-fns";
+import { format, addDays, startOfMonth, endOfMonth, isToday } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -43,40 +43,35 @@ const dailySchemaGenerator = (ducks: Duck[]) => {
 
 type DailyFormData = z.infer<ReturnType<typeof dailySchemaGenerator>>;
 
-const DailyDataForm = ({ production, onSave, children }: { production?: DailyProduction, onSave: (date: Date, data: DailyFormData) => void, children: React.ReactNode }) => {
+const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { production?: DailyProduction, onSave: (date: Date, data: DailyFormData) => void, children: React.ReactNode, open: boolean, onOpenChange: (open: boolean) => void; }) => {
     const { ducks } = useAppStore();
     const { toast } = useToast();
-    const [open, setOpen] = React.useState(false);
+    
+    const isEditMode = !!production;
 
     const dailySchema = dailySchemaGenerator(ducks);
     
-    // Set default values directly based on props. This is more reliable.
-    const defaultValues = React.useMemo(() => {
-        return production
-            ? {
-                  date: new Date(production.date),
-                  perCage: ducks.reduce(
-                      (acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }),
-                      {}
-                  ),
-              }
-            : {
-                  date: new Date(),
-                  perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
-              };
-    }, [production, ducks]);
-
     const { control, handleSubmit, register, watch, formState: { errors }, reset } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
-        defaultValues,
     });
     
-    // Reset the form whenever the dialog opens or the default values change
     React.useEffect(() => {
         if (open) {
+            const defaultValues = production
+                ? {
+                      date: new Date(production.date),
+                      perCage: ducks.reduce(
+                          (acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }),
+                          {}
+                      ),
+                  }
+                : {
+                      date: new Date(),
+                      perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
+                  };
             reset(defaultValues);
         }
-    }, [open, defaultValues, reset]);
+    }, [open, production, ducks, reset]);
 
 
     const allValues = watch();
@@ -88,19 +83,19 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
 
 
     const onSubmit = (data: DailyFormData) => {
-        onSave(production ? new Date(production.date) : data.date, data);
-        setOpen(false);
-        toast({ title: `Data Harian ${production ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk tanggal ${format(data.date, "dd/MM/yyyy")} telah ${production ? 'diperbarui' : 'disimpan'}.` });
+        onSave(data.date, data);
+        onOpenChange(false);
+        toast({ title: `Data Harian ${isEditMode ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk tanggal ${format(data.date, "dd/MM/yyyy")} telah ${isEditMode ? 'diperbarui' : 'disimpan'}.` });
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                  <form onSubmit={handleSubmit(onSubmit)}>
-                    <DialogHeader><DialogTitle>{production ? 'Edit' : 'Input'} Data Produksi Harian</DialogTitle></DialogHeader>
+                    <DialogHeader><DialogTitle>{isEditMode ? 'Edit' : 'Input'} Data Produksi Harian</DialogTitle></DialogHeader>
                     
                     <div className="space-y-4 py-4">
                         <Controller
@@ -109,7 +104,7 @@ const DailyDataForm = ({ production, onSave, children }: { production?: DailyPro
                             render={({ field }) => (
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")} disabled={!!production}>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")} disabled={isEditMode}>
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.value ? format(field.value, "dd/MM/yyyy", { locale: idLocale }) : <span>Pilih tanggal</span>}
                                         </Button>
@@ -489,9 +484,9 @@ export default function ProductionTab() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
-  const [zoomLevel, setZoomLevel] = React.useState(1);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   
+  const [isDailyFormOpen, setIsDailyFormOpen] = React.useState(false);
   const [editingProduction, setEditingProduction] = React.useState<DailyProduction | undefined>(undefined);
   
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -562,10 +557,14 @@ export default function ProductionTab() {
 
   const handleRowDoubleClick = (day: DailyProduction) => {
       setEditingProduction(day);
-      // We need a way to imperatively open the dialog.
-      // A simple way is to have a button and click it programmatically.
-      document.getElementById(`edit-daily-trigger-${day.date.toISOString()}`)?.click();
+      setIsDailyFormOpen(true);
   };
+  
+  const handleInputDataClick = () => {
+    const todayRecord = eggProduction.daily.find(d => isToday(new Date(d.date)));
+    setEditingProduction(todayRecord); // Will be undefined if no record for today, which is correct
+    setIsDailyFormOpen(true);
+  }
 
   const weeklyDataForMonth = eggProduction.weekly
     .filter(w => {
@@ -622,25 +621,6 @@ export default function ProductionTab() {
         </div>
     </TableCell>
   );
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const container = scrollContainerRef.current;
-      if (!container) return;
-
-      const scrollAmount = 100; // pixels to scroll
-      
-      e.preventDefault(); // Prevent default browser behavior for arrow keys
-
-      if (e.key === 'ArrowUp') {
-          container.scrollTop -= scrollAmount;
-      } else if (e.key === 'ArrowDown') {
-          container.scrollTop += scrollAmount;
-      } else if (e.key === 'ArrowLeft') {
-          container.scrollLeft -= scrollAmount;
-      } else if (e.key === 'ArrowRight') {
-          container.scrollLeft += scrollAmount;
-      }
-  };
 
   return (
     <div className="space-y-6">
@@ -738,19 +718,10 @@ export default function ProductionTab() {
                     )}
 
                     {activeTab === 'daily' && (
-                        <>
-                        <div className="flex items-center gap-1">
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.1))}><ZoomOut className="h-4 w-4"/></Button>
-                            <span className="text-sm font-medium w-16 text-center">{Math.round(zoomLevel * 100)}%</span>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(2, prev + 0.1))}><ZoomIn className="h-4 w-4"/></Button>
-                        </div>
-                        <DailyDataForm onSave={handleDailySave}>
-                            <Button>
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Input Data Harian
-                            </Button>
-                        </DailyDataForm>
-                        </>
+                        <Button onClick={handleInputDataClick}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Input Data Harian
+                        </Button>
                     )}
                     {activeTab === 'weekly' && (
                         <WeeklyDataForm onSave={addWeeklyProduction}>
@@ -763,17 +734,10 @@ export default function ProductionTab() {
             <TabsContent value="daily">
              <div
                   ref={scrollContainerRef}
-                  onKeyDown={handleKeyDown}
                   tabIndex={0}
                   className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   style={{ maxHeight: '60vh' }}
               >
-                  <div
-                      style={{
-                          transform: `scale(${zoomLevel})`,
-                          transformOrigin: 'top left',
-                      }}
-                  >
                       <Table>
                           <TableHeader>
                               <TableRow>
@@ -822,18 +786,16 @@ export default function ProductionTab() {
                                   ))}
                           </TableBody>
                       </Table>
-                  </div>
               </div>
-               {/* This is a bit of a hack to allow imperatively opening the dialog for editing */}
-              {editingProduction && (
-                 <DailyDataForm 
-                    key={editingProduction.date.toISOString()} // Force re-render
-                    production={editingProduction} 
-                    onSave={handleDailySave}
+               <DailyDataForm 
+                  open={isDailyFormOpen}
+                  onOpenChange={setIsDailyFormOpen}
+                  production={editingProduction} 
+                  onSave={handleDailySave}
                 >
-                    <button id={`edit-daily-trigger-${editingProduction.date.toISOString()}`} className="hidden" />
-                 </DailyDataForm>
-              )}
+                    {/* The Dialog is controlled by state, no trigger needed here */}
+                    <div />
+               </DailyDataForm>
             </TabsContent>
             <TabsContent value="weekly">
               <div className="overflow-x-auto">
