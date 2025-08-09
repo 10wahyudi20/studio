@@ -119,7 +119,7 @@ const AssistantDialogContent = () => {
         <DialogHeader>
             <DialogTitle>Asisten AI Pribadi</DialogTitle>
             <DialogDescription>
-            Ketik "hallo bebek" untuk memulai analisis peternakan Anda. Riwayat obrolan hanya sementara.
+            Tanyakan apa saja, atau minta analisis tentang data peternakan Anda.
             </DialogDescription>
         </DialogHeader>
         <div className="flex-grow my-4 overflow-hidden">

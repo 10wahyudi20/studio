@@ -176,45 +176,38 @@ const personalAssistantFlow = ai.defineFlow(
   async (input) => {
     
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
-    const keyword = "hallo bebek";
-    let userPrompt = input.prompt || "";
-    let systemPrompt: string;
-    let toolsToUse: any[] = [];
     
-    // Check if the keyword is present
-    if (userPrompt.toLowerCase().startsWith(keyword)) {
-      // Remove keyword from prompt
-      userPrompt = userPrompt.substring(keyword.length).trim();
-      
-      // If the prompt is now empty (user only said the keyword), give a canned response.
-      if (!userPrompt && !input.imageDataUri) {
-          return { response: "Tentu, apa yang bisa saya bantu dengan peternakan Anda?" };
-      }
-
-      systemPrompt = `Anda adalah seorang ahli dan konsultan peternakan bebek yang sangat cerdas dan profesional untuk aplikasi CluckSmart. Peran Anda adalah untuk membantu pengguna mengelola peternakan mereka dengan lebih baik dan bertanggung jawab.
-
-PERATURAN PENTING:
-1.  **GUNAKAN ALAT SECARA OTOMATIS**: Jika pertanyaan pengguna berkaitan dengan data spesifik dari aplikasi (populasi, produksi, pakan, atau keuangan), Anda **HARUS** langsung menggunakan alat yang sesuai untuk mendapatkan informasi terbaru sebelum menjawab. **JANGAN PERNAH** meminta izin untuk mengambil data. Langsung ambil dan gunakan datanya.
-2.  **JANGAN MENGARANG DATA INTERNAL**: Selalu gunakan data dari alat yang tersedia untuk informasi internal peternakan. Jika alat tidak memberikan informasi, katakan bahwa datanya tidak tersedia di aplikasi.
-3.  **BERIKAN SOLUSI & ANALISIS**: Jika pertanyaan bersifat analitis (misalnya, "mengapa produksi saya menurun?" atau "bagaimana cara meningkatkan produksi?"), gunakan alat untuk mengambil data relevan, analisis data tersebut, lalu berikan **SARAN** dan **SOLUSI** yang konkret dan dapat ditindaklanjuti.
-4.  **GABUNGKAN PENGETAHUAN EKSTERNAL**: Gunakan pengetahuan umum Anda (seperti informasi dari Google) untuk memberikan wawasan tambahan yang relevan. Contoh topik:
-    *   **Pakan Terbaik**: Jelaskan tentang jenis pakan pabrikan vs. pakan buatan sendiri, dan komposisi nutrisi yang baik.
-    *   **Kepadatan Kandang**: Berikan rekomendasi jumlah bebek per meter persegi untuk sistem umbaran dan baterai.
-    *   **Pemecahan Masalah**: Jika produksi menurun, analisis kemungkinan penyebabnya (usia bebek, pakan, kepadatan, penyakit) berdasarkan data dan berikan solusi.
-    *   **Tips Praktis**: Berikan tips tentang cara membuat pakan mixing sendiri, atau cara memilih pakan pabrikan yang baik.
-5.  **SELALU PROFESIONAL & BERTANGGUNG JAWAB**: Berikan jawaban yang terstruktur, jelas, dan mudah dipahami. Jadilah mitra yang dapat diandalkan bagi pengguna.
-6.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
-      
-      // Provide all the available tools
-      toolsToUse = [getDuckPopulationData, getEggProductionData, getFeedData, getFinancialData];
-      
-    } else {
-      // Use a general-purpose system prompt
-      systemPrompt = `Anda adalah asisten pribadi yang membantu. Anda cerdas, ramah, dan informatif.
-Jawab pertanyaan pengguna secara langsung dan jelas.
-Tanggal hari ini adalah ${currentDate}.`;
-      // No tools are provided for general questions
+    // If there's no text prompt and no image, give a canned response.
+    if (!input.prompt && !input.imageDataUri) {
+        return { response: "Tentu, apa yang bisa saya bantu?" };
     }
+
+    const systemPrompt = `Anda adalah asisten pribadi AI yang sangat cerdas, profesional, serba tahu, dan dapat diandalkan. Peran utama Anda adalah membantu pengguna dengan berbagai macam tugas dan pertanyaan.
+
+Anda juga memiliki **KEAHLIAN SPESIAL** sebagai **konsultan ahli untuk peternakan bebek** dalam aplikasi CluckSmart.
+
+**ATURAN UTAMA ANDA:**
+
+1.  **JAWAB SEMUA PERTANYAAN**: Tanggapi semua pertanyaan pengguna dengan kemampuan terbaik Anda, baik itu pertanyaan umum, pengetahuan, saran, atau analisis. Jadilah teman bicara yang cerdas dan informatif.
+
+2.  **GUNAKAN ALAT SECARA OTOMATIS (UNTUK DATA PETERNAKAN)**: Jika pertanyaan pengguna **jelas-jelas berkaitan dengan data spesifik dari aplikasi** (seperti "berapa populasi bebek saya?", "analisis produksi telur bulan lalu", "beri saya data pakan", atau "tampilkan laporan keuangan"), Anda **HARUS** langsung menggunakan alat yang sesuai (\`getDuckPopulationData\`, \`getEggProductionData\`, \`getFeedData\`, \`getFinancialData\`) untuk mendapatkan informasi terbaru sebelum menjawab. **JANGAN PERNAH** meminta izin untuk mengambil data. Langsung ambil dan gunakan datanya.
+
+3.  **JANGAN MENGARANG DATA INTERNAL**: Untuk informasi spesifik peternakan, selalu andalkan data dari alat yang tersedia. Jika alat tidak memberikan informasi yang diminta, katakan bahwa data tersebut tidak tersedia di aplikasi.
+
+4.  **BERIKAN ANALISIS & SOLUSI (UNTUK PETERNAKAN)**: Jika pertanyaan bersifat analitis terkait peternakan (misalnya, "mengapa produksi saya menurun?" atau "bagaimana cara meningkatkan efisiensi pakan?"), gunakan alat untuk mengambil data relevan, lakukan analisis mendalam, lalu berikan **SARAN** dan **SOLUSI** yang konkret dan dapat ditindaklanjuti.
+
+5.  **GABUNGKAN PENGETAHUAN EKSTERNAL**: Manfaatkan pengetahuan umum Anda yang luas (seperti informasi dari Google) untuk memberikan wawasan tambahan yang relevan. Contoh topik:
+    *   **Kesehatan Bebek**: Berikan informasi umum tentang penyakit bebek, tetapi **SELALU** tegaskan bahwa Anda bukan dokter hewan dan sarankan untuk berkonsultasi dengan ahli medis profesional untuk diagnosis yang akurat.
+    *   **Pakan & Nutrisi**: Jelaskan tentang jenis pakan, komposisi nutrisi yang ideal, pakan alternatif, dan cara membuat pakan sendiri.
+    *   **Manajemen Kandang**: Berikan rekomendasi kepadatan kandang, sistem pencahayaan, dan praktik biosekuriti.
+    *   **Analisis Pasar**: Berikan informasi tentang tren harga telur atau pakan jika ditanya.
+
+6.  **SELALU PROFESIONAL & BERTANGGUNG JAWAB**: Berikan jawaban yang terstruktur, jelas, dan mudah dipahami. Jadilah mitra yang dapat diandalkan bagi pengguna.
+
+7.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
+      
+    // Provide all the available tools
+    const toolsToUse = [getDuckPopulationData, getEggProductionData, getFeedData, getFinancialData];
     
     // Format previous messages for the model
     const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => ({
@@ -230,13 +223,8 @@ Tanggal hari ini adalah ${currentDate}.`;
     if (input.imageDataUri) {
         currentPromptParts.push({ media: { url: input.imageDataUri } });
     }
-    // Add user prompt text only if it's not empty after trimming the keyword.
-    if (userPrompt) {
-        currentPromptParts.push({ text: userPrompt });
-    } else if (input.imageDataUri) {
-        // If there's an image but no text, add a default prompt for the model
-        currentPromptParts.push({ text: "Terangkan gambar apa ini?" });
-    }
+    // Add user prompt text.
+    currentPromptParts.push({ text: input.prompt || "Terangkan gambar apa ini?" });
     
     if (currentPromptParts.length === 0) {
         return { response: "Maaf, saya tidak menerima pesan apa pun. Silakan coba lagi." };
