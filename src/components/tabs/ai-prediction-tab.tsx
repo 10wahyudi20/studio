@@ -17,7 +17,7 @@ import { DateRange } from "react-day-picker";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
-import { format, addDays } from 'date-fns';
+import { format, addDays, differenceInDays } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 
