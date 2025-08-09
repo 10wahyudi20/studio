@@ -151,46 +151,44 @@ export default function AiPredictionTab() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <ScrollArea className="h-[96] pr-4">
-                <div className="space-y-4">
+            <div className="space-y-4">
+                <DataDisplayCard
+                    title="Informasi Populasi Bebek"
+                    data={duckInfoForAI}
+                    columns={[
+                        { header: "Kdg", accessor: "cage" },
+                        { header: "Jml", accessor: "quantity" },
+                        { header: "Usia", accessor: "ageMonths" },
+                        { header: "Ukuran", accessor: "cageSize" },
+                        { header: "Sistem", accessor: "cageSystem" },
+                    ]}
+                />
+                <DataDisplayCard
+                    title={`Informasi Produksi (Data Terakhir)`}
+                    data={productionInfoForAI}
+                    columns={[
+                        { header: "Kdg", accessor: "cage" },
+                        { header: "Produksi", accessor: "production" },
+                        { header: "Produktifitas (%)", accessor: "productivity" },
+                    ]}
+                />
                     <DataDisplayCard
-                        title="Informasi Populasi Bebek"
-                        data={duckInfoForAI}
-                        columns={[
-                            { header: "Kdg", accessor: "cage" },
-                            { header: "Jml", accessor: "quantity" },
-                            { header: "Usia", accessor: "ageMonths" },
-                            { header: "Ukuran", accessor: "cageSize" },
-                            { header: "Sistem", accessor: "cageSystem" },
-                        ]}
-                    />
-                    <DataDisplayCard
-                        title={`Informasi Produksi (Data Terakhir)`}
-                        data={productionInfoForAI}
-                        columns={[
-                            { header: "Kdg", accessor: "cage" },
-                            { header: "Produksi", accessor: "production" },
-                            { header: "Produktifitas (%)", accessor: "productivity" },
-                        ]}
-                    />
-                     <DataDisplayCard
-                        title="Informasi Pakan"
-                        data={feedInfoForAI}
-                        columns={[
-                            { header: "Nama Pakan", accessor: "name" },
-                            { header: "Skema (g)", accessor: "schema" },
-                        ]}
-                    />
-                     <div className="space-y-2">
-                        <Label htmlFor="housingInformation" className="font-semibold text-sm">Informasi Kandang & Lingkungan (Opsional)</Label>
-                        <Textarea id="housingInformation" value={housingInfo} onChange={(e) => setHousingInfo(e.target.value)} rows={3} />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="predictionDays" className="font-semibold text-sm">Hari untuk di Prediksi</Label>
-                        <Input id="predictionDays" type="number" value={predictionDays} onChange={(e) => setPredictionDays(Number(e.target.value))} min={1} />
-                    </div>
+                    title="Informasi Pakan"
+                    data={feedInfoForAI}
+                    columns={[
+                        { header: "Nama Pakan", accessor: "name" },
+                        { header: "Skema (g)", accessor: "schema" },
+                    ]}
+                />
+                    <div className="space-y-2">
+                    <Label htmlFor="housingInformation" className="font-semibold text-sm">Informasi Kandang & Lingkungan (Opsional)</Label>
+                    <Textarea id="housingInformation" value={housingInfo} onChange={(e) => setHousingInfo(e.target.value)} rows={3} />
                 </div>
-            </ScrollArea>
+                    <div className="space-y-2">
+                    <Label htmlFor="predictionDays" className="font-semibold text-sm">Hari untuk di Prediksi</Label>
+                    <Input id="predictionDays" type="number" value={predictionDays} onChange={(e) => setPredictionDays(Number(e.target.value))} min={1} />
+                </div>
+            </div>
         </CardContent>
         <CardFooter>
             <Button onClick={handleSubmit} disabled={isLoading || !canPredict}>
@@ -278,3 +276,5 @@ export default function AiPredictionTab() {
     </div>
   );
 }
+
+    
