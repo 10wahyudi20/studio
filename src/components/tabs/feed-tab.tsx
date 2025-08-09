@@ -205,7 +205,24 @@ export default function FeedTab() {
             }
         />
         <StatCard title="Total Nilai Stok" value={`Rp ${totalStockValue.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} icon={Sigma} />
-        <StatCard title="Total Pakan/Hari" value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} icon={Wheat} />
+        <StatCard 
+            title="Total Pakan/Hari" 
+            value={`${totalFeedPerDay.toLocaleString('id-ID')} Kg`} 
+            icon={Wheat} 
+            footer={
+                <div className="w-full pt-2 text-xs">
+                    {feed.map(item => {
+                        const dailyConsumption = totalDucks * item.schema / 1000;
+                        return (
+                            <div key={item.id} className="flex justify-between">
+                                <span>{item.name}:</span>
+                                <span>{dailyConsumption.toLocaleString('id-ID', {minimumFractionDigits: 1, maximumFractionDigits: 1})} Kg</span>
+                            </div>
+                        )
+                    })}
+                </div>
+            }
+        />
       </div>
 
       <Card>
