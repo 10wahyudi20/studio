@@ -601,7 +601,7 @@ export default function ProductionTab() {
       const container = scrollContainerRef.current;
       if (!container) return;
 
-      const scrollAmount = 50; // pixels to scroll
+      const scrollAmount = 100; // pixels to scroll
 
       if (e.key === 'ArrowUp') {
           e.preventDefault();
@@ -792,7 +792,7 @@ export default function ProductionTab() {
                                               return (
                                                   <TableCell key={duck.id} className="p-0 text-center align-middle">
                                                       <div className="pt-4 pb-2">{production ?? '-'}</div>
-                                                      <div className={cn("text-xs py-0.5 w-full mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
+                                                      <div className={cn("text-xs py-0.5 w-11/12 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
                                                           {productivity.toFixed(1)}%
                                                       </div>
                                                   </TableCell>
