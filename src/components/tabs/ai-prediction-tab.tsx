@@ -195,7 +195,7 @@ export default function AiPredictionTab() {
                     data={productionInfoForAI}
                     columns={[
                         { header: "Kdg", accessor: "cage" },
-                        { header: "Produksi", accessor: "production" },
+                        { header: "Telur/Kandang", accessor: "production" },
                         { header: "Produktifitas (%)", accessor: "productivity" },
                     ]}
                 />
