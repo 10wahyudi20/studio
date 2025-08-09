@@ -16,7 +16,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "../ui/input";
 
-const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[], columns: { header: string, accessor: string, format?: (value: any) => React.ReactNode }[] }) => (
+const DataDisplayCard = ({ title, data, columns, footerData }: { title: string, data: any[], columns: { header: string, accessor: string, format?: (value: any) => React.ReactNode }[], footerData?: React.ReactNode }) => (
     <div className="space-y-2">
         <h4 className="font-semibold text-sm">{title}</h4>
         <Card className="bg-muted/50">
@@ -39,6 +39,11 @@ const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[],
                                 </tr>
                             ))}
                         </tbody>
+                        {footerData && (
+                            <tfoot>
+                                {footerData}
+                            </tfoot>
+                        )}
                     </table>
                 ) : (
                     <p className="text-xs text-center text-muted-foreground p-2">Tidak ada data.</p>
@@ -90,6 +95,9 @@ export default function AiPredictionTab() {
       schema: f.schema,
       dailyConsumption: (totalDucks * f.schema) / 1000 // in Kg
   }));
+  
+  const totalSchema = feedInfoForAI.reduce((sum, f) => sum + f.schema, 0);
+  const totalDailyConsumption = feedInfoForAI.reduce((sum, f) => sum + f.dailyConsumption, 0);
 
   const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0;
 
@@ -191,6 +199,13 @@ export default function AiPredictionTab() {
                             format: (value) => `${value.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`
                         },
                     ]}
+                    footerData={
+                        <tr className="border-t font-bold">
+                            <td className="p-1">Total</td>
+                            <td className="p-1">{totalSchema} g</td>
+                            <td className="p-1">{totalDailyConsumption.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg</td>
+                        </tr>
+                    }
                 />
                     <div className="space-y-2">
                     <Label htmlFor="housingInformation" className="font-semibold text-sm">Informasi Kandang & Lingkungan (Opsional)</Label>
