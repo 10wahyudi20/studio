@@ -112,7 +112,7 @@ const AssistantDialogContent = () => {
   return (
     <div
         className={cn(
-            "ai-dialog flex flex-col h-[70vh] p-6"
+            "ai-dialog flex flex-col h-[90vh] p-6"
         )}
         data-loading={isLoading}
     >
