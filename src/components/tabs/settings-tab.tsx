@@ -36,6 +36,7 @@ const MegaCloudAuthDialog = () => {
     const { toast } = useToast();
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [showPassword, setShowPassword] = React.useState(false);
     const [isOpen, setIsOpen] = React.useState(false);
     const [isAuthSuccessful, setIsAuthSuccessful] = React.useState(false);
 
@@ -47,6 +48,7 @@ const MegaCloudAuthDialog = () => {
             // Reset state on close
             setUsername('');
             setPassword('');
+            setShowPassword(false);
             setIsAuthSuccessful(false);
         }
     };
@@ -95,8 +97,14 @@ const MegaCloudAuthDialog = () => {
                                 <Input id="mega-username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username Mega Anda" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="mega-password">Password</Label>
-                                <Input id="mega-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password Mega Anda" />
+                                <Label htmlFor="mega-password-dialog">Password</Label>
+                                <div className="relative">
+                                    <Input id="mega-password-dialog" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password Mega Anda" />
+                                    <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        <span className="sr-only">{showPassword ? "Sembunyikan" : "Tampilkan"} password</span>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                         <DialogFooter>
@@ -442,5 +450,3 @@ export default function SettingsTab() {
     </div>
   );
 }
-
-    
