@@ -18,7 +18,7 @@ const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, des
         </CardHeader>
         <CardContent>
             <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            {description && <div className="text-xs text-muted-foreground">{description}</div>}
             {footer && (
               <>
                 <Separator className="my-2" />
@@ -252,4 +252,5 @@ export default function HomeTab() {
   );
 }
 
+    
     
