@@ -113,49 +113,54 @@ const AssistantDialogContent = () => {
     <div
         className={cn(
             "ai-dialog flex flex-col h-full",
-            "p-0 sm:p-6"
         )}
         data-loading={isLoading}
     >
-        <DialogHeader className="p-6 sm:p-0 flex-shrink-0">
+        <DialogHeader className="p-6 pb-2 flex-shrink-0">
             <DialogTitle>Asisten AI Pribadi</DialogTitle>
             <DialogDescription>
             Tanyakan apa saja, atau minta analisis tentang data peternakan Anda.
             </DialogDescription>
         </DialogHeader>
+        
         <div className="flex-grow my-4 overflow-hidden">
             <ScrollArea className="h-full pr-4" viewportRef={viewportRef}>
-            <div className="space-y-4 pr-2 sm:pr-0">
-                {history.length === 0 && !imageDataUri && (
-                <div className="text-center text-muted-foreground py-8">
-                    <Bot className="mx-auto h-12 w-12" />
-                    <p className="mt-2">Bagaimana saya bisa membantu Anda hari ini?</p>
-                </div>
-                )}
-                {history.map((msg, index) => (
-                <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
-                    {msg.role === 'model' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
-                    <div className={cn("p-3 rounded-lg max-w-sm", msg.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
-                    {msg.imageUrl && <Image src={msg.imageUrl} alt="Lampiran" width={200} height={200} className="rounded-md mb-2" />}
-                    <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                <div className="space-y-4 pr-2 sm:pr-0">
+                    {history.length === 0 && !imageDataUri && (
+                    <div className="text-center text-muted-foreground py-8">
+                        <Bot className="mx-auto h-12 w-12" />
+                        <p className="mt-2">Bagaimana saya bisa membantu Anda hari ini?</p>
                     </div>
-                    {msg.role === 'user' && <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
-                </div>
-                ))}
-                {isLoading && (
-                <div className="flex items-start gap-3">
-                    <Bot className="h-6 w-6 text-primary flex-shrink-0" />
-                    <div className="p-3 rounded-lg bg-muted">
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    )}
+                    {history.map((msg, index) => (
+                    <div key={index} className={cn("flex items-start gap-3", msg.role === 'user' ? 'justify-end' : '')}>
+                        {msg.role === 'model' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
+                        <div className={cn("p-3 rounded-lg max-w-sm", msg.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
+                        {msg.imageUrl && <Image src={msg.imageUrl} alt="Lampiran" width={200} height={200} className="rounded-md mb-2" />}
+                        <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                        </div>
+                        {msg.role === 'user' && <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
                     </div>
+                    ))}
+                    {isLoading && (
+                    <div className="flex items-start gap-3">
+                        <Bot className="h-6 w-6 text-primary flex-shrink-0" />
+                        <div className="p-3 rounded-lg bg-muted">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        </div>
+                    </div>
+                    )}
                 </div>
-                )}
-            </div>
             </ScrollArea>
         </div>
-        {error && <Alert variant="destructive" className="mb-4 flex-shrink-0"><AlertDescription>{error}</AlertDescription></Alert>}
+        
+        {error && (
+            <div className="px-6 pb-4 flex-shrink-0">
+                <Alert variant="destructive" className="mb-0"><AlertDescription>{error}</AlertDescription></Alert>
+            </div>
+        )}
 
-        <DialogFooter className="p-6 sm:p-0 pt-0 flex-shrink-0">
+        <DialogFooter className="p-6 pt-2 flex-shrink-0">
             {imageDataUri && (
             <div className="relative w-fit mb-2">
                 <Image src={imageDataUri} alt="Pratinjau" width={80} height={80} className="rounded-md object-cover" />
