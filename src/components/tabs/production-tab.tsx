@@ -579,7 +579,10 @@ export default function ProductionTab() {
         return startDate <= endOfSelectedMonth && endDate >= startOfSelectedMonth;
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-  
+    
+  const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
+  const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
+
   const weeklyDataByPeriod = weeklyDataForMonth.reduce((acc, current) => {
     const period = `${format(new Date(current.startDate), 'dd MMM yyyy')} - ${format(new Date(current.endDate), 'dd MMM yyyy')}`;
     if (!acc[period]) {
@@ -675,7 +678,17 @@ export default function ProductionTab() {
             }
         />
         <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
-        <StatCard title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} value={monthProduction.toLocaleString('id-ID')} icon={CalendarDays} />
+        <StatCard 
+            title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} 
+            value={monthProduction.toLocaleString('id-ID')} 
+            icon={CalendarDays} 
+            footer={
+              <div className="w-full flex justify-between pt-2">
+                <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
+                <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
+              </div>
+            }
+        />
       </div>
 
       <Card>
@@ -979,3 +992,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
