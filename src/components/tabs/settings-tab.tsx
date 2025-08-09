@@ -15,6 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 const ttsVoices = [
     { id: 'algenib', name: 'Female 1 (Algenib)' },
@@ -26,6 +27,59 @@ const ttsVoices = [
     { id: 'sadaltager', name: 'Male 3 (Sadaltager)' },
     { id: 'zubenelgenubi', name: 'Male 4 (Zubenelgenubi)' },
 ];
+
+
+const MegaCloudAuthDialog = () => {
+    const { companyInfo } = useAppStore();
+    const { toast } = useToast();
+    const [username, setUsername] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    const handleOpenMega = () => {
+        if (username === (companyInfo.megaUsername || '') && password === (companyInfo.megaPassword || '')) {
+            window.open('https://mega.nz/', '_blank');
+            setIsOpen(false);
+            setUsername('');
+            setPassword('');
+            toast({ title: "Berhasil!", description: "Membuka Mega Cloud di tab baru." });
+        } else {
+            toast({ variant: "destructive", title: "Gagal", description: "Username atau password Mega Cloud salah." });
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button variant="outline">
+                    <Cloud className="mr-2 h-4 w-4" /> Buka Akun Mega Cloud
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Otentikasi Mega Cloud</DialogTitle>
+                    <CardDescription>Masukkan kredensial Anda untuk membuka Mega Cloud.</CardDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="mega-username">Username</Label>
+                        <Input id="mega-username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username Mega Anda" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="mega-password">Password</Label>
+                        <Input id="mega-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password Mega Anda" />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button type="button" variant="secondary">Batal</Button>
+                    </DialogClose>
+                    <Button onClick={handleOpenMega}>Buka</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 
 export default function SettingsTab() {
@@ -45,6 +99,7 @@ export default function SettingsTab() {
   const [isPreviewing, setIsPreviewing] = React.useState(false);
   const [audioError, setAudioError] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
+  const [showMegaPassword, setShowMegaPassword] = React.useState(false);
 
 
   const { toast } = useToast();
@@ -206,16 +261,33 @@ export default function SettingsTab() {
 
            <div className="space-y-4 pt-4 border-t">
                <div>
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">Username Aplikasi</Label>
                 <Input id="username" name="username" value={info.username || ''} onChange={handleInfoChange} />
               </div>
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Password Aplikasi</Label>
                 <div className="relative">
                     <Input id="password" name="password" type={showPassword ? "text" : "password"} value={info.password || ''} onChange={handleInfoChange} />
                     <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         <span className="sr-only">{showPassword ? "Sembunyikan" : "Tampilkan"} password</span>
+                    </Button>
+                </div>
+              </div>
+           </div>
+
+           <div className="space-y-4 pt-4 border-t">
+               <div>
+                <Label htmlFor="megaUsername">Username Mega Cloud</Label>
+                <Input id="megaUsername" name="megaUsername" value={info.megaUsername || ''} onChange={handleInfoChange} />
+              </div>
+              <div>
+                <Label htmlFor="megaPassword">Password Mega Cloud</Label>
+                <div className="relative">
+                    <Input id="megaPassword" name="megaPassword" type={showMegaPassword ? "text" : "password"} value={info.megaPassword || ''} onChange={handleInfoChange} />
+                    <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8" onClick={() => setShowMegaPassword(!showMegaPassword)}>
+                        {showMegaPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        <span className="sr-only">{showMegaPassword ? "Sembunyikan" : "Tampilkan"} password</span>
                     </Button>
                 </div>
               </div>
@@ -266,11 +338,7 @@ export default function SettingsTab() {
                     <Input id="import" type="file" accept=".json" className="hidden" onChange={handleImport} />
                 </Label>
             </Button>
-            <Button asChild variant="outline">
-              <a href="https://mega.nz/" target="_blank" rel="noopener noreferrer">
-                <Cloud className="mr-2 h-4 w-4" /> Buka Akun Mega Cloud
-              </a>
-            </Button>
+            <MegaCloudAuthDialog />
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant="destructive">

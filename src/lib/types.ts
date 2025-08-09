@@ -9,6 +9,8 @@ export interface CompanyInfo {
     username?: string;
     password?: string;
     loginBackground?: string;
+    megaUsername?: string;
+    megaPassword?: string;
 }
 
 export interface Duck {

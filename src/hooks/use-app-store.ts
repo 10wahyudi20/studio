@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord } from '@/lib/types';
 import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO } from 'date-fns';
@@ -20,6 +21,8 @@ const getInitialState = (): AppState => ({
     username: "",
     password: "",
     loginBackground: "",
+    megaUsername: "",
+    megaPassword: ""
   },
   ducks: [],
   eggProduction: {
