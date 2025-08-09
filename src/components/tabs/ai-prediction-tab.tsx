@@ -22,14 +22,14 @@ const predictionSchema = z.object({
   duckQuantity: z.coerce.number().min(1, "Jumlah bebek harus diisi"),
   duckAgeMonths: z.coerce.number().min(1, "Usia rata-rata harus diisi"),
   duckCondition: z.string().nonempty("Kondisi bebek harus dipilih"),
-  feedQuality: z.string().nonempty("Kualitas pakan harus dipilih"),
+  feedQuality: z.string().nonempty("Kualitas pakan harus diisi"),
   housingInformation: z.string().nonempty("Informasi kandang harus diisi"),
 });
 
 type PredictionFormData = z.infer<typeof predictionSchema>;
 
 export default function AiPredictionTab() {
-  const { ducks, companyInfo } = useAppStore();
+  const { ducks, feed, companyInfo } = useAppStore();
   const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(null);
   const [audio, setAudio] = React.useState<TextToSpeechOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -41,7 +41,7 @@ export default function AiPredictionTab() {
     resolver: zodResolver(predictionSchema),
     defaultValues: {
       duckCondition: "healthy",
-      feedQuality: "medium",
+      feedQuality: "",
       housingInformation: "Kandang baterai dan umbaran, sirkulasi udara cukup baik, suhu rata-rata 28°C.",
     }
   });
@@ -56,7 +56,12 @@ export default function AiPredictionTab() {
     setValue("duckQuantity", totalDucks, { shouldValidate: true });
     setValue("duckAgeMonths", avgAge, { shouldValidate: true });
 
-  }, [ducks, setValue]);
+    const feedDescription = feed
+      .map(f => `${f.name} (${f.schema}g)`)
+      .join(', ');
+    setValue("feedQuality", feedDescription || "Tidak ada data pakan.", { shouldValidate: true });
+
+  }, [ducks, feed, setValue]);
 
 
   const onSubmit = async (data: PredictionFormData) => {
@@ -136,17 +141,9 @@ export default function AiPredictionTab() {
                 )} />
               </div>
                <div className="space-y-2">
-                <Label>Kualitas Pakan</Label>
-                 <Controller name="feedQuality" control={control} render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger><SelectValue placeholder="Pilih kualitas" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="high">Tinggi</SelectItem>
-                            <SelectItem value="medium">Sedang</SelectItem>
-                            <SelectItem value="low">Rendah</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )} />
+                <Label htmlFor="feedQuality">Kualitas Pakan</Label>
+                <Input id="feedQuality" {...register("feedQuality")} readOnly className="bg-muted"/>
+                {errors.feedQuality && <p className="text-sm text-destructive mt-1">{errors.feedQuality.message}</p>}
               </div>
             </div>
              <div className="space-y-2">
