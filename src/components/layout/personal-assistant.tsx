@@ -117,7 +117,7 @@ const AssistantDialogContent = () => {
         )}
         data-loading={isLoading}
     >
-        <DialogHeader className="p-6 sm:p-0">
+        <DialogHeader className="p-6 sm:p-0 flex-shrink-0">
             <DialogTitle>Asisten AI Pribadi</DialogTitle>
             <DialogDescription>
             Tanyakan apa saja, atau minta analisis tentang data peternakan Anda.
@@ -137,7 +137,7 @@ const AssistantDialogContent = () => {
                     {msg.role === 'model' && <Bot className="h-6 w-6 text-primary flex-shrink-0" />}
                     <div className={cn("p-3 rounded-lg max-w-sm", msg.role === 'model' ? 'bg-muted' : 'bg-primary text-primary-foreground')}>
                     {msg.imageUrl && <Image src={msg.imageUrl} alt="Lampiran" width={200} height={200} className="rounded-md mb-2" />}
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
                     </div>
                     {msg.role === 'user' && <User className="h-6 w-6 text-muted-foreground flex-shrink-0" />}
                 </div>
@@ -153,9 +153,9 @@ const AssistantDialogContent = () => {
             </div>
             </ScrollArea>
         </div>
-        {error && <Alert variant="destructive" className="mb-4"><AlertDescription>{error}</AlertDescription></Alert>}
+        {error && <Alert variant="destructive" className="mb-4 flex-shrink-0"><AlertDescription>{error}</AlertDescription></Alert>}
 
-        <DialogFooter className="p-6 sm:p-0 pt-0">
+        <DialogFooter className="p-6 sm:p-0 pt-0 flex-shrink-0">
             {imageDataUri && (
             <div className="relative w-fit mb-2">
                 <Image src={imageDataUri} alt="Pratinjau" width={80} height={80} className="rounded-md object-cover" />
