@@ -10,6 +10,27 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Separator } from "../ui/separator";
 
+const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
+    <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
+        </CardHeader>
+        <CardContent>
+            <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
+            {description && <p className="text-xs text-muted-foreground">{description}</p>}
+            {footer && (
+              <>
+                <Separator className="my-2" />
+                <div className="text-xs text-muted-foreground">
+                    {footer}
+                </div>
+              </>
+            )}
+        </CardContent>
+    </Card>
+);
+
 export default function HomeTab() {
   const { ducks, eggProduction, feed, finance } = useAppStore();
 
@@ -91,24 +112,6 @@ export default function HomeTab() {
   const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
   const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
 
-  const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
-    <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
-        </CardHeader>
-        <CardContent>
-            <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
-            {description && <p className="text-xs text-muted-foreground">{description}</p>}
-            {footer && (
-              <div className="mt-2 pt-2 text-xs text-muted-foreground border-t">
-                  {footer}
-              </div>
-            )}
-        </CardContent>
-    </Card>
-);
-
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -154,7 +157,7 @@ export default function HomeTab() {
             valueClassName="text-yellow-500"
             iconClassName="text-yellow-500"
             footer={
-                 <div className="w-full pt-2 space-y-1">
+                 <div className="w-full space-y-1">
                     <div className="font-semibold">Riwayat Bulan Ini:</div>
                     <div className="flex justify-between items-center">
                         <span className="flex items-center">
@@ -180,7 +183,7 @@ export default function HomeTab() {
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
             footer={
-                <div className="w-full pt-2 text-xs space-y-1">
+                <div className="w-full space-y-1">
                     {feed.map(item => (
                         <div key={item.id} className="flex justify-between">
                             <span>{item.name}:</span>
@@ -195,7 +198,7 @@ export default function HomeTab() {
             value={`Rp ${dailyFeedCost.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`} 
             icon={Wheat}
             footer={
-                <div className="w-full pt-2 space-y-1">
+                <div className="w-full space-y-1">
                     <div className="flex justify-between">
                         <span>Konsumsi:</span>
                         <span>{dailyFeedConsumptionKg.toLocaleString('id-ID', {minimumFractionDigits: 1, maximumFractionDigits: 1})} Kg</span>
@@ -211,7 +214,7 @@ export default function HomeTab() {
           value={`Rp ${netProfit.toLocaleString('id-ID')}`} 
           icon={Wallet}
           footer={
-            <div className="w-full flex justify-between pt-2 text-xs">
+            <div className="w-full flex justify-between">
               <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
               <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
             </div>
@@ -249,4 +252,4 @@ export default function HomeTab() {
   );
 }
 
-
+    
