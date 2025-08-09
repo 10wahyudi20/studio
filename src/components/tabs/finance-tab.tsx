@@ -20,6 +20,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const transactionSchema = z.object({
   date: z.string().nonempty("Tanggal harus diisi"),
@@ -130,10 +131,15 @@ export default function FinanceTab() {
   const creditTransactions = finance.filter(t => t.type === 'credit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 
-  const StatCard = ({ title, value, icon: Icon }: { title: string, value: string, icon: React.ElementType }) => (
+  const StatCard = ({ title, value, icon: Icon, valueClassName, iconClassName }: { title: string, value: string, icon: React.ElementType, valueClassName?: string, iconClassName?: string }) => (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{title}</CardTitle><Icon className="h-4 w-4 text-muted-foreground" /></CardHeader>
-      <CardContent><div className="text-2xl font-bold">{value}</div></CardContent>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
+      </CardHeader>
+      <CardContent>
+        <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
+      </CardContent>
     </Card>
   );
 
@@ -208,16 +214,19 @@ export default function FinanceTab() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Pendapatan Bulanan" value={`Rp ${monthlyIncome.toLocaleString('id-ID')}`} icon={TrendingUp} />
         <StatCard title="Pengeluaran Bulanan" value={`Rp ${monthlyExpense.toLocaleString('id-ID')}`} icon={TrendingDown} />
-        <StatCard title="Laba Bersih" value={`Rp ${netProfit.toLocaleString('id-ID')}`} icon={Landmark} />
+        <StatCard 
+            title="Laba Bersih" 
+            value={`Rp ${netProfit.toLocaleString('id-ID')}`} 
+            icon={Landmark} 
+            valueClassName={netProfit < 0 ? 'text-red-500' : ''}
+            iconClassName={netProfit < 0 ? 'text-red-500' : ''}
+        />
         <StatCard title="Margin Keuntungan" value={`${profitMargin}%`} icon={Scale} />
       </div>
 
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Pembukuan</h2>
-        <div className="space-y-6">
-            <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
-            <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
+        <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
       </div>
 
     </div>
