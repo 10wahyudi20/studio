@@ -92,21 +92,21 @@ export default function HomeTab() {
 
   const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card className="flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
-        {description && <div className="text-xs text-muted-foreground">{description}</div>}
-      </CardContent>
-      {footer && (
-          <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
-              {footer}
-          </CardFooter>
-      )}
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className={cn("h-4 w-4 text-muted-foreground", iconClassName)} />
+        </CardHeader>
+        <CardContent className="flex-grow">
+            <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
+            {description && <div className="text-xs text-muted-foreground">{description}</div>}
+        </CardContent>
+        {footer && (
+            <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">
+                {footer}
+            </CardFooter>
+        )}
     </Card>
-  );
+);
 
   return (
     <div className="space-y-6">
@@ -247,3 +247,4 @@ export default function HomeTab() {
     </div>
   );
 }
+
