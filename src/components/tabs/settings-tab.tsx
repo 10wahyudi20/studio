@@ -168,7 +168,7 @@ export default function SettingsTab() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>Logo Perusahaan</Label>
-              <Image src={logoPreview || "https://placehold.co/64x64.png"} alt="Logo" width={64} height={64} className="rounded-lg bg-muted object-cover" data-ai-hint="duck logo" />
+              <Image src={logoPreview || "https://placehold.co/64x64.png"} alt="Logo" width={64} height={64} className="rounded-lg bg-muted object-cover h-16 w-16" data-ai-hint="duck logo" />
               <div>
                 <Label htmlFor="logo" className="sr-only">Ganti Logo</Label>
                 <Input id="logo" type="file" accept="image/*" onChange={handleLogoChange} />
@@ -176,7 +176,7 @@ export default function SettingsTab() {
             </div>
              <div className="space-y-2">
               <Label>Latar Belakang Halaman Login</Label>
-              <Image src={backgroundPreview || "https://placehold.co/128x64.png"} alt="Login Background Preview" width={128} height={64} className="rounded-lg bg-muted object-cover" data-ai-hint="farm landscape" />
+              <Image src={backgroundPreview || "https://placehold.co/128x64.png"} alt="Login Background Preview" width={128} height={64} className="rounded-lg bg-muted object-cover h-16 w-full" data-ai-hint="farm landscape" />
               <div>
                   <Label htmlFor="loginBackground" className="sr-only">Ganti Latar Belakang</Label>
                   <Input id="loginBackground" type="file" accept="image/*" onChange={handleBackgroundChange} />
