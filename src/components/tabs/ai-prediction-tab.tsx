@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "../ui/input";
 
 const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[], columns: { header: string, accessor: string }[] }) => (
     <div className="space-y-2">
@@ -55,6 +56,8 @@ export default function AiPredictionTab() {
   const [error, setError] = React.useState<string | null>(null);
   const [audioError, setAudioError] = React.useState<string | null>(null);
   const [housingInfo, setHousingInfo] = React.useState("Kandang baterai dan umbaran, sirkulasi udara cukup baik, suhu rata-rata 28°C.");
+  const [predictionDays, setPredictionDays] = React.useState(1);
+
 
   const lastDailyRecord = eggProduction.daily.at(-1);
 
@@ -105,6 +108,7 @@ export default function AiPredictionTab() {
         productionInfo: productionInfoForAI,
         feedInfo: feedInfoForAI,
         housingInformation: housingInfo,
+        predictionDays: predictionDays
       };
       const result = await predictEggProduction(input);
       setPrediction(result);
@@ -147,7 +151,7 @@ export default function AiPredictionTab() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <ScrollArea className="h-96 pr-4">
+            <ScrollArea className="h-[96] pr-4">
                 <div className="space-y-4">
                     <DataDisplayCard
                         title="Informasi Populasi Bebek"
@@ -180,6 +184,10 @@ export default function AiPredictionTab() {
                      <div className="space-y-2">
                         <Label htmlFor="housingInformation" className="font-semibold text-sm">Informasi Kandang & Lingkungan (Opsional)</Label>
                         <Textarea id="housingInformation" value={housingInfo} onChange={(e) => setHousingInfo(e.target.value)} rows={3} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="predictionDays" className="font-semibold text-sm">Hari untuk di Prediksi</Label>
+                        <Input id="predictionDays" type="number" value={predictionDays} onChange={(e) => setPredictionDays(Number(e.target.value))} min={1} />
                     </div>
                 </div>
             </ScrollArea>
@@ -220,10 +228,30 @@ export default function AiPredictionTab() {
             {prediction && (
                 <div className="space-y-4">
                     <div className="text-center">
-                        <p className="text-sm text-muted-foreground">Prediksi Produksi Besok</p>
-                        <p className="text-5xl font-bold text-primary">{prediction.predictedEggProduction}</p>
+                        <p className="text-sm text-muted-foreground">Total Prediksi Produksi ({predictionDays} Hari)</p>
+                        <p className="text-5xl font-bold text-primary">{prediction.totalPredictedProduction}</p>
                         <p className="font-medium">butir telur</p>
                     </div>
+                    
+                    <div className="max-h-32 overflow-y-auto pr-2">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="text-left border-b">
+                                    <th className="p-2 font-medium text-muted-foreground">Hari</th>
+                                    <th className="p-2 font-medium text-muted-foreground text-right">Prediksi Telur</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {prediction.dailyPredictions.map((dailyPred) => (
+                                    <tr key={dailyPred.day} className="border-b">
+                                        <td className="p-2">{dailyPred.day}</td>
+                                        <td className="p-2 text-right font-medium">{dailyPred.predictedEggs}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
                     <Separator />
                     <div>
                         <div className="flex items-center justify-between mb-2">

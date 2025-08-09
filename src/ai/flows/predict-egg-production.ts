@@ -38,14 +38,19 @@ const PredictEggProductionInputSchema = z.object({
   productionInfo: z.array(ProductionInfoSchema).describe('Informasi produksi dari setiap kandang kemarin.'),
   feedInfo: z.array(FeedInfoSchema).describe('Informasi mengenai pakan yang digunakan.'),
   housingInformation: z.string().describe('Informasi tambahan mengenai lingkungan atau kondisi umum kandang.'),
+  predictionDays: z.number().describe('Jumlah hari ke depan untuk diprediksi.'),
 });
 export type PredictEggProductionInput = z.infer<typeof PredictEggProductionInputSchema>;
 
+const DailyPredictionSchema = z.object({
+    day: z.string().describe('Hari yang diprediksi (misal: Hari 1, Hari 2)'),
+    predictedEggs: z.number().describe('Jumlah telur yang diprediksi untuk hari tersebut.'),
+});
+
 const PredictEggProductionOutputSchema = z.object({
-  predictedEggProduction: z
-    .number()
-    .describe('The predicted number of eggs that will be produced tomorrow.'),
-  reasoning: z.string().describe('The AI reasoning behind the predicted egg production.'),
+  dailyPredictions: z.array(DailyPredictionSchema).describe('Prediksi produksi telur untuk setiap hari dalam rentang yang diminta.'),
+  reasoning: z.string().describe('Alasan AI di balik prediksi, mempertimbangkan tren dan semua data yang diberikan.'),
+  totalPredictedProduction: z.number().describe('Jumlah total telur yang diprediksi selama seluruh periode.'),
 });
 export type PredictEggProductionOutput = z.infer<typeof PredictEggProductionOutputSchema>;
 
@@ -59,13 +64,16 @@ const predictEggProductionPrompt = ai.definePrompt({
   output: {schema: PredictEggProductionOutputSchema},
   prompt: `Anda adalah asisten manajemen peternakan AI yang sangat ahli dalam menganalisis data dan memprediksi produksi telur bebek.
 
-  Berdasarkan data komprehensif yang diberikan, lakukan analisis mendalam untuk memprediksi jumlah total telur yang akan diproduksi besok. Pertimbangkan semua variabel yang ada:
+  Berdasarkan data komprehensif yang diberikan, lakukan analisis mendalam untuk memprediksi jumlah total telur yang akan diproduksi untuk **{{predictionDays}} hari ke depan**. Pertimbangkan semua variabel yang ada:
   - Data dari setiap kandang (jumlah bebek, usia, ukuran, sistem). Usia sangat berpengaruh pada produktivitas.
   - Data produksi dan produktivitas aktual dari hari sebelumnya untuk setiap kandang. Ini adalah indikator performa terkini.
   - Jenis pakan yang digunakan dan skemanya. Kualitas dan kuantitas pakan adalah faktor kunci.
   - Informasi tambahan mengenai lingkungan.
 
-  Berikan alasan yang detail dan logis untuk prediksi Anda dalam Bahasa Indonesia, jelaskan bagaimana Anda menghubungkan berbagai data untuk sampai pada kesimpulan Anda.
+  **Tugas Anda:**
+  1.  Buat prediksi produksi telur untuk setiap hari dalam rentang yang diminta. Isi array 'dailyPredictions'.
+  2.  Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
+  3.  Berikan alasan yang detail dan logis untuk prediksi Anda dalam Bahasa Indonesia. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
 
   DATA POPULASI PER KANDANG:
   {{#each duckInfo}}
@@ -84,6 +92,8 @@ const predictEggProductionPrompt = ai.definePrompt({
 
   INFORMASI LINGKUNGAN TAMBAHAN:
   {{{housingInformation}}}
+  
+  PREDIKSI UNTUK: {{predictionDays}} hari ke depan.
   
   Berikan respons dalam format JSON.`,
 });
