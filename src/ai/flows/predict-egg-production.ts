@@ -75,9 +75,13 @@ const predictEggProductionPrompt = ai.definePrompt({
   - Informasi tambahan mengenai lingkungan.
 
   **Tugas Anda:**
-  1.  Buat prediksi produksi telur untuk **SETIAP HARI** dalam rentang tanggal yang diminta. Format tanggal di output 'day' harus 'dd MMMM yyyy' dalam Bahasa Indonesia (contoh: 25 Juli 2024). Isi array 'dailyPredictions'.
-  2.  Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
-  3.  Berikan alasan yang detail dan logis untuk prediksi Anda dalam Bahasa Indonesia. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
+  1.  **Prediksi Produksi**: Buat prediksi produksi telur untuk **SETIAP HARI** dalam rentang tanggal yang diminta. Format tanggal di output 'day' harus 'dd MMMM yyyy' dalam Bahasa Indonesia (contoh: 25 Juli 2024). Isi array 'dailyPredictions'.
+  2.  **Total Prediksi**: Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
+  3.  **Analisis & Rekomendasi Mendalam (Sertakan di 'reasoning')**:
+      a.  **Alasan Prediksi Telur**: Berikan alasan yang detail dan logis untuk prediksi Anda. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
+      b.  **Analisis Pakan**: Berikan analisis mendalam tentang penggunaan pakan. Jelaskan tentang pentingnya komposisi nutrisi.
+      c.  **Pakan Pabrikan vs. Mixing**: Berikan informasi tentang keuntungan dan kerugian menggunakan pakan pabrikan dibandingkan membuat pakan mixing sendiri (misalnya dari segi biaya, konsistensi nutrisi, dan tenaga kerja). Berikan tips praktis jika pengguna ingin mencoba membuat pakan mixing.
+      d.  **Rekomendasi**: Berikan rekomendasi konkret yang bisa ditindaklanjuti terkait manajemen pakan untuk optimasi biaya dan peningkatan produksi.
 
   **CONTOH FORMAT JSON OUTPUT YANG DIHARAPKAN:**
   Pastikan nama field di dalam array 'dailyPredictions' adalah **'predictedEggs'**.
@@ -87,7 +91,7 @@ const predictEggProductionPrompt = ai.definePrompt({
       { "day": "01 Januari 2025", "predictedEggs": 120 },
       { "day": "02 Januari 2025", "predictedEggs": 122 }
     ],
-    "reasoning": "...",
+    "reasoning": "Analisis prediksi telur...\n\n**Analisis dan Rekomendasi Pakan:**\nAnalisis penggunaan pakan saat ini...\n\n**Pakan Pabrikan vs. Mixing:**\nKeuntungan pakan pabrikan adalah... Namun, kerugiannya adalah...\nMembuat pakan mixing sendiri bisa lebih hemat biaya karena... Tips untuk memulai:...",
     "totalPredictedProduction": 242
   }
   \`\`\`
