@@ -79,6 +79,19 @@ const predictEggProductionPrompt = ai.definePrompt({
   2.  Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
   3.  Berikan alasan yang detail dan logis untuk prediksi Anda dalam Bahasa Indonesia. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
 
+  **CONTOH FORMAT JSON OUTPUT YANG DIHARAPKAN:**
+  Pastikan nama field di dalam array 'dailyPredictions' adalah **'predictedEggs'**.
+  \`\`\`json
+  {
+    "dailyPredictions": [
+      { "day": "01 Januari 2025", "predictedEggs": 120 },
+      { "day": "02 Januari 2025", "predictedEggs": 122 }
+    ],
+    "reasoning": "...",
+    "totalPredictedProduction": 242
+  }
+  \`\`\`
+
   DATA POPULASI PER KANDANG:
   {{#each duckInfo}}
   - Kandang {{cage}}: {{quantity}} ekor, Usia {{ageMonths}} bulan, Ukuran {{cageSize}}, Sistem {{cageSystem}}
