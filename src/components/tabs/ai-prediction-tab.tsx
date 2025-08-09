@@ -305,7 +305,7 @@ export default function AiPredictionTab() {
                         <p className="font-medium">butir telur</p>
                     </div>
                     
-                    <div className="max-h-32 overflow-y-auto pr-2">
+                    <div>
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="text-left border-b">
