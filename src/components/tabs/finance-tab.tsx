@@ -156,12 +156,12 @@ export default function FinanceTab() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Tgl</TableHead>
+                    <TableHead className="w-[100px]">Tgl</TableHead>
                     <TableHead>Uraian</TableHead>
-                    <TableHead>Jumlah</TableHead>
-                    <TableHead>Harga Satuan</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead className="text-right">Aksi</TableHead>
+                    <TableHead className="w-[100px] text-right">Jumlah</TableHead>
+                    <TableHead className="w-[120px] text-right">Harga Satuan</TableHead>
+                    <TableHead className="w-[120px] text-right">Total</TableHead>
+                    <TableHead className="w-[80px] text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                   <TableBody>
@@ -172,9 +172,9 @@ export default function FinanceTab() {
                         <TableRow key={t.id}>
                           <TableCell>{format(new Date(t.date), "dd/MM/yyyy")}</TableCell>
                           <TableCell>{t.description}</TableCell>
-                          <TableCell>{t.quantity.toLocaleString('id-ID')}</TableCell>
-                          <TableCell>Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
-                          <TableCell>Rp {t.total.toLocaleString('id-ID')}</TableCell>
+                          <TableCell className="text-right">{t.quantity.toLocaleString('id-ID')}</TableCell>
+                          <TableCell className="text-right">Rp {t.unitPrice.toLocaleString('id-ID')}</TableCell>
+                          <TableCell className="text-right">Rp {t.total.toLocaleString('id-ID')}</TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
