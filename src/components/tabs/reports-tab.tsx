@@ -45,12 +45,14 @@ export default function ReportsTab() {
 
   const handleGenerateReport = () => {
     setIsLoading(true);
+
     // Revoke any existing URL before creating a new one
     if (pdfPreviewUrl) {
-      URL.revokeObjectURL(pdfPreviewUrl);
+        URL.revokeObjectURL(pdfPreviewUrl);
+        setPdfPreviewUrl(null);
     }
-    setPdfPreviewUrl(null);
     
+    // Use a brief timeout to allow the UI to update to the loading state
     setTimeout(() => {
         const year = parseInt(selectedYear, 10);
         const month = parseInt(selectedMonth, 10);
@@ -168,7 +170,6 @@ export default function ReportsTab() {
             const blobUrl = URL.createObjectURL(pdfBlob);
             setPdfPreviewUrl(blobUrl);
 
-
             toast({ title: "Pratinjau Laporan Dibuat!", description: "Laporan kini ditampilkan di bawah." });
 
         } catch (error) {
@@ -177,7 +178,7 @@ export default function ReportsTab() {
         } finally {
             setIsLoading(false);
         }
-    }, 500); // Add a small delay for better UX
+    }, 100); 
   };
 
   return (
@@ -234,7 +235,7 @@ export default function ReportsTab() {
         </div>
       )}
 
-      {pdfPreviewUrl && (
+      {pdfPreviewUrl && !isLoading && (
         <Card>
             <CardHeader>
                 <CardTitle>Pratinjau Laporan</CardTitle>
