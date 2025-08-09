@@ -8,13 +8,18 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { BrainCircuit, Loader2, PlayCircle, Table, Info } from "lucide-react";
+import { BrainCircuit, Loader2, PlayCircle, Table, Info, Calendar as CalendarIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "../ui/label";
-import { ScrollArea } from "../ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "../ui/input";
+import { DateRange } from "react-day-picker";
+import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+import { Calendar } from "../ui/calendar";
+import { cn } from "@/lib/utils";
+import { format, addDays } from 'date-fns';
+import { id as idLocale } from 'date-fns/locale';
+
 
 const DataDisplayCard = ({ title, data, columns, footerData }: { title: string, data: any[], columns: { header: string, accessor: string, format?: (value: any) => React.ReactNode }[], footerData?: React.ReactNode }) => (
     <div className="space-y-2">
@@ -65,7 +70,10 @@ export default function AiPredictionTab() {
   const [error, setError] = React.useState<string | null>(null);
   const [audioError, setAudioError] = React.useState<string | null>(null);
   const [housingInfo, setHousingInfo] = React.useState("Kandang baterai dan umbaran, sirkulasi udara cukup baik, suhu rata-rata 28°C.");
-  const [predictionDays, setPredictionDays] = React.useState(1);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 6),
+  });
 
 
   const lastDailyRecord = eggProduction.daily.at(-1);
@@ -99,14 +107,14 @@ export default function AiPredictionTab() {
   const totalSchema = feedInfoForAI.reduce((sum, f) => sum + f.schema, 0);
   const totalDailyConsumption = feedInfoForAI.reduce((sum, f) => sum + f.dailyConsumption, 0);
 
-  const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0;
+  const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0 && dateRange?.from && dateRange?.to;
 
   const handleSubmit = async () => {
     if (!canPredict) {
         toast({
             variant: "destructive",
             title: "Data Tidak Lengkap",
-            description: "Pastikan ada data di tab Populasi, Produksi (minimal 1 hari), dan Pakan untuk membuat prediksi."
+            description: "Pastikan ada data di Populasi, Produksi (minimal 1 hari), Pakan, dan rentang tanggal prediksi telah dipilih."
         });
         return;
     }
@@ -123,12 +131,13 @@ export default function AiPredictionTab() {
         productionInfo: productionInfoForAI,
         feedInfo: feedInfoForAI.map(({dailyConsumption, ...rest}) => rest), // Exclude dailyConsumption from AI input
         housingInformation: housingInfo,
-        predictionDays: predictionDays
+        startDate: format(dateRange.from!, 'yyyy-MM-dd'),
+        endDate: format(dateRange.to!, 'yyyy-MM-dd'),
       };
       const result = await predictEggProduction(input);
       setPrediction(result);
-    } catch (e) {
-      setError("Gagal menghasilkan prediksi. Silakan coba lagi.");
+    } catch (e: any) {
+      setError(`Gagal menghasilkan prediksi: ${e.message}`);
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -155,6 +164,9 @@ export default function AiPredictionTab() {
       setIsGeneratingAudio(false);
     }
   };
+  
+  const predictionDays = dateRange?.from && dateRange?.to ? (differenceInDays(dateRange.to, dateRange.from) + 1) : 0;
+
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
@@ -162,7 +174,7 @@ export default function AiPredictionTab() {
         <CardHeader>
           <CardTitle>Prediksi Produksi Telur</CardTitle>
           <CardDescription>
-            AI akan menganalisis data dari seluruh aplikasi untuk memprediksi produksi besok.
+            AI akan menganalisis data dari seluruh aplikasi untuk memprediksi produksi.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -207,13 +219,48 @@ export default function AiPredictionTab() {
                         </tr>
                     }
                 />
-                    <div className="space-y-2">
+                <div className="space-y-2">
                     <Label htmlFor="housingInformation" className="font-semibold text-sm">Informasi Kandang & Lingkungan (Opsional)</Label>
                     <Textarea id="housingInformation" value={housingInfo} onChange={(e) => setHousingInfo(e.target.value)} rows={3} />
                 </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="predictionDays" className="font-semibold text-sm">Hari untuk di Prediksi</Label>
-                    <Input id="predictionDays" type="number" value={predictionDays} onChange={(e) => setPredictionDays(Number(e.target.value))} min={1} />
+                <div className="space-y-2">
+                    <Label htmlFor="predictionDateRange" className="font-semibold text-sm">Rentang Tanggal Prediksi</Label>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                id="predictionDateRange"
+                                variant={"outline"}
+                                className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !dateRange && "text-muted-foreground"
+                                )}
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {dateRange?.from ? (
+                                dateRange.to ? (
+                                    <>
+                                    {format(dateRange.from, "dd LLL, y")} -{" "}
+                                    {format(dateRange.to, "dd LLL, y")}
+                                    </>
+                                ) : (
+                                    format(dateRange.from, "dd LLL, y")
+                                )
+                                ) : (
+                                <span>Pilih rentang tanggal</span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            initialFocus
+                            mode="range"
+                            defaultMonth={dateRange?.from}
+                            selected={dateRange}
+                            onSelect={setDateRange}
+                            numberOfMonths={2}
+                        />
+                        </PopoverContent>
+                    </Popover>
                 </div>
             </div>
         </CardContent>
@@ -226,7 +273,7 @@ export default function AiPredictionTab() {
                 <Alert variant="destructive" className="ml-4 text-xs">
                     <Info className="h-4 w-4" />
                     <AlertTitle>Data Kurang</AlertTitle>
-                    <AlertDescription>Data dari Populasi, Produksi, dan Pakan dibutuhkan.</AlertDescription>
+                    <AlertDescription>Data dari Populasi, Produksi, dan Pakan dibutuhkan, serta rentang tanggal harus dipilih.</AlertDescription>
                 </Alert>
             )}
         </CardFooter>
@@ -254,7 +301,7 @@ export default function AiPredictionTab() {
                 <div className="space-y-4">
                     <div className="text-center">
                         <p className="text-sm text-muted-foreground">Total Prediksi Produksi ({predictionDays} Hari)</p>
-                        <p className="text-5xl font-bold text-primary">{prediction.totalPredictedProduction}</p>
+                        <p className="text-5xl font-bold text-primary">{prediction.totalPredictedProduction.toLocaleString('id-ID')}</p>
                         <p className="font-medium">butir telur</p>
                     </div>
                     
@@ -262,7 +309,7 @@ export default function AiPredictionTab() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="text-left border-b">
-                                    <th className="p-2 font-medium text-muted-foreground">Hari</th>
+                                    <th className="p-2 font-medium text-muted-foreground">Tanggal</th>
                                     <th className="p-2 font-medium text-muted-foreground text-right">Prediksi Telur</th>
                                 </tr>
                             </thead>
@@ -270,7 +317,7 @@ export default function AiPredictionTab() {
                                 {prediction.dailyPredictions.map((dailyPred) => (
                                     <tr key={dailyPred.day} className="border-b">
                                         <td className="p-2">{dailyPred.day}</td>
-                                        <td className="p-2 text-right font-medium">{dailyPred.predictedEggs}</td>
+                                        <td className="p-2 text-right font-medium">{dailyPred.predictedEggs.toLocaleString('id-ID')}</td>
                                     </tr>
                                 ))}
                             </tbody>

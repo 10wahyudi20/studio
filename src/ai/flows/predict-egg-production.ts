@@ -12,6 +12,9 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { format, eachDayOfInterval, differenceInDays } from 'date-fns';
+import { id as idLocale } from 'date-fns/locale';
+
 
 const DuckInfoSchema = z.object({
   cage: z.number().describe('Nomor kandang'),
@@ -38,13 +41,14 @@ const PredictEggProductionInputSchema = z.object({
   productionInfo: z.array(ProductionInfoSchema).describe('Informasi produksi dari setiap kandang kemarin.'),
   feedInfo: z.array(FeedInfoSchema).describe('Informasi mengenai pakan yang digunakan.'),
   housingInformation: z.string().describe('Informasi tambahan mengenai lingkungan atau kondisi umum kandang.'),
-  predictionDays: z.number().describe('Jumlah hari ke depan untuk diprediksi.'),
+  startDate: z.string().describe('Tanggal mulai prediksi dalam format ISO (YYYY-MM-DD).'),
+  endDate: z.string().describe('Tanggal akhir prediksi dalam format ISO (YYYY-MM-DD).'),
 });
 export type PredictEggProductionInput = z.infer<typeof PredictEggProductionInputSchema>;
 
 const DailyPredictionSchema = z.object({
-    day: z.string().describe('Hari yang diprediksi (misal: Hari 1, Hari 2)'),
-    predictedEggs: z.number().describe('Jumlah telur yang diprediksi untuk hari tersebut.'),
+    day: z.string().describe('Tanggal yang diprediksi (misal: 25 Juli 2024)'),
+    predictedEggs: z.number().describe('Jumlah telur yang diprediksi untuk tanggal tersebut.'),
 });
 
 const PredictEggProductionOutputSchema = z.object({
@@ -64,14 +68,14 @@ const predictEggProductionPrompt = ai.definePrompt({
   output: {schema: PredictEggProductionOutputSchema},
   prompt: `Anda adalah asisten manajemen peternakan AI yang sangat ahli dalam menganalisis data dan memprediksi produksi telur bebek.
 
-  Berdasarkan data komprehensif yang diberikan, lakukan analisis mendalam untuk memprediksi jumlah total telur yang akan diproduksi untuk **{{predictionDays}} hari ke depan**. Pertimbangkan semua variabel yang ada:
-  - Data dari setiap kandang (jumlah bebek, usia, ukuran, sistem). Usia sangat berpengaruh pada produktivitas.
+  Berdasarkan data komprehensif yang diberikan, lakukan analisis mendalam untuk memprediksi jumlah total telur yang akan diproduksi untuk periode dari **{{startDate}}** hingga **{{endDate}}**. Pertimbangkan semua variabel yang ada:
+  - Data dari setiap kandang (jumlah bebek, usia, sistem). Usia sangat berpengaruh pada produktivitas.
   - Data produksi dan produktivitas aktual dari hari sebelumnya untuk setiap kandang. Ini adalah indikator performa terkini.
   - Jenis pakan yang digunakan dan skemanya. Kualitas dan kuantitas pakan adalah faktor kunci.
   - Informasi tambahan mengenai lingkungan.
 
   **Tugas Anda:**
-  1.  Buat prediksi produksi telur untuk setiap hari dalam rentang yang diminta. Isi array 'dailyPredictions'.
+  1.  Buat prediksi produksi telur untuk **SETIAP HARI** dalam rentang tanggal yang diminta. Format tanggal di output 'day' harus 'dd MMMM yyyy' dalam Bahasa Indonesia (contoh: 25 Juli 2024). Isi array 'dailyPredictions'.
   2.  Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
   3.  Berikan alasan yang detail dan logis untuk prediksi Anda dalam Bahasa Indonesia. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
 
@@ -93,7 +97,7 @@ const predictEggProductionPrompt = ai.definePrompt({
   INFORMASI LINGKUNGAN TAMBAHAN:
   {{{housingInformation}}}
   
-  PREDIKSI UNTUK: {{predictionDays}} hari ke depan.
+  PERIODE PREDIKSI: Dari {{startDate}} hingga {{endDate}}.
   
   Berikan respons dalam format JSON.`,
 });
@@ -104,8 +108,44 @@ const predictEggProductionFlow = ai.defineFlow(
     inputSchema: PredictEggProductionInputSchema,
     outputSchema: PredictEggProductionOutputSchema,
   },
-  async input => {
-    const {output} = await predictEggProductionPrompt(input);
-    return output!;
+  async (input) => {
+    const { startDate, endDate } = input;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Ensure the output contains a prediction for every day in the range.
+    const response = await ai.generate({
+        model: 'googleai/gemini-2.0-flash',
+        prompt: predictEggProductionPrompt.compile(input),
+        output: {
+            schema: PredictEggProductionOutputSchema,
+            validate: (output) => {
+                const dayCount = differenceInDays(end, start) + 1;
+                if (output.dailyPredictions.length !== dayCount) {
+                    throw new Error(`AI harus memberikan prediksi untuk setiap hari dalam rentang yang diminta. Diharapkan ${dayCount} hari, tetapi menerima ${output.dailyPredictions.length}.`);
+                }
+                return output;
+            }
+        },
+    });
+
+    const output = response.output();
+    if (!output) {
+      throw new Error("AI tidak memberikan output yang valid.");
+    }
+    
+    // Sort predictions by date just in case the AI doesn't return them in order
+    const sortedPredictions = output.dailyPredictions.sort((a, b) => {
+        try {
+            const dateA = parse(a.day, 'dd MMMM yyyy', new Date(), { locale: idLocale });
+            const dateB = parse(b.day, 'dd MMMM yyyy', new Date(), { locale: idLocale });
+            return dateA.getTime() - dateB.getTime();
+        } catch (e) {
+            // Handle parsing error if the date format is wrong
+            return 0;
+        }
+    });
+
+    return { ...output, dailyPredictions: sortedPredictions };
   }
 );
