@@ -336,6 +336,30 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
 
 const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#0088FE", "#00C49F"];
 
+const renderCustomizedLabel = (props: any) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, percent, value } = props;
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    if (percent === 0) return null;
+
+    return (
+        <text
+            x={x}
+            y={y}
+            fill="white"
+            textAnchor={x > cx ? 'start' : 'end'}
+            dominantBaseline="central"
+            className="text-xs font-bold"
+        >
+            {`${value.toLocaleString('id-ID')} - ${(percent * 100).toFixed(0)}%`}
+        </text>
+    );
+};
+
+
 const MonthlyChart = ({ data }: { data: any[] }) => {
     const pieData = [
         { name: "Grade A", value: data.reduce((sum, item) => sum + item.gradeA, 0) },
@@ -389,7 +413,7 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <RechartsPieChart>
-                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
+                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <Tooltip />
@@ -464,7 +488,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                         <RechartsPieChart>
-                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
+                            <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <Tooltip />
@@ -992,5 +1016,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
