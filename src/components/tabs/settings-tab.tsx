@@ -10,13 +10,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff, ShieldCheck, ChevronRight } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { cn } from "@/lib/utils";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const ttsVoices = [
     { id: 'algenib', name: 'Female 1 (Algenib)' },
@@ -145,6 +146,8 @@ export default function SettingsTab() {
   const [audioError, setAudioError] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showMegaPassword, setShowMegaPassword] = React.useState(false);
+  const [isAppCredsOpen, setIsAppCredsOpen] = React.useState(false);
+  const [isMegaCredsOpen, setIsMegaCredsOpen] = React.useState(false);
 
 
   const { toast } = useToast();
@@ -312,7 +315,16 @@ export default function SettingsTab() {
             <Input id="email" name="email" value={info.email} onChange={handleInfoChange} />
           </div>
 
-           <div className="space-y-4 pt-4 border-t">
+          <Separator />
+          
+          <Collapsible open={isAppCredsOpen} onOpenChange={setIsAppCredsOpen}>
+            <CollapsibleTrigger asChild>
+              <button className="flex justify-between items-center w-full py-2 font-semibold">
+                <span>Kredensial Aplikasi</span>
+                <ChevronRight className={cn("h-4 w-4 transition-transform", isAppCredsOpen && "rotate-90")} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-2">
                <div>
                 <Label htmlFor="username">Username Aplikasi</Label>
                 <Input id="username" name="username" value={info.username || ''} onChange={handleInfoChange} />
@@ -327,9 +339,19 @@ export default function SettingsTab() {
                     </Button>
                 </div>
               </div>
-           </div>
+            </CollapsibleContent>
+          </Collapsible>
+          
+          <Separator />
 
-           <div className="space-y-4 pt-4 border-t">
+          <Collapsible open={isMegaCredsOpen} onOpenChange={setIsMegaCredsOpen}>
+             <CollapsibleTrigger asChild>
+              <button className="flex justify-between items-center w-full py-2 font-semibold">
+                <span>Kredensial Mega Cloud</span>
+                <ChevronRight className={cn("h-4 w-4 transition-transform", isMegaCredsOpen && "rotate-90")} />
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-2">
                <div>
                 <Label htmlFor="megaUsername">Username Mega Cloud</Label>
                 <Input id="megaUsername" name="megaUsername" value={info.megaUsername || ''} onChange={handleInfoChange} />
@@ -344,9 +366,12 @@ export default function SettingsTab() {
                     </Button>
                 </div>
               </div>
-           </div>
+            </CollapsibleContent>
+          </Collapsible>
 
-          <div className="space-y-2 pt-4 border-t">
+          <Separator />
+
+          <div className="space-y-2 pt-2">
               <Label>Suara Text-to-Speech</Label>
               <div className="flex items-center gap-2">
                   <Select value={info.ttsVoice} onValueChange={handleVoiceChange}>
@@ -371,7 +396,7 @@ export default function SettingsTab() {
               )}
           </div>
 
-          <Button onClick={handleSaveInfo}>Simpan Pengaturan</Button>
+          <Button onClick={handleSaveInfo} className="w-full">Simpan Pengaturan</Button>
         </CardContent>
       </Card>
 
@@ -417,3 +442,4 @@ export default function SettingsTab() {
     </div>
   );
 }
+
