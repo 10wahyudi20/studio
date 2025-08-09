@@ -16,6 +16,7 @@ import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { cn } from "@/lib/utils";
 
 const ttsVoices = [
     { id: 'algenib', name: 'Female 1 (Algenib)' },
@@ -36,6 +37,8 @@ const MegaCloudAuthDialog = () => {
     const [password, setPassword] = React.useState('');
     const [isOpen, setIsOpen] = React.useState(false);
 
+    const isMegaConfigured = !!companyInfo.megaUsername && !!companyInfo.megaPassword;
+
     const handleOpenMega = () => {
         if (username === (companyInfo.megaUsername || '') && password === (companyInfo.megaPassword || '')) {
             window.open('https://mega.nz/', '_blank');
@@ -51,7 +54,7 @@ const MegaCloudAuthDialog = () => {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant={isMegaConfigured ? "default" : "outline"} className={cn(isMegaConfigured && "bg-green-600 hover:bg-green-700 text-white")}>
                     <Cloud className="mr-2 h-4 w-4" /> Buka Akun Mega Cloud
                 </Button>
             </DialogTrigger>
@@ -364,5 +367,3 @@ export default function SettingsTab() {
     </div>
   );
 }
-
-    
