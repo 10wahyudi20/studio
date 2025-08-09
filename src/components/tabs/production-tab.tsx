@@ -484,6 +484,7 @@ export default function ProductionTab() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
+  const [zoomLevel, setZoomLevel] = React.useState(100);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   
   const [isDailyFormOpen, setIsDailyFormOpen] = React.useState(false);
@@ -699,6 +700,17 @@ export default function ProductionTab() {
                     <TabsTrigger value="monthly">Bulanan</TabsTrigger>
                 </TabsList>
                  <div className="flex items-center gap-2">
+                    {activeTab === 'daily' && (
+                        <>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 10))}>
+                                <ZoomOut className="h-4 w-4" />
+                            </Button>
+                            <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 10))}>
+                                <ZoomIn className="h-4 w-4" />
+                            </Button>
+                        </>
+                    )}
                     {activeTab !== 'monthly' && (
                         <Popover>
                             <PopoverTrigger asChild>
@@ -738,6 +750,7 @@ export default function ProductionTab() {
                   className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   style={{ maxHeight: '60vh' }}
               >
+                    <div style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top left' }}>
                       <Table>
                           <TableHeader>
                               <TableRow>
@@ -786,6 +799,7 @@ export default function ProductionTab() {
                                   ))}
                           </TableBody>
                       </Table>
+                    </div>
               </div>
                <DailyDataForm 
                   open={isDailyFormOpen}
