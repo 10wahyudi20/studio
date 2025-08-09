@@ -195,12 +195,15 @@ export default function FeedTab() {
             valueClassName="text-green-700 dark:text-green-400"
             footer={
                 <div className="w-full pt-2 text-xs">
-                    {feed.map(item => (
+                    {feed.map(item => {
+                      const schemaPercentage = totalSchema > 0 ? (item.schema / totalSchema * 100) : 0;
+                      return (
                         <div key={item.id} className="flex justify-between">
                             <span>{item.name}:</span>
-                            <span className="font-semibold text-green-700 dark:text-green-400">{item.schema} g</span>
+                            <span className="font-semibold text-green-700 dark:text-green-400">{item.schema} g - {schemaPercentage.toFixed(1)}%</span>
                         </div>
-                    ))}
+                      )
+                    })}
                 </div>
             }
         />
@@ -316,5 +319,7 @@ export default function FeedTab() {
     </div>
   );
 }
+
+    
 
     
