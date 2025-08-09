@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff, ShieldCheck, ChevronRight } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle as AlertTitleComponent } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -426,9 +426,9 @@ export default function SettingsTab() {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                     <AlertDialogTitle>Anda benar-benar yakin?</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogDesc>
                         Aksi ini akan menghapus semua data yang telah Anda masukkan (inventaris, produksi, keuangan, dll) secara permanen dan mengembalikan aplikasi ke keadaan kosong. Aksi ini tidak dapat dibatalkan.
-                    </AlertDialogDescription>
+                    </AlertDialogDesc>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
