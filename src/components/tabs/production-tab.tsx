@@ -334,7 +334,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   );
 };
 
-const CHART_COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"];
+const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#0088FE", "#00C49F"];
 
 const MonthlyChart = ({ data }: { data: any[] }) => {
     const pieData = [
