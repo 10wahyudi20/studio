@@ -30,7 +30,7 @@ const ttsVoices = [
 ];
 
 
-const MegaCloudAuthDialog = () => {
+const MegaCloudAuthButton = () => {
     const { companyInfo } = useAppStore();
     const { toast } = useToast();
     const [username, setUsername] = React.useState('');
@@ -39,7 +39,12 @@ const MegaCloudAuthDialog = () => {
 
     const isMegaConfigured = !!companyInfo.megaUsername && !!companyInfo.megaPassword;
 
-    const handleOpenMega = () => {
+    const handleDirectOpen = () => {
+        window.open('https://mega.nz/', '_blank');
+        toast({ title: "Berhasil!", description: "Membuka Mega Cloud di tab baru." });
+    };
+    
+    const handleAuthenticatedOpen = () => {
         if (username === (companyInfo.megaUsername || '') && password === (companyInfo.megaPassword || '')) {
             window.open('https://mega.nz/', '_blank');
             setIsOpen(false);
@@ -50,11 +55,24 @@ const MegaCloudAuthDialog = () => {
             toast({ variant: "destructive", title: "Gagal", description: "Username atau password Mega Cloud salah." });
         }
     };
+    
+    const buttonStyles = cn(
+        "w-full",
+        isMegaConfigured && "bg-green-600 hover:bg-green-700 text-white"
+    );
+
+    if (isMegaConfigured) {
+        return (
+            <Button onClick={handleDirectOpen} className={buttonStyles}>
+                <Cloud className="mr-2 h-4 w-4" /> Buka Akun Mega Cloud
+            </Button>
+        );
+    }
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant={isMegaConfigured ? "default" : "outline"} className={cn(isMegaConfigured && "bg-green-600 hover:bg-green-700 text-white")}>
+                <Button variant="outline" className={buttonStyles}>
                     <Cloud className="mr-2 h-4 w-4" /> Buka Akun Mega Cloud
                 </Button>
             </DialogTrigger>
@@ -77,7 +95,7 @@ const MegaCloudAuthDialog = () => {
                     <DialogClose asChild>
                         <Button type="button" variant="secondary">Batal</Button>
                     </DialogClose>
-                    <Button onClick={handleOpenMega}>Buka</Button>
+                    <Button onClick={handleAuthenticatedOpen}>Buka</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -341,7 +359,7 @@ export default function SettingsTab() {
                     <Input id="import" type="file" accept=".json" className="hidden" onChange={handleImport} />
                 </Label>
             </Button>
-            <MegaCloudAuthDialog />
+            <MegaCloudAuthButton />
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button variant="destructive">
@@ -367,3 +385,5 @@ export default function SettingsTab() {
     </div>
   );
 }
+
+    
