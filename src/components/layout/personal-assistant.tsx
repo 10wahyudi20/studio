@@ -79,9 +79,9 @@ const AssistantDialogContent = () => {
         history,
         prompt: currentPrompt,
         imageDataUri: currentImageDataUri ?? undefined,
-        ducks: ducks.map(d => ({...d, entryDate: d.entryDate.toISOString()})),
+        ducks: ducks.map(d => ({...d, entryDate: new Date(d.entryDate).toISOString()})),
         eggProduction: {
-            daily: eggProduction.daily.map(d => ({...d, date: d.date.toISOString()})),
+            daily: eggProduction.daily.map(d => ({...d, date: new Date(d.date).toISOString()})),
             weekly: eggProduction.weekly.map(w => ({
                 ...w, 
                 startDate: new Date(w.startDate).toISOString(), 
