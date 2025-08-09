@@ -15,7 +15,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "../ui/separator";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { cn } from "@/lib/utils";
 
 const ttsVoices = [
@@ -86,7 +86,7 @@ const MegaCloudAuthDialog = () => {
                      <>
                         <DialogHeader>
                             <DialogTitle>Otentikasi Mega Cloud</DialogTitle>
-                            <CardDescription>Masukkan kredensial Anda untuk membuka Mega Cloud.</CardDescription>
+                            <DialogDescription>Masukkan kredensial Anda untuk membuka Mega Cloud.</DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
