@@ -83,10 +83,12 @@ export default function AiPredictionTab() {
       };
   }) : [];
   
+  const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+
   const feedInfoForAI = feed.map(f => ({
       name: f.name,
       schema: f.schema,
-      pricePerKg: f.pricePerKg
+      dailyConsumption: (totalDucks * f.schema) / 1000 // in Kg
   }));
 
   const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0;
@@ -111,7 +113,7 @@ export default function AiPredictionTab() {
       const input: PredictEggProductionInput = {
         duckInfo: duckInfoForAI,
         productionInfo: productionInfoForAI,
-        feedInfo: feedInfoForAI.map(({pricePerKg, ...rest}) => rest), // Exclude pricePerKg from AI input
+        feedInfo: feedInfoForAI.map(({dailyConsumption, ...rest}) => rest), // Exclude dailyConsumption from AI input
         housingInformation: housingInfo,
         predictionDays: predictionDays
       };
@@ -184,9 +186,9 @@ export default function AiPredictionTab() {
                         { header: "Nama Pakan", accessor: "name" },
                         { header: "Skema (g)", accessor: "schema" },
                         { 
-                            header: "Harga/Kg", 
-                            accessor: "pricePerKg",
-                            format: (value) => `Rp ${value.toLocaleString('id-ID')}`
+                            header: "Pakan/Hari (Kg)", 
+                            accessor: "dailyConsumption",
+                            format: (value) => `${value.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`
                         },
                     ]}
                 />
