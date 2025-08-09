@@ -2,76 +2,111 @@
 "use client";
 
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { predictEggProduction, PredictEggProductionInput, PredictEggProductionOutput } from "@/ai/flows/predict-egg-production";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BrainCircuit, Loader2, PlayCircle, Volume2 } from "lucide-react";
+import { BrainCircuit, Loader2, PlayCircle, Table, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
-const predictionSchema = z.object({
-  duckQuantity: z.coerce.number().min(1, "Jumlah bebek harus diisi"),
-  duckAgeMonths: z.coerce.number().min(1, "Usia rata-rata harus diisi"),
-  duckCondition: z.string().nonempty("Kondisi bebek harus dipilih"),
-  feedQuality: z.string().nonempty("Kualitas pakan harus diisi"),
-  housingInformation: z.string().nonempty("Informasi kandang harus diisi"),
-});
+const DataDisplayCard = ({ title, data, columns }: { title: string, data: any[], columns: { header: string, accessor: string }[] }) => (
+    <div className="space-y-2">
+        <h4 className="font-semibold text-sm">{title}</h4>
+        <Card className="bg-muted/50">
+            <CardContent className="p-3">
+                {data.length > 0 ? (
+                    <table className="w-full text-xs">
+                        <thead>
+                            <tr className="text-left">
+                                {columns.map(col => <th key={col.header} className="p-1 font-medium text-muted-foreground">{col.header}</th>)}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.map((item, index) => (
+                                <tr key={index} className="border-t">
+                                    {columns.map(col => <td key={col.accessor} className="p-1">{item[col.accessor]}</td>)}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className="text-xs text-center text-muted-foreground p-2">Tidak ada data.</p>
+                )}
+            </CardContent>
+        </Card>
+    </div>
+);
 
-type PredictionFormData = z.infer<typeof predictionSchema>;
 
 export default function AiPredictionTab() {
-  const { ducks, feed, companyInfo } = useAppStore();
+  const { ducks, feed, eggProduction, companyInfo } = useAppStore();
+  const { toast } = useToast();
+  
   const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(null);
   const [audio, setAudio] = React.useState<TextToSpeechOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [audioError, setAudioError] = React.useState<string | null>(null);
+  const [housingInfo, setHousingInfo] = React.useState("Kandang baterai dan umbaran, sirkulasi udara cukup baik, suhu rata-rata 28°C.");
 
-  const { register, handleSubmit, control, formState: { errors }, setValue, watch } = useForm<PredictionFormData>({
-    resolver: zodResolver(predictionSchema),
-    defaultValues: {
-      duckCondition: "healthy",
-      feedQuality: "",
-      housingInformation: "Kandang baterai dan umbaran, sirkulasi udara cukup baik, suhu rata-rata 28°C.",
+  const lastDailyRecord = eggProduction.daily.at(-1);
+
+  const duckInfoForAI = ducks.map(d => ({
+      cage: d.cage,
+      quantity: d.quantity,
+      ageMonths: d.ageMonths,
+      cageSize: d.cageSize,
+      cageSystem: d.cageSystem
+  }));
+
+  const productionInfoForAI = lastDailyRecord ? Object.entries(lastDailyRecord.perCage).map(([cage, production]) => {
+      const duckInCage = ducks.find(d => String(d.cage) === cage);
+      const productivity = (duckInCage && duckInCage.quantity > 0) ? (production / duckInCage.quantity) * 100 : 0;
+      return {
+          cage: Number(cage),
+          production: production,
+          productivity: parseFloat(productivity.toFixed(2))
+      };
+  }) : [];
+  
+  const feedInfoForAI = feed.map(f => ({
+      name: f.name,
+      schema: f.schema
+  }));
+
+  const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0;
+
+  const handleSubmit = async () => {
+    if (!canPredict) {
+        toast({
+            variant: "destructive",
+            title: "Data Tidak Lengkap",
+            description: "Pastikan ada data di tab Populasi, Produksi (minimal 1 hari), dan Pakan untuk membuat prediksi."
+        });
+        return;
     }
-  });
 
-  const duckQuantity = watch("duckQuantity");
-
-  React.useEffect(() => {
-    const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-    const totalAge = ducks.reduce((sum, duck) => sum + (duck.quantity * duck.ageMonths), 0);
-    const avgAge = totalDucks > 0 ? Math.round(totalAge / totalDucks) : 0;
-    
-    setValue("duckQuantity", totalDucks, { shouldValidate: true });
-    setValue("duckAgeMonths", avgAge, { shouldValidate: true });
-
-    const feedDescription = feed
-      .map(f => `${f.name} (${f.schema}g)`)
-      .join(', ');
-    setValue("feedQuality", feedDescription || "Tidak ada data pakan.", { shouldValidate: true });
-
-  }, [ducks, feed, setValue]);
-
-
-  const onSubmit = async (data: PredictionFormData) => {
     setIsLoading(true);
     setError(null);
     setPrediction(null);
     setAudio(null);
     setAudioError(null);
+
     try {
-      const result = await predictEggProduction(data);
+      const input: PredictEggProductionInput = {
+        duckInfo: duckInfoForAI,
+        productionInfo: productionInfoForAI,
+        feedInfo: feedInfoForAI,
+        housingInformation: housingInfo,
+      };
+      const result = await predictEggProduction(input);
       setPrediction(result);
     } catch (e) {
       setError("Gagal menghasilkan prediksi. Silakan coba lagi.");
@@ -108,57 +143,60 @@ export default function AiPredictionTab() {
         <CardHeader>
           <CardTitle>Prediksi Produksi Telur</CardTitle>
           <CardDescription>
-            Masukkan data untuk memprediksi jumlah produksi telur untuk hari berikutnya menggunakan AI.
+            AI akan menganalisis data dari seluruh aplikasi untuk memprediksi produksi besok.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="duckQuantity">Jumlah Bebek</Label>
-                <Input id="duckQuantity" type="number" {...register("duckQuantity")} readOnly className="bg-muted"/>
-                {errors.duckQuantity && <p className="text-sm text-destructive mt-1">{errors.duckQuantity.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="duckAgeMonths">Rata-rata Usia Bebek (Bulan)</Label>
-                <Input id="duckAgeMonths" type="number" {...register("duckAgeMonths")} readOnly className="bg-muted"/>
-                 {errors.duckAgeMonths && <p className="text-sm text-destructive mt-1">{errors.duckAgeMonths.message}</p>}
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-               <div className="space-y-2">
-                <Label>Kondisi Bebek</Label>
-                <Controller name="duckCondition" control={control} render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger><SelectValue placeholder="Pilih kondisi" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="healthy">Sehat</SelectItem>
-                            <SelectItem value="minor_sickness">Sakit Ringan</SelectItem>
-                            <SelectItem value="major_sickness">Sakit Berat</SelectItem>
-                        </SelectContent>
-                    </Select>
-                )} />
-              </div>
-               <div className="space-y-2">
-                <Label htmlFor="feedQuality">Kualitas Pakan</Label>
-                <Input id="feedQuality" {...register("feedQuality")} readOnly className="bg-muted"/>
-                {errors.feedQuality && <p className="text-sm text-destructive mt-1">{errors.feedQuality.message}</p>}
-              </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="housingInformation">Informasi Kandang & Lingkungan</Label>
-                <Textarea id="housingInformation" {...register("housingInformation")} rows={4} />
-                {errors.housingInformation && <p className="text-sm text-destructive mt-1">{errors.housingInformation.message}</p>}
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button type="submit" disabled={isLoading || !duckQuantity || duckQuantity === 0}>
+        <CardContent>
+            <ScrollArea className="h-96 pr-4">
+                <div className="space-y-4">
+                    <DataDisplayCard
+                        title="Informasi Populasi Bebek"
+                        data={duckInfoForAI}
+                        columns={[
+                            { header: "Kdg", accessor: "cage" },
+                            { header: "Jml", accessor: "quantity" },
+                            { header: "Usia", accessor: "ageMonths" },
+                            { header: "Ukuran", accessor: "cageSize" },
+                            { header: "Sistem", accessor: "cageSystem" },
+                        ]}
+                    />
+                    <DataDisplayCard
+                        title={`Informasi Produksi (Data Terakhir)`}
+                        data={productionInfoForAI}
+                        columns={[
+                            { header: "Kdg", accessor: "cage" },
+                            { header: "Produksi", accessor: "production" },
+                            { header: "Produktifitas (%)", accessor: "productivity" },
+                        ]}
+                    />
+                     <DataDisplayCard
+                        title="Informasi Pakan"
+                        data={feedInfoForAI}
+                        columns={[
+                            { header: "Nama Pakan", accessor: "name" },
+                            { header: "Skema (g)", accessor: "schema" },
+                        ]}
+                    />
+                     <div className="space-y-2">
+                        <Label htmlFor="housingInformation" className="font-semibold text-sm">Informasi Kandang & Lingkungan (Opsional)</Label>
+                        <Textarea id="housingInformation" value={housingInfo} onChange={(e) => setHousingInfo(e.target.value)} rows={3} />
+                    </div>
+                </div>
+            </ScrollArea>
+        </CardContent>
+        <CardFooter>
+            <Button onClick={handleSubmit} disabled={isLoading || !canPredict}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
               Hasilkan Prediksi
             </Button>
-          </CardFooter>
-        </form>
+            {!canPredict && (
+                <Alert variant="destructive" className="ml-4 text-xs">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Data Kurang</AlertTitle>
+                    <AlertDescription>Data dari Populasi, Produksi, dan Pakan dibutuhkan.</AlertDescription>
+                </Alert>
+            )}
+        </CardFooter>
       </Card>
 
       <div className="space-y-6">

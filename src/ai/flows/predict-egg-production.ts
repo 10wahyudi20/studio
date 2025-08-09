@@ -13,12 +13,31 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
+const DuckInfoSchema = z.object({
+  cage: z.number().describe('Nomor kandang'),
+  quantity: z.number().describe('Jumlah bebek di kandang ini'),
+  ageMonths: z.number().describe('Usia rata-rata bebek di kandang ini (bulan)'),
+  cageSize: z.string().describe('Ukuran kandang (misal: 10m x 5m)'),
+  cageSystem: z.string().describe('Sistem kandang (baterai atau umbaran)'),
+});
+
+const ProductionInfoSchema = z.object({
+    cage: z.number().describe('Nomor kandang'),
+    production: z.number().describe('Jumlah telur yang dihasilkan di kandang ini kemarin'),
+    productivity: z.number().describe('Tingkat produktivitas kandang ini kemarin (%)'),
+});
+
+const FeedInfoSchema = z.object({
+    name: z.string().describe('Nama pakan'),
+    schema: z.number().describe('Skema pakan dalam gram per ekor per hari'),
+});
+
+
 const PredictEggProductionInputSchema = z.object({
-  duckQuantity: z.number().describe('The total number of ducks.'),
-  duckAgeMonths: z.number().describe('The average age of the ducks in months.'),
-  duckCondition: z.string().describe('The overall health condition of the ducks (e.g., healthy, sick).'),
-  feedQuality: z.string().describe('The quality of the feed being provided (e.g., high, medium, low).'),
-  housingInformation: z.string().describe('Information about the housing or kandang of the ducks'),
+  duckInfo: z.array(DuckInfoSchema).describe('Informasi detail dari setiap kandang bebek.'),
+  productionInfo: z.array(ProductionInfoSchema).describe('Informasi produksi dari setiap kandang kemarin.'),
+  feedInfo: z.array(FeedInfoSchema).describe('Informasi mengenai pakan yang digunakan.'),
+  housingInformation: z.string().describe('Informasi tambahan mengenai lingkungan atau kondisi umum kandang.'),
 });
 export type PredictEggProductionInput = z.infer<typeof PredictEggProductionInputSchema>;
 
@@ -38,23 +57,35 @@ const predictEggProductionPrompt = ai.definePrompt({
   name: 'predictEggProductionPrompt',
   input: {schema: PredictEggProductionInputSchema},
   output: {schema: PredictEggProductionOutputSchema},
-  prompt: `Anda adalah asisten manajemen peternakan AI yang berspesialisasi dalam memprediksi produksi telur.
+  prompt: `Anda adalah asisten manajemen peternakan AI yang sangat ahli dalam menganalisis data dan memprediksi produksi telur bebek.
 
-  Berdasarkan informasi yang diberikan tentang bebek, kondisi mereka, kualitas pakan, dan perkandangan,
-  prediksi jumlah telur yang akan diproduksi besok dan berikan alasan singkat untuk prediksi Anda dalam Bahasa Indonesia.
+  Berdasarkan data komprehensif yang diberikan, lakukan analisis mendalam untuk memprediksi jumlah total telur yang akan diproduksi besok. Pertimbangkan semua variabel yang ada:
+  - Data dari setiap kandang (jumlah bebek, usia, ukuran, sistem). Usia sangat berpengaruh pada produktivitas.
+  - Data produksi dan produktivitas aktual dari hari sebelumnya untuk setiap kandang. Ini adalah indikator performa terkini.
+  - Jenis pakan yang digunakan dan skemanya. Kualitas dan kuantitas pakan adalah faktor kunci.
+  - Informasi tambahan mengenai lingkungan.
 
-  Data Peternakan:
-  - Jumlah Bebek: {{{duckQuantity}}}
-  - Rata-rata Usia Bebek (Bulan): {{{duckAgeMonths}}}
-  - Kondisi Bebek: {{{duckCondition}}}
-  - Kualitas Pakan: {{{feedQuality}}}
-  - Informasi Kandang: {{{housingInformation}}}
+  Berikan alasan yang detail dan logis untuk prediksi Anda dalam Bahasa Indonesia, jelaskan bagaimana Anda menghubungkan berbagai data untuk sampai pada kesimpulan Anda.
+
+  DATA POPULASI PER KANDANG:
+  {{#each duckInfo}}
+  - Kandang {{cage}}: {{quantity}} ekor, Usia {{ageMonths}} bulan, Ukuran {{cageSize}}, Sistem {{cageSystem}}
+  {{/each}}
   
-  Berikan respons dalam format JSON berikut:
-  {
-    "predictedEggProduction": number,
-    "reasoning": string
-  }`,
+  DATA PRODUKSI PER KANDANG (KEMARIN):
+  {{#each productionInfo}}
+  - Kandang {{cage}}: {{production}} butir (Produktivitas {{productivity}}%)
+  {{/each}}
+
+  DATA PAKAN:
+  {{#each feedInfo}}
+  - {{name}}: {{schema}} gram/ekor/hari
+  {{/each}}
+
+  INFORMASI LINGKUNGAN TAMBAHAN:
+  {{{housingInformation}}}
+  
+  Berikan respons dalam format JSON.`,
 });
 
 const predictEggProductionFlow = ai.defineFlow(
