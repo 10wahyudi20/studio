@@ -37,20 +37,27 @@ export default function AiPredictionTab() {
   const [error, setError] = React.useState<string | null>(null);
   const [audioError, setAudioError] = React.useState<string | null>(null);
 
-  const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-  const totalAge = ducks.reduce((sum, duck) => sum + (duck.quantity * duck.ageMonths), 0);
-  const avgAge = totalDucks > 0 ? Math.round(totalAge / totalDucks) : 0;
-  
-  const { register, handleSubmit, control, formState: { errors } } = useForm<PredictionFormData>({
+  const { register, handleSubmit, control, formState: { errors }, setValue, watch } = useForm<PredictionFormData>({
     resolver: zodResolver(predictionSchema),
     defaultValues: {
-      duckQuantity: totalDucks,
-      duckAgeMonths: avgAge,
       duckCondition: "healthy",
       feedQuality: "medium",
       housingInformation: "Kandang baterai dan umbaran, sirkulasi udara cukup baik, suhu rata-rata 28°C.",
     }
   });
+
+  const duckQuantity = watch("duckQuantity");
+
+  React.useEffect(() => {
+    const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+    const totalAge = ducks.reduce((sum, duck) => sum + (duck.quantity * duck.ageMonths), 0);
+    const avgAge = totalDucks > 0 ? Math.round(totalAge / totalDucks) : 0;
+    
+    setValue("duckQuantity", totalDucks, { shouldValidate: true });
+    setValue("duckAgeMonths", avgAge, { shouldValidate: true });
+
+  }, [ducks, setValue]);
+
 
   const onSubmit = async (data: PredictionFormData) => {
     setIsLoading(true);
@@ -104,12 +111,12 @@ export default function AiPredictionTab() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="duckQuantity">Jumlah Bebek</Label>
-                <Input id="duckQuantity" type="number" {...register("duckQuantity")} />
+                <Input id="duckQuantity" type="number" {...register("duckQuantity")} readOnly className="bg-muted"/>
                 {errors.duckQuantity && <p className="text-sm text-destructive mt-1">{errors.duckQuantity.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="duckAgeMonths">Rata-rata Usia Bebek (Bulan)</Label>
-                <Input id="duckAgeMonths" type="number" {...register("duckAgeMonths")} />
+                <Input id="duckAgeMonths" type="number" {...register("duckAgeMonths")} readOnly className="bg-muted"/>
                  {errors.duckAgeMonths && <p className="text-sm text-destructive mt-1">{errors.duckAgeMonths.message}</p>}
               </div>
             </div>
@@ -149,7 +156,7 @@ export default function AiPredictionTab() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || !duckQuantity || duckQuantity === 0}>
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
               Hasilkan Prediksi
             </Button>
