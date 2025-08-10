@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon } from "lucide-react";
 import { format, addDays, startOfMonth, endOfMonth, isToday } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -27,6 +27,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 
 // Daily Data Form
@@ -334,7 +335,8 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   );
 };
 
-const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6"];
+const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#f97316", "#eab308", "#22c55e", "#8b5cf6"];
+
 
 const renderCustomizedLabel = (props: any) => {
     const { cx, cy, midAngle, outerRadius, percent, value, name } = props;
@@ -516,6 +518,8 @@ export default function ProductionTab() {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
+  const [showDailyChart, setShowDailyChart] = React.useState(false);
+
   const [zoomLevel, setZoomLevel] = React.useState(100);
   
   const [isDailyFormOpen, setIsDailyFormOpen] = React.useState(false);
@@ -657,6 +661,16 @@ export default function ProductionTab() {
     </TableCell>
   );
 
+  const dailyChartData = eggProduction.daily.slice(-30).map(d => {
+    const formattedData: { [key: string]: any } = {
+        name: format(new Date(d.date), 'dd/MM')
+    };
+    ducks.forEach(duck => {
+        formattedData[`Kdg ${duck.cage}`] = d.perCage[duck.cage] ?? null;
+    });
+    return formattedData;
+  });
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -746,6 +760,14 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
+                            <Collapsible>
+                                <CollapsibleTrigger asChild>
+                                    <Button variant="outline" size="icon" onClick={() => setShowDailyChart(!showDailyChart)}>
+                                        <LineChartIcon className="h-4 w-4" />
+                                        <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
+                                    </Button>
+                                </CollapsibleTrigger>
+                            </Collapsible>
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))}>
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
@@ -788,10 +810,44 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
+             <Collapsible open={showDailyChart} onOpenChange={setShowDailyChart} className="space-y-4">
+                <CollapsibleContent>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Grafik Produksi per Kandang (30 Hari Terakhir)</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={dailyChartData}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" fontSize={12} />
+                                    <YAxis />
+                                    <Tooltip
+                                        contentStyle={{
+                                            background: "hsl(var(--background))",
+                                            borderColor: "hsl(var(--border))",
+                                        }}
+                                    />
+                                    <Legend />
+                                    {ducks.map((duck, index) => (
+                                        <Line
+                                            key={duck.id}
+                                            type="monotone"
+                                            dataKey={`Kdg ${duck.cage}`}
+                                            stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                                            dot={false}
+                                            connectNulls
+                                        />
+                                    ))}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </CollapsibleContent>
+             </Collapsible>
              <div className="w-full overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
                 <div style={{ 
-                    width: `${100 / (zoomLevel / 100)}%`, 
-                    height: `${100 / (zoomLevel / 100)}%`, 
+                    width: 'fit-content',
                     transform: `scale(${zoomLevel / 100})`,
                     transformOrigin: 'top left'
                   }}>
