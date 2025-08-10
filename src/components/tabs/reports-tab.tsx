@@ -43,7 +43,7 @@ export default function ReportsTab() {
   const [selectedMonth, setSelectedMonth] = useState(String(currentMonth));
   const [isLoading, setIsLoading] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const [generatedPdf, setGeneratedPdf] = useState<jsPDF | null>(null);
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
 
 
   // Clean up the object URL when the component unmounts or when a new URL is created
@@ -57,7 +57,7 @@ export default function ReportsTab() {
 
   const handleGenerateReport = () => {
     setIsLoading(true);
-    setGeneratedPdf(null);
+    setPdfBlob(null);
 
     // Revoke any existing URL before creating a new one
     if (pdfPreviewUrl) {
@@ -179,12 +179,11 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
             
-            setGeneratedPdf(doc);
-            const pdfBlob = doc.output('blob');
-            const blobUrl = URL.createObjectURL(pdfBlob);
-            setPdfPreviewUrl(blobUrl);
+            const newPdfBlob = doc.output('blob');
+            setPdfBlob(newPdfBlob);
+            setPdfPreviewUrl(URL.createObjectURL(newPdfBlob));
 
-            toast({ title: "Pratinjau Laporan Dibuat!", description: "Laporan kini ditampilkan di bawah." });
+            toast({ title: "Laporan Dibuat!", description: "Pratinjau laporan kini ditampilkan di bawah." });
 
         } catch (error) {
             console.error("Failed to generate PDF", error);
@@ -196,7 +195,7 @@ export default function ReportsTab() {
   };
   
   const handleDownloadReport = () => {
-    if (!generatedPdf) {
+    if (!pdfBlob) {
         toast({
             variant: "destructive",
             title: "Laporan Tidak Tersedia",
@@ -205,7 +204,14 @@ export default function ReportsTab() {
         return;
     }
     const monthName = months.find(m => m.value === parseInt(selectedMonth, 10))?.name || '';
-    generatedPdf.save(`Laporan_${monthName}_${selectedYear}_${companyInfo.name}.pdf`);
+    const downloadUrl = URL.createObjectURL(pdfBlob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `Laporan_${monthName}_${selectedYear}_${companyInfo.name}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(downloadUrl);
   };
 
   return (
@@ -252,7 +258,7 @@ export default function ReportsTab() {
             )}
             Tampilkan Pratinjau
           </Button>
-          {generatedPdf && (
+          {pdfBlob && (
             <Button onClick={handleDownloadReport} variant="outline" className="w-full sm:w-auto">
                 <FileDown className="mr-2 h-4 w-4" />
                 Unduh Laporan
@@ -271,9 +277,10 @@ export default function ReportsTab() {
       {pdfPreviewUrl && !isLoading && (
         <Card>
             <CardHeader>
-                <CardTitle>Tampilkan Laporan</CardTitle>
+                <CardTitle>tampilkan laporan</CardTitle>
             </CardHeader>
             <CardContent>
+                laporan tampilkan di sini
                 <iframe
                     src={pdfPreviewUrl}
                     className="w-full h-[700px] border rounded-md mt-4"
