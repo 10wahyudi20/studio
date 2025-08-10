@@ -658,13 +658,17 @@ export default function ProductionTab() {
     </TableCell>
   );
 
-  React.useEffect(() => {
-    if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollLeft = 0;
-        scrollContainerRef.current.scrollTop = 0;
-    }
-  }, [zoomLevel]);
-
+  const zoomClass = () => {
+    if (zoomLevel === 100) return "text-sm";
+    if (zoomLevel > 100) return `text-lg`;
+    return `text-xs`;
+  }
+  
+  const cellPaddingClass = () => {
+      if (zoomLevel === 100) return "p-2";
+      if (zoomLevel > 100) return `p-3`;
+      return `p-1`;
+  }
 
   return (
     <div className="space-y-6">
@@ -755,11 +759,11 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 10))}>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(70, prev - 10))}>
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 10))}>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(130, prev + 10))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
                         </>
@@ -803,19 +807,15 @@ export default function ProductionTab() {
                   className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   style={{ maxHeight: '60vh' }}
               >
-                    <div 
-                        key={zoomLevel}
-                        style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top left' }}
-                    >
-                      <Table>
+                      <Table className={zoomClass()}>
                           <TableHeader>
                               <TableRow>
-                                  <TableHead className="text-center align-middle">Tanggal</TableHead>
-                                  <TableHead className="text-center align-middle">Hari</TableHead>
-                                  <TableHead className="text-center align-middle">Jumlah Telur</TableHead>
-                                  <TableHead className="text-center align-middle">Produktifitas</TableHead>
+                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Tanggal</TableHead>
+                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Hari</TableHead>
+                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Jumlah Telur</TableHead>
+                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Produktifitas</TableHead>
                                   {ducks.map(duck => (
-                                      <TableHead key={duck.id} className="text-center p-2 align-top">
+                                      <TableHead key={duck.id} className={cn("text-center align-top", cellPaddingClass())}>
                                           <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
                                               <div>Kdg {duck.cage}</div>
                                               <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
@@ -833,17 +833,17 @@ export default function ProductionTab() {
                                   .reverse()
                                   .map((day) => (
                                       <TableRow key={day.date.toISOString()} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
-                                          <TableCell className="align-middle text-center">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
-                                          <TableCell className="align-middle text-center">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
-                                          <TableCell className="align-middle text-center">{day.totalEggs}</TableCell>
-                                          <TableCell className="align-middle text-center">{day.productivity.toFixed(2)}%</TableCell>
+                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
+                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
+                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{day.totalEggs}</TableCell>
+                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{day.productivity.toFixed(2)}%</TableCell>
                                           {ducks.map(duck => {
                                               const production = day.perCage[duck.cage];
                                               const productivity = duck.quantity > 0 && production != null
                                                   ? (production / duck.quantity * 100)
                                                   : 0;
                                               return (
-                                                  <TableCell key={duck.id} className="p-0 text-center align-middle">
+                                                  <TableCell key={duck.id} className={cn("p-0 text-center align-middle", cellPaddingClass())}>
                                                       <div className="pt-4 pb-2">{production ?? '-'}</div>
                                                       <div className={cn("text-xs py-0.5 w-11/12 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
                                                           {productivity.toFixed(1)}%
@@ -855,7 +855,6 @@ export default function ProductionTab() {
                                   ))}
                           </TableBody>
                       </Table>
-                    </div>
               </div>
                <DailyDataForm 
                   open={isDailyFormOpen}
