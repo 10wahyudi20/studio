@@ -568,6 +568,14 @@ export default function ProductionTab() {
   const worstProductionRecord = monthlyProductionData.length > 0
     ? monthlyProductionData.reduce((worst, current) => current.totalEggs < worst.totalEggs ? current : worst)
     : null;
+    
+  const bestProductivityRecord = monthlyProductionData.length > 0
+    ? monthlyProductionData.reduce((best, current) => current.productivity > best.productivity ? current : best)
+    : null;
+
+  const worstProductivityRecord = monthlyProductionData.length > 0
+    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
+    : null;
   
   const getProductivityColor = (p: number) => {
     if (p > 100) return 'bg-blue-400 text-black';
@@ -740,7 +748,30 @@ export default function ProductionTab() {
                 </div>
             }
         />
-        <StatCard title="Produktifitas" value={`${productivity.toFixed(2)}%`} icon={Percent} />
+        <StatCard 
+            title="Produktifitas" 
+            value={`${productivity.toFixed(2)}%`} 
+            icon={Percent} 
+            footer={
+                <div className="w-full pt-2 space-y-1">
+                    <div className="font-semibold">Produktifitas Bulan Ini:</div>
+                    <div className="flex justify-between items-center">
+                        <span className="flex items-center">
+                            <TrendingUp className="h-3 w-3 mr-1 text-green-500"/>
+                            Terbaik ({bestProductivityRecord ? format(new Date(bestProductivityRecord.date), 'dd/MM') : '-'}):
+                        </span>
+                        <span className="font-semibold">{bestProductivityRecord?.productivity.toFixed(2) ?? 0}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="flex items-center">
+                            <TrendingDown className="h-3 w-3 mr-1 text-red-500"/>
+                            Terendah ({worstProductivityRecord ? format(new Date(worstProductivityRecord.date), 'dd/MM') : '-'}):
+                        </span>
+                        <span className="font-semibold">{worstProductivityRecord?.productivity.toFixed(2) ?? 0}%</span>
+                    </div>
+                </div>
+            }
+        />
         <StatCard 
             title={`Telur Bulan ${format(currentDate, "MMMM", { locale: idLocale })}`} 
             value={monthProduction.toLocaleString('id-ID')} 
@@ -1097,4 +1128,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
 
