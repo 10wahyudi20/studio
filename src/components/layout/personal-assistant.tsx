@@ -42,11 +42,7 @@ const AssistantDialogContent = () => {
 
   useEffect(() => {
     if (viewportRef.current) {
-      setTimeout(() => {
-        if (viewportRef.current) {
-            viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
-        }
-      }, 100);
+        viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
     }
   }, [history]);
 
