@@ -658,6 +658,14 @@ export default function ProductionTab() {
     </TableCell>
   );
 
+  React.useEffect(() => {
+    if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollLeft = 0;
+        scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [zoomLevel]);
+
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -795,7 +803,10 @@ export default function ProductionTab() {
                   className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   style={{ maxHeight: '60vh' }}
               >
-                    <div style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top left' }}>
+                    <div 
+                        key={zoomLevel}
+                        style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top left' }}
+                    >
                       <Table>
                           <TableHeader>
                               <TableRow>
@@ -1024,5 +1035,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
