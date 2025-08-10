@@ -128,7 +128,7 @@ export default function PersonalAssistant() {
              <div className="flex-grow my-4 flex flex-col overflow-hidden">
                 <ScrollArea className="flex-grow pr-4" viewportRef={viewportRef}>
                     <div className="space-y-4 pr-2 sm:pr-0">
-                        {history.length === 0 && !imageDataUri && !isLoading && (
+                        {history.length === 0 && !imageDataUri && (
                             <div className="text-center text-muted-foreground py-8">
                                 <Bot className="mx-auto h-12 w-12" />
                                 <p className="mt-2">Bagaimana saya bisa membantu Anda hari ini?</p>
