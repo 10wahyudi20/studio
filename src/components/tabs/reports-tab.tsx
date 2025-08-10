@@ -42,34 +42,16 @@ export default function ReportsTab() {
   const [selectedYear, setSelectedYear] = useState(String(currentYear));
   const [selectedMonth, setSelectedMonth] = useState(String(currentMonth));
   const [isLoading, setIsLoading] = useState(false);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-
-
-  // Clean up the object URL when the component unmounts
-  useEffect(() => {
-    return () => {
-      if (pdfPreviewUrl) {
-        URL.revokeObjectURL(pdfPreviewUrl);
-      }
-    };
-  }, [pdfPreviewUrl]);
-
+  
   const handleGenerateReport = () => {
     setIsLoading(true);
 
-    // Revoke any existing URL and clear state before creating a new one
-    if (pdfPreviewUrl) {
-        URL.revokeObjectURL(pdfPreviewUrl);
-    }
-    setPdfPreviewUrl(null);
-    setPdfBlob(null);
-    
     // Use a brief timeout to allow the UI to update to the loading state
     setTimeout(() => {
         const year = parseInt(selectedYear, 10);
         const month = parseInt(selectedMonth, 10);
-
+        const monthName = months.find(m => m.value === month)?.name || '';
+        
         // Filter data for the selected month and year
         const dailyProdData = eggProduction.daily.filter(d => {
             const date = new Date(d.date);
@@ -85,7 +67,7 @@ export default function ReportsTab() {
             toast({
                 variant: "destructive",
                 title: "Data Tidak Ditemukan",
-                description: `Tidak ada data produksi atau keuangan untuk ${months.find(m => m.value === month)?.name} ${year}.`
+                description: `Tidak ada data produksi atau keuangan untuk ${monthName} ${year}.`
             });
             setIsLoading(false);
             return;
@@ -93,7 +75,6 @@ export default function ReportsTab() {
 
         try {
             const doc = new jsPDF();
-            const monthName = months.find(m => m.value === month)?.name || '';
 
             // --- HEADER ---
             doc.setFontSize(20);
@@ -179,11 +160,10 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
             
-            const newPdfBlob = doc.output('blob');
-            setPdfBlob(newPdfBlob);
-            setPdfPreviewUrl(URL.createObjectURL(newPdfBlob));
+            // Open the PDF in a new tab instead of an iframe
+            doc.output('dataurlnewwindow');
 
-            toast({ title: "Laporan Dibuat!", description: "Pratinjau laporan kini ditampilkan di bawah." });
+            toast({ title: "Laporan Dibuat!", description: "Laporan telah dibuka di tab baru." });
 
         } catch (error) {
             console.error("Failed to generate PDF", error);
@@ -194,26 +174,6 @@ export default function ReportsTab() {
     }, 100); 
   };
   
-  const handleDownloadReport = () => {
-    if (!pdfBlob) {
-        toast({
-            variant: "destructive",
-            title: "Laporan Tidak Tersedia",
-            description: "Silakan buat pratinjau laporan terlebih dahulu."
-        });
-        return;
-    }
-    const monthName = months.find(m => m.value === parseInt(selectedMonth, 10))?.name || '';
-    const downloadUrl = URL.createObjectURL(pdfBlob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `Laporan_${monthName}_${selectedYear}_${companyInfo.name}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(downloadUrl);
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -256,39 +216,10 @@ export default function ReportsTab() {
             ) : (
               <Eye className="mr-2 h-4 w-4" />
             )}
-            Tampilkan Pratinjau
+            Tampilkan Laporan
           </Button>
-          {pdfBlob && (
-            <Button onClick={handleDownloadReport} variant="outline" className="w-full sm:w-auto">
-                <FileDown className="mr-2 h-4 w-4" />
-                Unduh Laporan
-            </Button>
-          )}
         </CardContent>
       </Card>
-      
-      {isLoading && (
-         <div className="text-center p-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-            <p className="mt-2 text-muted-foreground">Membuat pratinjau laporan...</p>
-        </div>
-      )}
-
-      {pdfPreviewUrl && !isLoading && (
-        <Card>
-            <CardHeader>
-                <CardTitle>Tampilkan Laporan</CardTitle>
-            </CardHeader>
-            <CardContent>
-                laporan tampilkan di sini
-                <iframe
-                    src={pdfPreviewUrl}
-                    className="w-full h-[700px] border rounded-md mt-4"
-                    title="Pratinjau Laporan"
-                ></iframe>
-            </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
