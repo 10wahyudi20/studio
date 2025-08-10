@@ -200,17 +200,15 @@ const AssistantDialogContent = () => {
 
 
 export default function PersonalAssistant() {
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
           <Sparkles className="h-5 w-5 text-purple-500" />
           <span className="sr-only">Asisten AI</span>
         </Button>
       </DialogTrigger>
-      {isDialogOpen && <AssistantDialogContent />}
+      <AssistantDialogContent />
     </Dialog>
   );
 }
