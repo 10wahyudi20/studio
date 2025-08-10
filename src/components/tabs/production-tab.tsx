@@ -738,13 +738,21 @@ export default function ProductionTab() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Tabel Produksi</CardTitle>
-           {(activeTab === 'monthly' || activeTab === 'weekly') && (
-              <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="hover:bg-transparent">
-                <BarChartIcon className="h-4 w-4" />
-                <span className="sr-only">Tampilkan Grafik</span>
-              </Button>
-           )}
+            <CardTitle>Tabel Produksi</CardTitle>
+            <div className="flex items-center gap-2">
+                 {(activeTab === 'monthly' || activeTab === 'weekly') && (
+                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="hover:bg-transparent">
+                        <BarChartIcon className="h-4 w-4" />
+                        <span className="sr-only">Tampilkan Grafik</span>
+                    </Button>
+                )}
+                {activeTab === 'daily' && (
+                     <Button variant="outline" size="icon" onClick={() => setShowDailyChart(!showDailyChart)}>
+                        <LineChartIcon className="h-4 w-4" />
+                        <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
+                    </Button>
+                )}
+            </div>
         </CardHeader>
         <CardContent>
         {showChart && (activeTab === 'monthly' || activeTab === 'weekly') ? (
@@ -760,14 +768,6 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Collapsible>
-                                <CollapsibleTrigger asChild>
-                                    <Button variant="outline" size="icon" onClick={() => setShowDailyChart(!showDailyChart)}>
-                                        <LineChartIcon className="h-4 w-4" />
-                                        <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
-                                    </Button>
-                                </CollapsibleTrigger>
-                            </Collapsible>
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))}>
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
