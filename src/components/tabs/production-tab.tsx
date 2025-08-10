@@ -517,7 +517,6 @@ export default function ProductionTab() {
   const [activeTab, setActiveTab] = React.useState("daily");
   const [showChart, setShowChart] = React.useState(false);
   const [zoomLevel, setZoomLevel] = React.useState(100);
-  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   
   const [isDailyFormOpen, setIsDailyFormOpen] = React.useState(false);
   const [editingProduction, setEditingProduction] = React.useState<DailyProduction | undefined>(undefined);
@@ -658,18 +657,6 @@ export default function ProductionTab() {
     </TableCell>
   );
 
-  const zoomClass = () => {
-    if (zoomLevel === 100) return "text-sm";
-    if (zoomLevel > 100) return `text-lg`;
-    return `text-xs`;
-  }
-  
-  const cellPaddingClass = () => {
-      if (zoomLevel === 100) return "p-2";
-      if (zoomLevel > 100) return `p-3`;
-      return `p-1`;
-  }
-
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -802,20 +789,19 @@ export default function ProductionTab() {
             
             <TabsContent value="daily">
              <div
-                  ref={scrollContainerRef}
                   tabIndex={0}
                   className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
                   style={{ maxHeight: '60vh' }}
               >
-                      <Table className={zoomClass()}>
+                      <Table style={{ fontSize: `${zoomLevel}%` }}>
                           <TableHeader>
                               <TableRow>
-                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Tanggal</TableHead>
-                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Hari</TableHead>
-                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Jumlah Telur</TableHead>
-                                  <TableHead className={cn("text-center align-middle", cellPaddingClass())}>Produktifitas</TableHead>
+                                  <TableHead className="text-center align-middle p-2">Tanggal</TableHead>
+                                  <TableHead className="text-center align-middle p-2">Hari</TableHead>
+                                  <TableHead className="text-center align-middle p-2">Jumlah Telur</TableHead>
+                                  <TableHead className="text-center align-middle p-2">Produktifitas</TableHead>
                                   {ducks.map(duck => (
-                                      <TableHead key={duck.id} className={cn("text-center align-top", cellPaddingClass())}>
+                                      <TableHead key={duck.id} className="text-center align-top p-2">
                                           <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
                                               <div>Kdg {duck.cage}</div>
                                               <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
@@ -833,18 +819,18 @@ export default function ProductionTab() {
                                   .reverse()
                                   .map((day) => (
                                       <TableRow key={day.date.toISOString()} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
-                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
-                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
-                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{day.totalEggs}</TableCell>
-                                          <TableCell className={cn("align-middle text-center", cellPaddingClass())}>{day.productivity.toFixed(2)}%</TableCell>
+                                          <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
+                                          <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
+                                          <TableCell className="align-middle text-center p-2">{day.totalEggs}</TableCell>
+                                          <TableCell className="align-middle text-center p-2">{day.productivity.toFixed(2)}%</TableCell>
                                           {ducks.map(duck => {
                                               const production = day.perCage[duck.cage];
                                               const productivity = duck.quantity > 0 && production != null
                                                   ? (production / duck.quantity * 100)
                                                   : 0;
                                               return (
-                                                  <TableCell key={duck.id} className={cn("p-0 text-center align-middle", cellPaddingClass())}>
-                                                      <div className="pt-4 pb-2">{production ?? '-'}</div>
+                                                  <TableCell key={duck.id} className="p-0 text-center align-middle">
+                                                      <div className="pt-4 pb-2 p-2">{production ?? '-'}</div>
                                                       <div className={cn("text-xs py-0.5 w-11/12 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
                                                           {productivity.toFixed(1)}%
                                                       </div>
