@@ -59,21 +59,22 @@ const AssistantDialogContent = () => {
     if (!prompt.trim() && !imageDataUri) return;
 
     const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri ?? undefined };
+    
+    // Add user message to history and start loading
     setHistory(prev => [...prev, newUserMessage]);
-
+    setIsLoading(true);
+    setError(null);
+    
+    // Store current prompt/image and clear the inputs
     const currentPrompt = prompt;
     const currentImageDataUri = imageDataUri;
-
     setPrompt('');
     setImageDataUri(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
-    setIsLoading(true);
-    setError(null);
-
     try {
       const result = await personalAssistant({
-        history,
+        history, // Send history *before* adding the new user message
         prompt: currentPrompt,
         imageDataUri: currentImageDataUri ?? undefined,
       });
@@ -99,9 +100,7 @@ const AssistantDialogContent = () => {
     <DialogContent 
         className={cn(
             "flex flex-col w-full max-w-xl h-full sm:h-[90vh] p-0 gap-0",
-            "ai-dialog"
         )}
-        data-loading={isLoading}
     >
         <DialogHeader className="p-6 pb-2 flex-shrink-0">
             <DialogTitle>Asisten AI Pribadi</DialogTitle>
