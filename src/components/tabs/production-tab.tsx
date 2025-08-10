@@ -530,7 +530,7 @@ export default function ProductionTab() {
   const productionDifference = todayProduction - yesterdayProduction;
 
   const bestProduction = Math.max(...eggProduction.daily.map(d => d.totalEggs), 0);
-  const productivity = totalDucks > 0 ? (todayProduction / totalDucks * 100) : 0;
+  const productivity = totalDucks > 0 ? (todayProduction / totalDucks) * 100 : 0;
   
   const monthlyProductionData = eggProduction.daily.filter(d => {
     const dDate = new Date(d.date);
@@ -746,11 +746,11 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(70, prev - 10))}>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))}>
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(130, prev + 10))}>
+                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
                         </>
@@ -788,59 +788,55 @@ export default function ProductionTab() {
             </div>
             
             <TabsContent value="daily">
-             <div
-                  tabIndex={0}
-                  className="w-full overflow-auto outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-md"
-                  style={{ maxHeight: '60vh' }}
-              >
-                      <Table style={{ fontSize: `${zoomLevel}%` }}>
-                          <TableHeader>
-                              <TableRow>
-                                  <TableHead className="text-center align-middle p-2">Tanggal</TableHead>
-                                  <TableHead className="text-center align-middle p-2">Hari</TableHead>
-                                  <TableHead className="text-center align-middle p-2">Jumlah Telur</TableHead>
-                                  <TableHead className="text-center align-middle p-2">Produktifitas</TableHead>
-                                  {ducks.map(duck => (
-                                      <TableHead key={duck.id} className="text-center align-top p-2">
-                                          <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
-                                              <div>Kdg {duck.cage}</div>
-                                              <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
-                                          </div>
-                                      </TableHead>
-                                  ))}
-                              </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                              {[...eggProduction.daily]
-                                  .filter(day => {
-                                      const dayDate = new Date(day.date);
-                                      return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
-                                  })
-                                  .reverse()
-                                  .map((day) => (
-                                      <TableRow key={day.date.toISOString()} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
-                                          <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
-                                          <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
-                                          <TableCell className="align-middle text-center p-2">{day.totalEggs}</TableCell>
-                                          <TableCell className="align-middle text-center p-2">{day.productivity.toFixed(2)}%</TableCell>
-                                          {ducks.map(duck => {
-                                              const production = day.perCage[duck.cage];
-                                              const productivity = duck.quantity > 0 && production != null
-                                                  ? (production / duck.quantity * 100)
-                                                  : 0;
-                                              return (
-                                                  <TableCell key={duck.id} className="p-0 text-center align-middle">
-                                                      <div className="pt-4 pb-2 p-2">{production ?? '-'}</div>
-                                                      <div className={cn("text-xs py-0.5 w-11/12 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
-                                                          {productivity.toFixed(1)}%
-                                                      </div>
-                                                  </TableCell>
-                                              );
-                                          })}
-                                      </TableRow>
-                                  ))}
-                          </TableBody>
-                      </Table>
+             <div className="w-full overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
+                  <Table style={{ fontSize: `${zoomLevel}%` }}>
+                      <TableHeader className="sticky top-0 bg-background z-10">
+                          <TableRow>
+                              <TableHead className="text-center align-middle p-2 min-w-[100px]">Tanggal</TableHead>
+                              <TableHead className="text-center align-middle p-2 min-w-[100px]">Hari</TableHead>
+                              <TableHead className="text-center align-middle p-2">Jumlah Telur</TableHead>
+                              <TableHead className="text-center align-middle p-2">Produktifitas</TableHead>
+                              {ducks.map(duck => (
+                                  <TableHead key={duck.id} className="text-center align-top p-2">
+                                      <div className="flex flex-col items-center justify-start h-full whitespace-nowrap">
+                                          <div>Kdg {duck.cage}</div>
+                                          <div className="font-normal text-xs text-muted-foreground">{duck.quantity} ekor</div>
+                                      </div>
+                                  </TableHead>
+                              ))}
+                          </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                          {[...eggProduction.daily]
+                              .filter(day => {
+                                  const dayDate = new Date(day.date);
+                                  return dayDate.getMonth() === currentDate.getMonth() && dayDate.getFullYear() === currentDate.getFullYear();
+                              })
+                              .reverse()
+                              .map((day) => (
+                                  <TableRow key={day.date.toISOString()} onDoubleClick={() => handleRowDoubleClick(day)} className="cursor-pointer">
+                                      <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
+                                      <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
+                                      <TableCell className="align-middle text-center p-2">{day.totalEggs}</TableCell>
+                                      <TableCell className="align-middle text-center p-2">{day.productivity.toFixed(2)}%</TableCell>
+                                      {ducks.map(duck => {
+                                          const production = day.perCage[duck.cage];
+                                          const productivity = duck.quantity > 0 && production != null
+                                              ? (production / duck.quantity * 100)
+                                              : 0;
+                                          return (
+                                              <TableCell key={duck.id} className="p-0 text-center align-middle">
+                                                  <div className="pt-4 pb-2 p-2">{production ?? '-'}</div>
+                                                  <div className={cn("text-xs py-0.5 w-11/12 mx-auto rounded-sm mb-2", getProductivityColor(productivity))}>
+                                                      {productivity.toFixed(1)}%
+                                                  </div>
+                                              </TableCell>
+                                          );
+                                      })}
+                                  </TableRow>
+                              ))}
+                      </TableBody>
+                  </Table>
               </div>
                <DailyDataForm 
                   open={isDailyFormOpen}
