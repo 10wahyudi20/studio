@@ -45,34 +45,52 @@ const dailySchemaGenerator = (ducks: Duck[]) => {
 type DailyFormData = z.infer<ReturnType<typeof dailySchemaGenerator>>;
 
 const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { production?: DailyProduction, onSave: (date: Date, data: DailyFormData) => void, children: React.ReactNode, open: boolean, onOpenChange: (open: boolean) => void; }) => {
-    const { ducks } = useAppStore();
+    const { ducks, eggProduction } = useAppStore();
     const { toast } = useToast();
     
     const isEditMode = !!production;
 
     const dailySchema = dailySchemaGenerator(ducks);
     
-    const { control, handleSubmit, register, watch, formState: { errors }, reset } = useForm<DailyFormData>({
+    const { control, handleSubmit, register, watch, formState: { errors }, reset, setValue } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
     });
-    
+
     React.useEffect(() => {
-        if (open) {
-            const defaultValues = production
+        const setFormValuesForDate = (targetDate: Date) => {
+            const record = eggProduction.daily.find(
+                (d) => new Date(d.date).toDateString() === targetDate.toDateString()
+            );
+
+            const defaultValues = record
                 ? {
-                      date: new Date(production.date),
-                      perCage: ducks.reduce(
-                          (acc, duck) => ({ ...acc, [duck.cage]: production.perCage[duck.cage] || 0 }),
-                          {}
-                      ),
-                  }
+                    date: new Date(record.date),
+                    perCage: ducks.reduce(
+                        (acc, duck) => ({ ...acc, [duck.cage]: record.perCage[duck.cage] || 0 }),
+                        {}
+                    ),
+                }
                 : {
-                      date: new Date(),
-                      perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
-                  };
+                    date: targetDate,
+                    perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
+                };
             reset(defaultValues);
+        };
+
+        if (open) {
+            setFormValuesForDate(production ? new Date(production.date) : new Date());
         }
-    }, [open, production, ducks, reset]);
+    }, [open, production, ducks, reset, eggProduction.daily]);
+
+    const handleDateChange = (date: Date | undefined) => {
+        if (!date) return;
+        const record = eggProduction.daily.find(d => new Date(d.date).toDateString() === date.toDateString());
+        
+        setValue('date', date);
+        ducks.forEach(duck => {
+            setValue(`perCage.${duck.cage}`, record?.perCage[duck.cage] || 0);
+        });
+    };
 
 
     const allValues = watch();
@@ -86,7 +104,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
     const onSubmit = (data: DailyFormData) => {
         onSave(data.date, data);
         onOpenChange(false);
-        toast({ title: `Data Harian ${isEditMode ? 'Diperbarui' : 'Disimpan'}`, description: `Data untuk tanggal ${format(data.date, "dd/MM/yyyy")} telah ${isEditMode ? 'diperbarui' : 'disimpan'}.` });
+        toast({ title: `Data Harian Disimpan`, description: `Data untuk tanggal ${format(data.date, "dd/MM/yyyy")} telah disimpan.` });
     };
 
     return (
@@ -105,12 +123,12 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                             render={({ field }) => (
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")} disabled={isEditMode}>
+                                        <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
                                             <CalendarIcon className="mr-2 h-4 w-4" />
                                             {field.value ? format(field.value, "dd/MM/yyyy", { locale: idLocale }) : <span>Pilih tanggal</span>}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent>
+                                    <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={field.value} onSelect={handleDateChange} initialFocus /></PopoverContent>
                                 </Popover>
                             )}
                         />
@@ -746,8 +764,8 @@ export default function ProductionTab() {
                         <span className="sr-only">Tampilkan Grafik</span>
                     </Button>
                 )}
-                {activeTab === 'daily' && (
-                     <Button variant="outline" size="icon" onClick={() => setShowDailyChart(!showDailyChart)}>
+                 {activeTab === 'daily' && (
+                    <Button variant="outline" size="icon" onClick={() => setShowDailyChart(!showDailyChart)}>
                         <LineChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
                     </Button>
@@ -1079,3 +1097,4 @@ export default function ProductionTab() {
     </div>
   );
 }
+
