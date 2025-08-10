@@ -46,7 +46,7 @@ export default function ReportsTab() {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
 
 
-  // Clean up the object URL when the component unmounts or when a new URL is created
+  // Clean up the object URL when the component unmounts
   useEffect(() => {
     return () => {
       if (pdfPreviewUrl) {
@@ -280,6 +280,7 @@ export default function ReportsTab() {
                 <CardTitle>Tampilkan Laporan</CardTitle>
             </CardHeader>
             <CardContent>
+                laporan tampilkan di sini
                 <iframe
                     src={pdfPreviewUrl}
                     className="w-full h-[700px] border rounded-md mt-4"
