@@ -24,6 +24,7 @@ export default function ReportsTab() {
   const [selectedMonth, setSelectedMonth] = useState(String(currentMonth));
   const [isLoading, setIsLoading] = useState(false);
   const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [generatedPdf, setGeneratedPdf] = useState<jsPDF | null>(null);
 
 
   const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
@@ -45,6 +46,7 @@ export default function ReportsTab() {
 
   const handleGenerateReport = () => {
     setIsLoading(true);
+    setGeneratedPdf(null);
 
     // Revoke any existing URL before creating a new one
     if (pdfPreviewUrl) {
@@ -166,6 +168,7 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
             
+            setGeneratedPdf(doc);
             const pdfBlob = doc.output('blob');
             const blobUrl = URL.createObjectURL(pdfBlob);
             setPdfPreviewUrl(blobUrl);
@@ -179,6 +182,19 @@ export default function ReportsTab() {
             setIsLoading(false);
         }
     }, 100); 
+  };
+  
+  const handleDownloadReport = () => {
+    if (!generatedPdf) {
+        toast({
+            variant: "destructive",
+            title: "Laporan Tidak Tersedia",
+            description: "Silakan buat pratinjau laporan terlebih dahulu."
+        });
+        return;
+    }
+    const monthName = months.find(m => m.value === parseInt(selectedMonth, 10))?.name || '';
+    generatedPdf.save(`Laporan_${monthName}_${selectedYear}_${companyInfo.name}.pdf`);
   };
 
   return (
@@ -225,6 +241,12 @@ export default function ReportsTab() {
             )}
             Tampilkan Pratinjau
           </Button>
+          {generatedPdf && (
+            <Button onClick={handleDownloadReport} variant="outline" className="w-full sm:w-auto">
+                <FileDown className="mr-2 h-4 w-4" />
+                Unduh Laporan
+            </Button>
+          )}
         </CardContent>
       </Card>
       
@@ -241,7 +263,6 @@ export default function ReportsTab() {
                 <CardTitle>Tampilkan Laporan</CardTitle>
             </CardHeader>
             <CardContent>
-                laporan tampilkan di sini
                 <iframe
                     src={pdfPreviewUrl}
                     className="w-full h-[700px] border rounded-md mt-4"
