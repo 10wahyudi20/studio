@@ -14,9 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { personalAssistant, Message } from "@/ai/flows/personal-assistant-flow";
