@@ -57,13 +57,13 @@ export default function ReportsTab() {
 
   const handleGenerateReport = () => {
     setIsLoading(true);
-    setPdfBlob(null);
 
-    // Revoke any existing URL before creating a new one
+    // Revoke any existing URL and clear state before creating a new one
     if (pdfPreviewUrl) {
         URL.revokeObjectURL(pdfPreviewUrl);
-        setPdfPreviewUrl(null);
     }
+    setPdfPreviewUrl(null);
+    setPdfBlob(null);
     
     // Use a brief timeout to allow the UI to update to the loading state
     setTimeout(() => {
@@ -277,14 +277,13 @@ export default function ReportsTab() {
       {pdfPreviewUrl && !isLoading && (
         <Card>
             <CardHeader>
-                <CardTitle>tampilkan laporan</CardTitle>
+                <CardTitle>Tampilkan Laporan</CardTitle>
             </CardHeader>
             <CardContent>
-                laporan tampilkan di sini
                 <iframe
                     src={pdfPreviewUrl}
                     className="w-full h-[700px] border rounded-md mt-4"
-                    title="Tampilkan Laporan"
+                    title="Pratinjau Laporan"
                 ></iframe>
             </CardContent>
         </Card>
