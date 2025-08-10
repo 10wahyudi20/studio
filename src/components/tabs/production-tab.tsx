@@ -166,7 +166,7 @@ const weeklySchema = z.object({
   priceC: z.coerce.number().min(0),
   priceConsumption: z.coerce.number().min(0),
 });
-type WeeklyFormData = z.infer<typeof weeklySchema>;
+type WeeklyFormData = z.infer<ReturnType<typeof weeklySchema>>;
 
 const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyProduction; onSave: (data: any) => void; children: React.ReactNode }) => {
   const { toast } = useToast();
@@ -789,7 +789,13 @@ export default function ProductionTab() {
             
             <TabsContent value="daily">
              <div className="w-full overflow-auto rounded-md border" style={{ maxHeight: '60vh' }}>
-                  <Table style={{ fontSize: `${zoomLevel}%` }}>
+                <div style={{ 
+                    width: `${100 / (zoomLevel / 100)}%`, 
+                    height: `${100 / (zoomLevel / 100)}%`, 
+                    transform: `scale(${zoomLevel / 100})`,
+                    transformOrigin: 'top left'
+                  }}>
+                  <Table>
                       <TableHeader className="sticky top-0 bg-background z-10">
                           <TableRow>
                               <TableHead className="text-center align-middle p-2 min-w-[100px]">Tanggal</TableHead>
@@ -837,6 +843,7 @@ export default function ProductionTab() {
                               ))}
                       </TableBody>
                   </Table>
+                </div>
               </div>
                <DailyDataForm 
                   open={isDailyFormOpen}
