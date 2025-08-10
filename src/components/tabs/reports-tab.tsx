@@ -238,16 +238,14 @@ export default function ReportsTab() {
       {pdfPreviewUrl && !isLoading && (
         <Card>
             <CardHeader>
-                <CardTitle>Pratinjau Laporan</CardTitle>
-                <CardDescription>
-                    Periksa laporan di bawah ini. Anda dapat mengunduh atau mencetaknya dari kontrol pratinjau.
-                </CardDescription>
+                <CardTitle>Tampilkan Laporan</CardTitle>
             </CardHeader>
             <CardContent>
+                laporan tampilkan di sini
                 <iframe
                     src={pdfPreviewUrl}
-                    className="w-full h-[700px] border rounded-md"
-                    title="Pratinjau Laporan"
+                    className="w-full h-[700px] border rounded-md mt-4"
+                    title="Tampilkan Laporan"
                 ></iframe>
             </CardContent>
         </Card>
