@@ -26,11 +26,7 @@ export type Message = z.infer<typeof MessageSchema>;
 
 
 const PersonalAssistantInputSchema = z.object({
-  history: z.array(MessageSchema).describe('The conversation history.'),
-  prompt: z.string().describe('The user\'s latest prompt.'),
-  imageDataUri: z.string().optional().describe(
-    "An optional image provided by the user, as a data URI."
-  ),
+  history: z.array(MessageSchema).describe('The conversation history, including the latest user message.'),
 });
 export type PersonalAssistantInput = z.infer<typeof PersonalAssistantInputSchema>;
 
@@ -55,8 +51,9 @@ const personalAssistantFlow = ai.defineFlow(
     
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
     
-    // If there's no text prompt and no image, give a canned response.
-    if (!input.prompt && !input.imageDataUri) {
+    // Check if there is any content in the last message
+    const lastMessage = input.history[input.history.length - 1];
+    if (!lastMessage || (!lastMessage.content && !lastMessage.imageUrl)) {
         return { response: "Tentu, apa yang bisa saya bantu?" };
     }
 
@@ -64,39 +61,27 @@ const personalAssistantFlow = ai.defineFlow(
 
 **ATURAN UTAMA ANDA:**
 
-1.  **JAWAB SEMUA PERTANYAAN**: Tanggapi semua pertanyaan pengguna dengan kemampuan terbaik Anda, baik itu pertanyaan umum, pengetahuan, saran, analisis, atau percakapan santai. Jadilah teman bicara yang cerdas dan informatif.
-2.  **MANFAATKAN PENGETAHUAN LUAS**: Gunakan pengetahuan umum Anda yang luas untuk memberikan jawaban yang akurat, wawasan mendalam, dan informasi tambahan yang relevan.
-3.  **BERPIKIR KREATIF**: Bantu pengguna dengan tugas-tugas kreatif seperti menulis email, membuat cerita, merancang ide, atau memecahkan masalah.
-4.  **TANGGAPI GAMBAR**: Jika pengguna memberikan gambar, analisis gambar tersebut dan jawab pertanyaan yang berkaitan dengannya, atau berikan deskripsi jika tidak ada pertanyaan spesifik.
-5.  **SELALU PROFESIONAL & BERTANGGUNG JAWAB**: Berikan jawaban yang terstruktur, jelas, dan mudah dipahami. Jadilah mitra yang dapat diandalkan bagi pengguna.
-6.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
+1.  **GUNAKAN KONTEKS PERCAKAPAN**: Selalu perhatikan riwayat percakapan (**history**) untuk memahami konteks pertanyaan. Jika pengguna mengajukan pertanyaan lanjutan (misalnya, "kapan dia lahir?" setelah bertanya tentang seseorang), Anda HARUS menggunakan konteks dari pesan sebelumnya untuk memberikan jawaban yang relevan.
+2.  **JAWAB SEMUA PERTANYAAN**: Tanggapi semua pertanyaan pengguna dengan kemampuan terbaik Anda, baik itu pertanyaan umum, pengetahuan, saran, analisis, atau percakapan santai. Jadilah teman bicara yang cerdas dan informatif.
+3.  **MANFAATKAN PENGETAHUAN LUAS**: Gunakan pengetahuan umum Anda yang luas untuk memberikan jawaban yang akurat, wawasan mendalam, dan informasi tambahan yang relevan.
+4.  **BERPIKIR KREATIF**: Bantu pengguna dengan tugas-tugas kreatif seperti menulis email, membuat cerita, merancang ide, atau memecahkan masalah.
+5.  **TANGGAPI GAMBAR**: Jika pengguna memberikan gambar, analisis gambar tersebut dan jawab pertanyaan yang berkaitan dengannya. Gunakan konteks percakapan untuk memahami pertanyaan tentang gambar tersebut.
+6.  **SELALU PROFESIONAL & BERTANGGUNG JAWAB**: Berikan jawaban yang terstruktur, jelas, dan mudah dipahami. Jadilah mitra yang dapat diandalkan bagi pengguna.
+7.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
       
-    // Format previous messages for the model
+    // Format all messages from history for the model
     const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => ({
       role: msg.role as Role,
       content: [
           ...(msg.imageUrl ? [{media: {url: msg.imageUrl}}] : []),
-          {text: msg.content}
+          {text: msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "")} // Provide default text if content is empty but image exists
       ],
     }));
-
-    // Construct the current prompt with optional image
-    const currentPromptParts: Part[] = [];
-    if (input.imageDataUri) {
-        currentPromptParts.push({ media: { url: input.imageDataUri } });
-    }
-    // Add user prompt text.
-    currentPromptParts.push({ text: input.prompt || "Terangkan gambar apa ini?" });
-    
-    if (currentPromptParts.length === 0) {
-        return { response: "Maaf, saya tidak menerima pesan apa pun. Silakan coba lagi." };
-    }
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
       system: systemPrompt,
       history: formattedHistory,
-      prompt: currentPromptParts,
       tools: [], // No tools are needed for a general-purpose assistant
       config: {
         safetySettings: [

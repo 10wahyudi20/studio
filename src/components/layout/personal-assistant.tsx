@@ -60,29 +60,32 @@ const AssistantDialogContent = () => {
 
     const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri ?? undefined };
     
-    // Add user message to history and start loading
-    setHistory(prev => [...prev, newUserMessage]);
+    // Immediately add user message to history and start loading
+    const updatedHistory = [...history, newUserMessage];
+    setHistory(updatedHistory);
     setIsLoading(true);
     setError(null);
     
-    // Store current prompt/image and clear the inputs
-    const currentPrompt = prompt;
-    const currentImageDataUri = imageDataUri;
+    // Clear inputs after capturing their values
     setPrompt('');
     setImageDataUri(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
     try {
+      // Send the complete, updated history to the AI flow
       const result = await personalAssistant({
-        history, // Send history *before* adding the new user message
-        prompt: currentPrompt,
-        imageDataUri: currentImageDataUri ?? undefined,
+        history: updatedHistory,
       });
+
       const aiResponse: Message = { role: 'model', content: result.response };
+      
+      // Add AI response to history
       setHistory(prev => [...prev, aiResponse]);
     } catch (e) {
       console.error("AI Assistant Error:", e);
       setError("Maaf, terjadi kesalahan saat menghubungi asisten AI. Silakan coba lagi.");
+      // Optional: remove the user's message if the call fails
+      setHistory(history); 
     } finally {
       setIsLoading(false);
     }
