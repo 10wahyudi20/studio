@@ -47,7 +47,7 @@ export default function PersonalAssistant() {
     if (viewportRef.current) {
         viewportRef.current.scrollTop = viewportRef.current.scrollHeight;
     }
-  }, [history]);
+  }, [history, isLoading]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
