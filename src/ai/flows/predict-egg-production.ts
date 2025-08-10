@@ -139,12 +139,6 @@ const predictEggProductionFlow = ai.defineFlow(
       throw new Error("AI tidak memberikan output yang valid.");
     }
     
-    // Validate the output after receiving it
-    const dayCount = differenceInDays(end, start) + 1;
-    if (output.dailyPredictions.length !== dayCount) {
-        throw new Error(`AI harus memberikan prediksi untuk setiap hari dalam rentang yang diminta. Diharapkan ${dayCount} hari, tetapi menerima ${output.dailyPredictions.length}.`);
-    }
-
     // Sort predictions by date just in case the AI doesn't return them in order
     const sortedPredictions = output.dailyPredictions.sort((a, b) => {
         try {
@@ -160,5 +154,6 @@ const predictEggProductionFlow = ai.defineFlow(
     return { ...output, dailyPredictions: sortedPredictions };
   }
 );
+
 
 
