@@ -4,7 +4,6 @@
 import React, { useRef, useEffect } from "react";
 import { Sparkles, Bot, User, Trash2, Send, X, Paperclip, Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
