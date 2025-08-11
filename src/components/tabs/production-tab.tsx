@@ -585,7 +585,7 @@ export default function ProductionTab() {
     if (p > 100) return 'bg-blue-400 text-black';
     if (p >= 90) return 'bg-blue-800 text-white';
     if (p >= 80) return 'bg-green-500 text-black';
-    if (p >= 70) return 'bg-green-800 text-white';
+    if (p >= 70) return 'bg-green-800 text-black';
     if (p >= 60) return 'bg-yellow-400 text-black';
     if (p >= 50) return 'bg-yellow-600 text-black';
     if (p >= 40) return 'bg-red-500 text-black';
@@ -1132,6 +1132,7 @@ export default function ProductionTab() {
     </div>
   );
 }
+
 
 
 
