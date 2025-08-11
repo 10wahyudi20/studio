@@ -58,7 +58,8 @@ const AssistantDialogContent = () => {
   const handleSend = async () => {
     if (!prompt.trim() && !imageDataUri) return;
 
-    const newUserMessage: Message = { role: 'user', content: prompt, imageUrl: imageDataUri ?? undefined };
+    // Explicitly ensure content is at least an empty string.
+    const newUserMessage: Message = { role: 'user', content: prompt || '', imageUrl: imageDataUri ?? undefined };
     
     // Immediately add user message to history and start loading
     const updatedHistory = [...history, newUserMessage];
