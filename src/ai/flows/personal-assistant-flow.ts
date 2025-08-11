@@ -81,9 +81,11 @@ const personalAssistantFlow = ai.defineFlow(
             contentParts.push({ media: { url: msg.imageUrl } });
         }
         
-        // Ensure there is always a text part, even for image-only messages.
+        // Add the text part. If content is empty but an image exists, provide a default prompt.
         const textContent = msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "");
-        contentParts.push({ text: textContent });
+        if (textContent) {
+           contentParts.push({ text: textContent });
+        }
         
         return {
             role: msg.role as Role,
