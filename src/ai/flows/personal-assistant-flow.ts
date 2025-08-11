@@ -95,7 +95,6 @@ const personalAssistantFlow = ai.defineFlow(
         }
         
         // Add the text part. If content is empty but an image exists, provide a default prompt.
-        // This is the key fix to prevent the TypeError.
         const textContent = msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "");
         
         if (textContent) {
