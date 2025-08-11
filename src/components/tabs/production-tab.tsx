@@ -353,7 +353,11 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
   );
 };
 
-const CHART_COLORS = ["#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#f97316", "#eab308", "#22c55e", "#8b5cf6"];
+const CHART_COLORS = [
+    "#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#f97316", "#eab308", 
+    "#22c55e", "#8b5cf6", "#14b8a6", "#f43f5e", "#6366f1", "#d946ef",
+    "#0ea5e9", "#f59e0b", "#10b981", "#a855f7", "#ec4899", "#64748b"
+];
 
 
 const renderCustomizedLabel = (props: any) => {
@@ -1128,5 +1132,6 @@ export default function ProductionTab() {
     </div>
   );
 }
+
 
 
