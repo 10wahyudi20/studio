@@ -175,9 +175,8 @@ const deathRecordSchema = z.object({
 });
 type DeathRecordFormData = z.infer<typeof deathRecordSchema>;
 
-const RecordDeathForm = () => {
+const RecordDeathForm = ({ onOpenChange }: { onOpenChange: (open: boolean) => void }) => {
     const { ducks, addDeathRecord } = useAppStore();
-    const [isRecordOpen, setIsRecordOpen] = React.useState(false);
     const { toast } = useToast();
 
     const { control, register, handleSubmit, reset, formState: { errors } } = useForm<DeathRecordFormData>({
@@ -190,72 +189,75 @@ const RecordDeathForm = () => {
             ...data,
             date: parseISO(data.date),
         });
-        setIsRecordOpen(false);
+        onOpenChange(false);
         reset();
         toast({ title: `Catatan Kematian Disimpan`, description: `${data.quantity} bebek mati di kandang ${data.cage} telah dicatat.` });
     };
 
     return (
-        <Dialog open={isRecordOpen} onOpenChange={setIsRecordOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8">
-                    <Pencil className="h-3 w-3 mr-1" /> Catat
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader><DialogTitle>Catat Bebek Mati</DialogTitle></DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
-                    <div className="space-y-2">
-                        <Label htmlFor="death_date">Tanggal Kematian</Label>
-                        <Input id="death_date" type="date" {...register("date")} />
-                        {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Kandang</Label>
-                        <Controller 
-                            name="cage" 
-                            control={control}
-                            render={({ field }) => (
-                                <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
-                                    <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
-                                    <SelectContent>
-                                        {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            )}
-                        />
-                        {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="quantity">Jumlah</Label>
-                        <Input id="quantity" type="number" {...register("quantity")} />
-                        {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="notes">Catatan (Opsional)</Label>
-                        <Textarea id="notes" {...register("notes")} placeholder="cth: Sakit, stress, dll."/>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
-                        <Button type="submit">Simpan</Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+            <div className="space-y-2">
+                <Label htmlFor="death_date">Tanggal Kematian</Label>
+                <Input id="death_date" type="date" {...register("date")} />
+                {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
+            </div>
+            <div className="space-y-2">
+                <Label>Kandang</Label>
+                <Controller 
+                    name="cage" 
+                    control={control}
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                            <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
+                            <SelectContent>
+                                {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    )}
+                />
+                {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="quantity">Jumlah</Label>
+                <Input id="quantity" type="number" {...register("quantity")} />
+                {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="notes">Catatan (Opsional)</Label>
+                <Textarea id="notes" {...register("notes")} placeholder="cth: Sakit, stress, dll."/>
+            </div>
+            <DialogFooter>
+                <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Batal</Button>
+                <Button type="submit">Simpan</Button>
+            </DialogFooter>
+        </form>
     );
 };
 
 const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => {
     const { deathRecords } = useAppStore();
+    const [isRecordOpen, setIsRecordOpen] = React.useState(false);
     const sortedRecords = [...deathRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-lg">
-                <DialogHeader className="flex flex-row justify-between items-center pr-10">
+                <DialogHeader>
+                  <div className="flex justify-between items-center">
                     <DialogTitle>Catatan Bebek Mati</DialogTitle>
-                    <RecordDeathForm />
+                     <Dialog open={isRecordOpen} onOpenChange={setIsRecordOpen}>
+                          <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-8">
+                                  <Pencil className="h-3 w-3 mr-1" /> Catat
+                              </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                              <DialogHeader><DialogTitle>Catat Bebek Mati</DialogTitle></DialogHeader>
+                              <RecordDeathForm onOpenChange={setIsRecordOpen} />
+                          </DialogContent>
+                      </Dialog>
+                  </div>
                 </DialogHeader>
                 <ScrollArea className="h-96">
                     <Table>
