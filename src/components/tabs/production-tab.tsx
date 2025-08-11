@@ -124,7 +124,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            
                                             {field.value ? format(field.value, "dd/MM/yyyy", { locale: idLocale }) : <span>Pilih tanggal</span>}
                                         </Button>
                                     </PopoverTrigger>
@@ -262,7 +262,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
                                       !field.value?.from && "text-muted-foreground"
                                       )}
                                   >
-                                      <CalendarIcon className="mr-2 h-4 w-4" />
+                                      
                                       {field.value?.from ? (
                                       field.value.to ? (
                                           <>
@@ -578,7 +578,7 @@ export default function ProductionTab() {
     : null;
 
   const worstProductivityRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
+    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : best)
     : null;
   
   const getProductivityColor = (p: number) => {
@@ -1132,7 +1132,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-
-
-
