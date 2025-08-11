@@ -19,7 +19,7 @@ import { id as idLocale } from "date-fns/locale";
 // Define the structure for a single message in the history
 const MessageSchema = z.object({
   role: z.enum(['user', 'model']),
-  content: z.string(),
+  content: z.string().optional(), // Content can be optional if an image is present
   imageUrl: z.string().optional().describe("A URL of an image associated with the message, if any. Can be a data URI."),
 });
 export type Message = z.infer<typeof MessageSchema>;
@@ -51,7 +51,10 @@ const personalAssistantFlow = ai.defineFlow(
     
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
     
-    // Safety check: If the last message is invalid or truly empty, return a default response.
+    // Safety check: If history is empty or the last message is invalid, return a default response.
+    if (!input.history || input.history.length === 0) {
+        return { response: "Tentu, apa yang bisa saya bantu?" };
+    }
     const lastMessage = input.history[input.history.length - 1];
     if (!lastMessage || (!lastMessage.content && !lastMessage.imageUrl)) {
         return { response: "Tentu, apa yang bisa saya bantu?" };
@@ -73,13 +76,12 @@ const personalAssistantFlow = ai.defineFlow(
     const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => {
         const contentParts: Part[] = [];
         
-        // Add the image part if it exists
-        if (msg.imageUrl) {
+        // Add the image part if it exists and is a valid data URI
+        if (msg.imageUrl && msg.imageUrl.startsWith('data:')) {
             contentParts.push({ media: { url: msg.imageUrl } });
         }
         
-        // Add the text part, ensuring it's never undefined.
-        // If there's an image but no text, add placeholder text.
+        // Ensure there is always a text part, even for image-only messages.
         const textContent = msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "");
         contentParts.push({ text: textContent });
         
@@ -87,7 +89,7 @@ const personalAssistantFlow = ai.defineFlow(
             role: msg.role as Role,
             content: contentParts,
         };
-    });
+    }).filter(msg => msg.content.length > 0); // Ensure no empty messages are sent
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
