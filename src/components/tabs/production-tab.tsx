@@ -578,7 +578,7 @@ export default function ProductionTab() {
     : null;
 
   const worstProductivityRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : best)
+    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
     : null;
   
   const getProductivityColor = (p: number) => {
@@ -828,6 +828,7 @@ export default function ProductionTab() {
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
+                            <span className="text-sm font-medium">{format(currentDate, "MMMM yyyy", { locale: idLocale })}</span>
                         </>
                     )}
                     {activeTab !== 'monthly' && (
@@ -1132,3 +1133,4 @@ export default function ProductionTab() {
     </div>
   );
 }
+
