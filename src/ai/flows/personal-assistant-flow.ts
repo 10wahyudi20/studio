@@ -49,17 +49,27 @@ const personalAssistantFlow = ai.defineFlow(
   },
   async (input) => {
     
-    const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
+    // =================================================================
+    //  ROBUST VALIDATION BLOCK - Prevents invalid calls to the AI
+    // =================================================================
     
-    // Safety check: If history is empty or the last message is invalid, return a default response.
+    // Safety check 1: If history is empty, provide a default response.
     if (!input.history || input.history.length === 0) {
         return { response: "Tentu, apa yang bisa saya bantu?" };
     }
+    
+    // Safety check 2: Check the last user message. If it's completely empty, provide a default response.
     const lastMessage = input.history[input.history.length - 1];
     if (!lastMessage || (!lastMessage.content && !lastMessage.imageUrl)) {
         return { response: "Tentu, apa yang bisa saya bantu?" };
     }
 
+    // =================================================================
+    //  PROMPT AND HISTORY FORMATTING
+    // =================================================================
+
+    const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
+    
     const systemPrompt = `Anda adalah asisten pribadi AI yang sangat cerdas, profesional, serba tahu, dan dapat diandalkan, dengan jangkauan pengetahuan seluas Google. Peran utama Anda adalah membantu pengguna dengan berbagai macam tugas dan pertanyaan.
 
 **ATURAN UTAMA ANDA:**
@@ -72,7 +82,10 @@ const personalAssistantFlow = ai.defineFlow(
 6.  **SELALU PROFESIONAL & BERTANGGUNG JAWAB**: Berikan jawaban yang terstruktur, jelas, dan mudah dipahami. Jadilah mitra yang dapat diandalkan bagi pengguna.
 7.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
       
-    // Format all messages from history for the model, ensuring validity.
+    // =================================================================
+    //  BULLETPROOF HISTORY FORMATTING - This ensures every message is valid.
+    // =================================================================
+    
     const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => {
         const contentParts: Part[] = [];
         
@@ -82,7 +95,9 @@ const personalAssistantFlow = ai.defineFlow(
         }
         
         // Add the text part. If content is empty but an image exists, provide a default prompt.
+        // This is the key fix to prevent the TypeError.
         const textContent = msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "");
+        
         if (textContent) {
            contentParts.push({ text: textContent });
         }
@@ -91,8 +106,11 @@ const personalAssistantFlow = ai.defineFlow(
             role: msg.role as Role,
             content: contentParts,
         };
-    }).filter(msg => msg.content.length > 0); // Ensure no empty messages are sent
+    }).filter(msg => msg.content.length > 0); // This filter is now safe because content is always an array.
 
+    // =================================================================
+    //  AI GENERATION CALL
+    // =================================================================
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
       system: systemPrompt,
