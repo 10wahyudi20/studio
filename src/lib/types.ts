@@ -94,6 +94,8 @@ export interface DeathRecord {
     notes?: string;
 }
 
+export interface DeathRecordInput extends Omit<DeathRecord, 'id'> {}
+
 export interface AppState {
     companyInfo: CompanyInfo;
     ducks: Duck[];

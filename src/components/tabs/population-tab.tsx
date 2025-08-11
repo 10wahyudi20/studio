@@ -168,6 +168,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
 };
 
 const deathRecordSchema = z.object({
+    date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Tanggal tidak valid" }),
     cage: z.coerce.number({invalid_type_error: "Kandang harus dipilih"}).min(1, "Kandang harus dipilih"),
     quantity: z.coerce.number().min(1, "Jumlah harus minimal 1"),
     notes: z.string().optional(),
@@ -181,11 +182,14 @@ const RecordDeathForm = () => {
 
     const { control, register, handleSubmit, reset, formState: { errors } } = useForm<DeathRecordFormData>({
         resolver: zodResolver(deathRecordSchema),
-        defaultValues: { cage: undefined, quantity: 1, notes: "" }
+        defaultValues: { date: format(new Date(), "yyyy-MM-dd"), cage: undefined, quantity: 1, notes: "" }
     });
 
     const onSubmit = (data: DeathRecordFormData) => {
-        addDeathRecord(data);
+        addDeathRecord({
+            ...data,
+            date: parseISO(data.date),
+        });
         setIsRecordOpen(false);
         reset();
         toast({ title: `Catatan Kematian Disimpan`, description: `${data.quantity} bebek mati di kandang ${data.cage} telah dicatat.` });
@@ -201,6 +205,11 @@ const RecordDeathForm = () => {
             <DialogContent className="sm:max-w-md">
                 <DialogHeader><DialogTitle>Catat Bebek Mati</DialogTitle></DialogHeader>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="death_date">Tanggal Kematian</Label>
+                        <Input id="death_date" type="date" {...register("date")} />
+                        {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
+                    </div>
                     <div className="space-y-2">
                         <Label>Kandang</Label>
                         <Controller 

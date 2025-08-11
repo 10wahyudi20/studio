@@ -89,7 +89,7 @@ type DailyProductionInput = {
 }
 
 type WeeklyProductionInput = Omit<WeeklyProduction, 'id' | 'totalEggs' | 'totalValue'>;
-type DeathRecordInput = Omit<DeathRecord, 'id' | 'date'>;
+type DeathRecordInput = Omit<DeathRecord, 'id'>;
 
 
 export const useAppStore = create<AppState & {
@@ -380,7 +380,6 @@ export const useAppStore = create<AppState & {
       const newRecord: DeathRecord = {
         ...record,
         id: Date.now(),
-        date: new Date(),
       };
       const updatedDucks = state.ducks.map(duck => {
         if(duck.cage === record.cage) {
