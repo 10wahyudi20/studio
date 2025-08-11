@@ -51,7 +51,7 @@ const personalAssistantFlow = ai.defineFlow(
     
     const currentDate = format(new Date(), "eeee, dd MMMM yyyy", { locale: idLocale });
     
-    // Check if there is any content in the last message
+    // Safety check: If the last message is invalid or truly empty, return a default response.
     const lastMessage = input.history[input.history.length - 1];
     if (!lastMessage || (!lastMessage.content && !lastMessage.imageUrl)) {
         return { response: "Tentu, apa yang bisa saya bantu?" };
@@ -69,13 +69,17 @@ const personalAssistantFlow = ai.defineFlow(
 6.  **SELALU PROFESIONAL & BERTANGGUNG JAWAB**: Berikan jawaban yang terstruktur, jelas, dan mudah dipahami. Jadilah mitra yang dapat diandalkan bagi pengguna.
 7.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
       
-    // Format all messages from history for the model
+    // Format all messages from history for the model, ensuring validity.
     const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => {
         const contentParts: Part[] = [];
+        
+        // Add the image part if it exists
         if (msg.imageUrl) {
             contentParts.push({ media: { url: msg.imageUrl } });
         }
-        // Ensure there's always a text part, even if it's just a placeholder.
+        
+        // Add the text part, ensuring it's never undefined.
+        // If there's an image but no text, add placeholder text.
         const textContent = msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "");
         contentParts.push({ text: textContent });
         
