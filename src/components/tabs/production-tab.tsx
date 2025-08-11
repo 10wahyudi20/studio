@@ -28,6 +28,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 
 // Daily Data Form
@@ -354,9 +355,9 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
 };
 
 const CHART_COLORS = [
-    "#8884d8", "#82ca9d", "#ef4444", "#3b82f6", "#f97316", "#eab308", 
-    "#22c55e", "#8b5cf6", "#14b8a6", "#f43f5e", "#6366f1", "#d946ef",
-    "#0ea5e9", "#f59e0b", "#10b981", "#a855f7", "#ec4899", "#64748b"
+    '#3b82f6', '#ef4444', '#22c55e', '#f97316', '#8b5cf6', '#eab308',
+    '#14b8a6', '#6366f1', '#f43f5e', '#d946ef', '#0ea5e9', '#10b981',
+    '#f59e0b', '#a855f7', '#ec4899', '#64748b', '#7c3aed', '#db2777',
 ];
 
 
@@ -533,6 +534,16 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
     );
 };
 
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    value: i,
+    label: format(new Date(0, i), 'MMMM', { locale: idLocale }),
+}));
+
+const currentYear = new Date().getFullYear();
+const yearOptions = Array.from({ length: 5 }, (_, i) => ({
+    value: currentYear - i,
+    label: String(currentYear - i),
+}));
 
 export default function ProductionTab() {
   const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
@@ -585,7 +596,7 @@ export default function ProductionTab() {
     if (p > 100) return 'bg-blue-400 text-black';
     if (p >= 90) return 'bg-blue-800 text-white';
     if (p >= 80) return 'bg-green-500 text-black';
-    if (p >= 70) return 'bg-green-800 text-black';
+    if (p >= 70) return 'bg-green-800 text-white';
     if (p >= 60) return 'bg-yellow-400 text-black';
     if (p >= 50) return 'bg-yellow-600 text-black';
     if (p >= 40) return 'bg-red-500 text-black';
@@ -828,14 +839,54 @@ export default function ProductionTab() {
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
-                            <span className="text-sm font-medium">{format(currentDate, "MMMM yyyy", { locale: idLocale })}</span>
+                            <div className="flex gap-1">
+                                <Select
+                                    value={String(currentDate.getMonth())}
+                                    onValueChange={(value) => {
+                                        const newDate = new Date(currentDate);
+                                        newDate.setMonth(parseInt(value));
+                                        setCurrentDate(newDate);
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[120px]">
+                                        <SelectValue placeholder="Pilih Bulan" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {monthOptions.map((month) => (
+                                            <SelectItem key={month.value} value={String(month.value)}>
+                                                {month.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select
+                                    value={String(currentDate.getFullYear())}
+                                    onValueChange={(value) => {
+                                        const newDate = new Date(currentDate);
+                                        newDate.setFullYear(parseInt(value));
+                                        setCurrentDate(newDate);
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[80px]">
+                                        <SelectValue placeholder="Pilih Tahun" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {yearOptions.map((year) => (
+                                            <SelectItem key={year.value} value={String(year.value)}>
+                                                {year.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </>
                     )}
-                    {activeTab !== 'monthly' && (
+                    
+                    {activeTab !== 'daily' && activeTab !== 'monthly' && (
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" size="icon">
-                                    <CalendarIcon className="h-4 w-4" />
+                                <Button variant="outline">
+                                    {format(currentDate, "MMMM yyyy", { locale: idLocale })}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
@@ -848,6 +899,7 @@ export default function ProductionTab() {
                             </PopoverContent>
                         </Popover>
                     )}
+
 
                     {activeTab === 'daily' && (
                         <Button onClick={handleInputDataClick}>
@@ -1134,3 +1186,6 @@ export default function ProductionTab() {
   );
 }
 
+
+
+    
