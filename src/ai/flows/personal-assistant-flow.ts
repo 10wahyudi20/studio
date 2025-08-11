@@ -70,13 +70,20 @@ const personalAssistantFlow = ai.defineFlow(
 7.  **TANGGAL HARI INI**: ${currentDate}. Gunakan ini jika ada pertanyaan terkait tanggal.`;
       
     // Format all messages from history for the model
-    const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => ({
-      role: msg.role as Role,
-      content: [
-          ...(msg.imageUrl ? [{media: {url: msg.imageUrl}}] : []),
-          {text: msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "")} // Provide default text if content is empty but image exists
-      ],
-    }));
+    const formattedHistory: {role: Role; content: Part[]}[] = input.history.map((msg: Message) => {
+        const contentParts: Part[] = [];
+        if (msg.imageUrl) {
+            contentParts.push({ media: { url: msg.imageUrl } });
+        }
+        // Ensure there's always a text part, even if it's just a placeholder.
+        const textContent = msg.content || (msg.imageUrl ? "Terangkan gambar apa ini?" : "");
+        contentParts.push({ text: textContent });
+        
+        return {
+            role: msg.role as Role,
+            content: contentParts,
+        };
+    });
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.0-flash',
