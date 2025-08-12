@@ -1,7 +1,6 @@
-
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord } from '@/lib/types';
-import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO } from 'date-fns';
+import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO, differenceInDays } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 
 let channel: BroadcastChannel | null = null;
@@ -120,6 +119,7 @@ export const useAppStore = create<AppState & {
   loadFullState: (state: Omit<AppState, 'isDirty' | 'isAuthenticated'>) => void;
   resetState: () => void;
   getInitialState: () => AppState;
+  updateStockBasedOnConsumption: () => void;
 }>((set, get) => ({
   ...getInitialState(),
 
@@ -396,6 +396,53 @@ export const useAppStore = create<AppState & {
     });
   },
 
+  updateStockBasedOnConsumption: () => {
+    const { lastStockUpdate, ducks, feed } = get();
+    const today = startOfDay(new Date());
+    const lastUpdateDate = lastStockUpdate ? startOfDay(parseISO(lastStockUpdate)) : null;
+
+    if (lastUpdateDate && lastUpdateDate < today) {
+        const daysPassed = differenceInDays(today, lastUpdateDate);
+        if (daysPassed <= 0) return;
+
+        const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+        if (totalDucks === 0) {
+            set({ lastStockUpdate: today.toISOString() });
+            return;
+        }
+
+        const dailyConsumptionPerFeedType: { [feedId: number]: number } = {};
+        feed.forEach(f => {
+            const consumptionInGrams = totalDucks * f.schema;
+            const consumptionInKg = consumptionInGrams / 1000;
+            dailyConsumptionPerFeedType[f.id] = consumptionInKg;
+        });
+
+        const totalConsumptionPerFeedType = Object.fromEntries(
+            Object.entries(dailyConsumptionPerFeedType).map(([id, dailyAmount]) => [
+                id,
+                dailyAmount * daysPassed,
+            ])
+        );
+
+        const updatedFeed = feed.map(f => {
+            const consumed = totalConsumptionPerFeedType[f.id] || 0;
+            const newStock = Math.max(0, f.stock - consumed);
+            return { ...f, stock: newStock };
+        });
+
+        set({
+            feed: updatedFeed,
+            lastStockUpdate: today.toISOString(),
+            isDirty: true,
+        });
+        
+        console.log(`Stock updated for ${daysPassed} days. Consumption:`, totalConsumptionPerFeedType);
+    } else if (!lastStockUpdate) {
+        set({ lastStockUpdate: today.toISOString(), isDirty: true });
+    }
+  },
+
   saveState: () => {
     try {
         const stateToSave = get().getFullState();
@@ -441,6 +488,7 @@ export const useAppStore = create<AppState & {
         revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
         
         set(revivedState);
+        get().updateStockBasedOnConsumption();
       } else {
         set({ isAuthenticated, activeTab: savedTab || 'home' });
       }
@@ -457,7 +505,8 @@ export const useAppStore = create<AppState & {
         "updateDuck", "removeDuck", "resetDuck", "addDailyProduction", "updateDailyProduction",
         "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
         "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
-        "addDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState"
+        "addDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState",
+        "updateStockBasedOnConsumption"
     ];
     functions.forEach(f => delete st[f]);
     return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;

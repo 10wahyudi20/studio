@@ -7,15 +7,16 @@ import { useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/toaster";
 
 export default function AuthWrapper({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loadState } = useAppStore(state => ({
+  const { isAuthenticated, loadState, updateStockBasedOnConsumption } = useAppStore(state => ({
     isAuthenticated: state.isAuthenticated,
     loadState: state.loadState,
+    updateStockBasedOnConsumption: state.updateStockBasedOnConsumption,
   }));
   const router = useRouter();
   const [isAuthCheckComplete, setIsAuthCheckComplete] = React.useState(false);
 
   React.useEffect(() => {
-    loadState(); // Initial load
+    loadState(); // Initial load, which now also triggers stock update.
     
     const handleStorageChange = (event: StorageEvent) => {
       // If the main data store changes in another tab, reload our state
