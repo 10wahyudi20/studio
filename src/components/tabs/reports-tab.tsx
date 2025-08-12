@@ -52,22 +52,22 @@ export default function ReportsTab() {
         const month = parseInt(selectedMonth, 10);
         const monthName = months.find(m => m.value === month)?.name || '';
         
-        // Filter data for the selected month and year
-        const dailyProdData = eggProduction.daily.filter(d => {
+        // --- DATA FOR DETAILED TABLES (FILTERED BY PERIOD) ---
+        const dailyProdDataForPeriod = eggProduction.daily.filter(d => {
             const date = new Date(d.date);
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
 
-        const financeData = finance.filter(t => {
+        const financeDataForPeriod = finance.filter(t => {
             const date = new Date(t.date);
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
 
-        if (dailyProdData.length === 0 && financeData.length === 0 && !lastPrediction) {
+        if (dailyProdDataForPeriod.length === 0 && financeDataForPeriod.length === 0 && !lastPrediction && ducks.length === 0 && feed.length === 0) {
             toast({
                 variant: "destructive",
                 title: "Data Tidak Ditemukan",
-                description: `Tidak ada data produksi, keuangan, atau prediksi AI untuk dicetak.`
+                description: `Tidak ada data apapun untuk dicetak.`
             });
             setIsLoading(false);
             return;
@@ -80,27 +80,27 @@ export default function ReportsTab() {
             doc.setFontSize(20);
             doc.text(`Laporan Bulanan - ${companyInfo.name}`, 14, 22);
             doc.setFontSize(11);
-            doc.text(`Periode: ${monthName} ${year}`, 14, 30);
+            doc.text(`Periode Detail: ${monthName} ${year}`, 14, 30);
             doc.setFontSize(9);
             doc.text(`${companyInfo.address} | ${companyInfo.phone} | ${companyInfo.email}`, 14, 35);
 
             let finalY = 45;
 
-            // --- RINGKASAN ---
+            // --- ALL-TIME SUMMARY DATA ---
             const totalDucks = ducks.reduce((sum, d) => sum + d.quantity, 0);
-            const totalEggsMonth = dailyProdData.reduce((sum, d) => sum + d.totalEggs, 0);
-            const income = financeData.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
-            const expense = financeData.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
-            const netProfit = income - expense;
+            const totalEggsAllTime = eggProduction.daily.reduce((sum, d) => sum + d.totalEggs, 0);
+            const totalIncome = finance.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
+            const totalExpense = finance.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+            const netProfit = totalIncome - totalExpense;
 
             autoTable(doc, {
                 startY: finalY,
-                head: [['Ringkasan Umum']],
+                head: [['Ringkasan Umum (Keseluruhan)']],
                 body: [
                     ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} ekor`],
-                    ['Total Produksi Telur', `${totalEggsMonth.toLocaleString('id-ID')} butir`],
-                    ['Total Pemasukan', `Rp ${income.toLocaleString('id-ID')}`],
-                    ['Total Pengeluaran', `Rp ${expense.toLocaleString('id-ID')}`],
+                    ['Total Produksi Telur', `${totalEggsAllTime.toLocaleString('id-ID')} butir`],
+                    ['Total Pemasukan', `Rp ${totalIncome.toLocaleString('id-ID')}`],
+                    ['Total Pengeluaran', `Rp ${totalExpense.toLocaleString('id-ID')}`],
                     ['Laba / Rugi Bersih', `Rp ${netProfit.toLocaleString('id-ID')}`],
                 ],
                 theme: 'grid',
@@ -108,12 +108,12 @@ export default function ReportsTab() {
             });
             finalY = (doc as any).lastAutoTable.finalY + 10;
             
-            // --- DETAIL PRODUKSI HARIAN ---
-            if(dailyProdData.length > 0) {
+            // --- DETAIL PRODUKSI HARIAN (for selected period) ---
+            if(dailyProdDataForPeriod.length > 0) {
                  autoTable(doc, {
                     startY: finalY,
-                    head: [['Tanggal', 'Jumlah Telur (Butir)', 'Produktifitas (%)']],
-                    body: dailyProdData.map(d => [
+                    head: [[`Detail Produksi Harian (${monthName} ${year})`, 'Jumlah Telur (Butir)', 'Produktifitas (%)']],
+                    body: dailyProdDataForPeriod.map(d => [
                         format(new Date(d.date), 'dd/MM/yyyy'),
                         d.totalEggs.toLocaleString('id-ID'),
                         `${d.productivity.toFixed(2)} %`
@@ -125,12 +125,12 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
 
-            // --- DETAIL KEUANGAN ---
-            if(financeData.length > 0) {
+            // --- DETAIL KEUANGAN (for selected period) ---
+            if(financeDataForPeriod.length > 0) {
                 autoTable(doc, {
                     startY: finalY,
-                    head: [['Tanggal', 'Uraian', 'Jenis', 'Total (Rp)']],
-                    body: financeData.map(t => [
+                    head: [[`Detail Keuangan (${monthName} ${year})`, 'Uraian', 'Jenis', 'Total (Rp)']],
+                    body: financeDataForPeriod.map(t => [
                         format(new Date(t.date), 'dd/MM/yyyy'),
                         t.description,
                         t.type === 'debit' ? 'Pemasukan' : 'Pengeluaran',
