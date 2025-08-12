@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import PersonalAssistant from "@/components/layout/personal-assistant";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
@@ -286,8 +285,6 @@ export default function Header() {
                 <span className="sr-only">Simpan Data</span>
             </Button>
             
-            <PersonalAssistant />
-
             <Dialog>
                 <DialogTrigger asChild>
                     <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
