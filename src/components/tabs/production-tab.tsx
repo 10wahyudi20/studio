@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon } from "lucide-react";
+import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon, Printer } from "lucide-react";
 import { format, addDays, startOfMonth, endOfMonth, isToday } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -546,7 +546,7 @@ const yearOptions = Array.from({ length: 5 }, (_, i) => ({
 }));
 
 export default function ProductionTab() {
-  const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction } = useAppStore();
+  const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction, companyInfo } = useAppStore();
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
@@ -712,6 +712,83 @@ export default function ProductionTab() {
     return formattedData;
   });
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        variant: "destructive",
+        title: "Gagal Membuka Jendela Cetak",
+        description: "Pastikan pop-up diizinkan untuk situs ini."
+      });
+      return;
+    }
+
+    const tableHead = `
+        <tr>
+            <th>Tanggal</th>
+            <th>Hari</th>
+            <th>Jumlah Telur</th>
+            <th>Produktifitas</th>
+            ${ducks.map(duck => `<th>Kdg ${duck.cage}</th>`).join('')}
+        </tr>
+    `;
+
+    const tableBody = monthlyProductionData.map(day => {
+        const perCageCells = ducks.map(duck => `<td>${day.perCage[duck.cage] ?? '-'}</td>`).join('');
+        return `
+            <tr>
+                <td>${format(new Date(day.date), "dd/MM/yyyy")}</td>
+                <td>${format(new Date(day.date), "eeee", { locale: idLocale })}</td>
+                <td>${day.totalEggs}</td>
+                <td>${day.productivity.toFixed(2)}%</td>
+                ${perCageCells}
+            </tr>
+        `;
+    }).join('');
+
+    const printContent = `
+        <html>
+            <head>
+                <title>Laporan Produksi Harian - ${companyInfo.name}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header h1 { margin: 0; }
+                    .header p { margin: 5px 0; color: #555; }
+                    table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+                    th { background-color: #f2f2f2; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Laporan Produksi Harian</h1>
+                    <p>${companyInfo.name}</p>
+                    <p>Periode: ${format(currentDate, "MMMM yyyy", { locale: idLocale })}</p>
+                    <p>Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}</p>
+                </div>
+                <table>
+                    <thead>
+                        ${tableHead}
+                    </thead>
+                    <tbody>
+                        ${tableBody}
+                    </tbody>
+                </table>
+            </body>
+        </html>
+    `;
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+  };
+
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -838,6 +915,10 @@ export default function ProductionTab() {
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
                                 <ZoomIn className="h-4 w-4" />
+                            </Button>
+                             <Button variant="outline" size="icon" onClick={handlePrint}>
+                                <Printer className="h-4 w-4" />
+                                <span className="sr-only">Cetak Tabel Harian</span>
                             </Button>
                             <div className="flex gap-1">
                                 <Select
