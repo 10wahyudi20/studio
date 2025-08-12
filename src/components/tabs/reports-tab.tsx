@@ -132,7 +132,7 @@ export default function ReportsTab() {
             if(debitTransactions.length > 0) {
                 autoTable(doc, {
                     startY: finalY,
-                    head: [[`Detail Pemasukan (Debit) - ${monthName} ${year}`]],
+                    head: [[`Detail Pemasukan (Debit) - ${monthName} ${year}`, 'Uraian', 'Total']],
                     body: debitTransactions.map(t => [
                         format(new Date(t.date), 'dd/MM/yyyy'),
                         t.description,
@@ -148,7 +148,7 @@ export default function ReportsTab() {
             if(creditTransactions.length > 0) {
                 autoTable(doc, {
                     startY: finalY,
-                    head: [[`Detail Pengeluaran (Kredit) - ${monthName} ${year}`]],
+                    head: [[`Detail Pengeluaran (Kredit) - ${monthName} ${year}`, 'Uraian', 'Total']],
                     body: creditTransactions.map(t => [
                         format(new Date(t.date), 'dd/MM/yyyy'),
                         t.description,
