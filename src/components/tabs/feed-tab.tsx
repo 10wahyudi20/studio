@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -207,9 +206,13 @@ export default function FeedTab() {
         footStyles: {
             fillColor: [232, 232, 232],
             textColor: 0,
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            halign: 'right'
         },
         columnStyles: {
+            0: { halign: 'left' },
+            1: { halign: 'left' },
+            2: { halign: 'left' },
             3: { halign: 'right' },
             4: { halign: 'right' },
             5: { halign: 'right' }
@@ -377,12 +380,3 @@ export default function FeedTab() {
     </div>
   );
 }
-
-    
-
-    
-
-      
-
-
-    
