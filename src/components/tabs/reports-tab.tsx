@@ -91,6 +91,7 @@ export default function ReportsTab() {
             const totalEggsMonth = dailyProdData.reduce((sum, d) => sum + d.totalEggs, 0);
             const income = financeData.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
             const expense = financeData.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+            const netProfit = income - expense;
 
             autoTable(doc, {
                 startY: finalY,
@@ -100,7 +101,7 @@ export default function ReportsTab() {
                     ['Total Produksi Telur', `${totalEggsMonth.toLocaleString('id-ID')} butir`],
                     ['Total Pemasukan', `Rp ${income.toLocaleString('id-ID')}`],
                     ['Total Pengeluaran', `Rp ${expense.toLocaleString('id-ID')}`],
-                    ['Laba / Rugi Bersih', `Rp ${(income - expense).toLocaleString('id-ID')}`],
+                    ['Laba / Rugi Bersih', `Rp ${netProfit.toLocaleString('id-ID')}`],
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [66, 165, 245] }
