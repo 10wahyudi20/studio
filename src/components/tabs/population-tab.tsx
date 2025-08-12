@@ -6,7 +6,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PlusCircle, Edit, Trash2, RefreshCw, Layers, Users, TrendingDown, ArrowRightLeft, ShieldOff, Notebook, Pencil } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Edit, Trash2, RefreshCw, Layers, Users, TrendingDown, ArrowRightLeft, ShieldOff, Notebook, Pencil, Printer } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { ScrollArea } from "../ui/scroll-area";
+import { id as idLocale } from "date-fns/locale";
 
 const duckSchema = z.object({
   cage: z.coerce.number().min(1),
@@ -291,7 +292,7 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
 };
 
 export default function PopulationTab() {
-  const { ducks, addDuck, updateDuck, removeDuck, resetDuck } = useAppStore();
+  const { ducks, addDuck, updateDuck, removeDuck, resetDuck, companyInfo } = useAppStore();
   const { toast } = useToast();
 
   const totalDucks = ducks.reduce((acc, duck) => acc + duck.quantity, 0);
@@ -316,6 +317,94 @@ export default function PopulationTab() {
         return cn(baseClasses, "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700");
     }
   };
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        toast({
+            variant: "destructive",
+            title: "Gagal Membuka Jendela Cetak",
+            description: "Pastikan pop-up diizinkan untuk situs ini."
+        });
+        return;
+    }
+
+    const tableRows = ducks.map(duck => `
+        <tr>
+            <td>${duck.cage}</td>
+            <td>${duck.quantity}</td>
+            <td>${duck.deaths}</td>
+            <td>${format(new Date(duck.entryDate), "dd/MM/yyyy")}</td>
+            <td>${duck.ageMonths}</td>
+            <td>${duck.status}</td>
+            <td>${duck.cageSize}</td>
+            <td>${duck.cageSystem}</td>
+        </tr>
+    `).join('');
+    
+    const totalsRow = `
+        <tr class="totals">
+            <td>Total</td>
+            <td>${totalDucks}</td>
+            <td>${totalDeaths}</td>
+            <td colspan="5"></td>
+        </tr>
+    `;
+
+    const printContent = `
+        <html>
+            <head>
+                <title>Laporan Inventaris Bebek - ${companyInfo.name}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    .header { text-align: center; margin-bottom: 20px; }
+                    .header h1 { margin: 0; }
+                    .header p { margin: 5px 0; color: #555; }
+                    table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+                    th { background-color: #f2f2f2; }
+                    tr:nth-child(even) { background-color: #f9f9f9; }
+                    .totals { font-weight: bold; background-color: #e8e8e8; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>Laporan Inventaris Bebek</h1>
+                    <p>${companyInfo.name}</p>
+                    <p>Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kandang</th>
+                            <th>Jumlah Bebek</th>
+                            <th>Bebek Mati</th>
+                            <th>Tanggal Masuk</th>
+                            <th>Usia (Bulan)</th>
+                            <th>Status</th>
+                            <th>Ukuran Kandang</th>
+                            <th>Sistem Kandang</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                    <tfoot>
+                        ${totalsRow}
+                    </tfoot>
+                </table>
+            </body>
+        </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250); // Timeout to ensure content is fully rendered
+  };
+
 
   const StatCard = ({ title, value, icon: Icon, footer, valueClassName, iconClassName }: { title: string, value: string | number, icon: React.ElementType, footer?: React.ReactNode, valueClassName?: string, iconClassName?: string }) => (
     <Card className="flex flex-col">
@@ -390,12 +479,18 @@ export default function PopulationTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Inventaris Bebek</CardTitle>
-          <DuckForm onSave={addDuck}>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Tambah Bebek
-            </Button>
-          </DuckForm>
+          <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={handlePrint}>
+                  <Printer className="mr-2 h-4 w-4" />
+                  Cetak
+              </Button>
+              <DuckForm onSave={addDuck}>
+                <Button>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Tambah Bebek
+                </Button>
+              </DuckForm>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
