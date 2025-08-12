@@ -62,12 +62,19 @@ export default function ReportsTab() {
             const date = new Date(t.date);
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
+        
+        // --- DATA FOR ALL-TIME SUMMARY ---
+        const totalDucks = ducks.reduce((sum, d) => sum + d.quantity, 0);
+        const totalEggsAllTime = eggProduction.daily.reduce((sum, d) => sum + d.totalEggs, 0);
+        const totalIncomeAllTime = finance.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
+        const totalExpenseAllTime = finance.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+        const netProfitAllTime = totalIncomeAllTime - totalExpenseAllTime;
 
         if (dailyProdDataForPeriod.length === 0 && financeDataForPeriod.length === 0 && ducks.length === 0 && feed.length === 0 && !lastPrediction) {
             toast({
                 variant: "destructive",
                 title: "Data Tidak Ditemukan",
-                description: `Tidak ada data apapun untuk dicetak.`
+                description: `Tidak ada data apapun yang dapat dicetak.`
             });
             setIsLoading(false);
             return;
@@ -87,21 +94,15 @@ export default function ReportsTab() {
             let finalY = 45;
 
             // --- ALL-TIME SUMMARY DATA ---
-            const totalDucks = ducks.reduce((sum, d) => sum + d.quantity, 0);
-            const totalEggsAllTime = eggProduction.daily.reduce((sum, d) => sum + d.totalEggs, 0);
-            const totalIncome = finance.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
-            const totalExpense = finance.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
-            const netProfit = totalIncome - totalExpense;
-
             autoTable(doc, {
                 startY: finalY,
                 head: [['Ringkasan Umum (Keseluruhan)']],
                 body: [
                     ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} ekor`],
                     ['Total Produksi Telur', `${totalEggsAllTime.toLocaleString('id-ID')} butir`],
-                    ['Total Pemasukan', `Rp ${totalIncome.toLocaleString('id-ID')}`],
-                    ['Total Pengeluaran', `Rp ${totalExpense.toLocaleString('id-ID')}`],
-                    ['Laba / Rugi Bersih', `Rp ${netProfit.toLocaleString('id-ID')}`],
+                    ['Total Pemasukan', `Rp ${totalIncomeAllTime.toLocaleString('id-ID')}`],
+                    ['Total Pengeluaran', `Rp ${totalExpenseAllTime.toLocaleString('id-ID')}`],
+                    ['Laba / Rugi Bersih', `Rp ${netProfitAllTime.toLocaleString('id-ID')}`],
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [66, 165, 245] }
@@ -284,3 +285,5 @@ export default function ReportsTab() {
     </div>
   );
 }
+
+    
