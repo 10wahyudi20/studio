@@ -105,7 +105,7 @@ const personalAssistantFlow = ai.defineFlow(
             role: msg.role as Role,
             content: contentParts,
         };
-    }).filter(msg => msg.content.length > 0); // This filter is now safe because content is always an array.
+    }).filter(msg => msg.content.length > 0); // Final safe filter to remove any accidentally empty messages
 
     // =================================================================
     //  AI GENERATION CALL
