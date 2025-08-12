@@ -589,7 +589,7 @@ export default function ProductionTab() {
     : null;
 
   const worstProductivityRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : best)
+    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
     : null;
   
   const getProductivityColor = (p: number) => {
@@ -1424,3 +1424,4 @@ export default function ProductionTab() {
     
 
     
+
