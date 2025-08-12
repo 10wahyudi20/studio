@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
+import { id as idLocale } from "fns-locale";
 
 const months = [
     { value: 1, name: "Januari" },
@@ -91,6 +91,7 @@ export default function ReportsTab() {
             const totalEggsMonth = dailyProdData.reduce((sum, d) => sum + d.totalEggs, 0);
             const income = financeData.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
             const expense = financeData.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+            const totalFeedStock = feed.reduce((sum, f) => sum + f.stock, 0);
 
             autoTable(doc, {
                 startY: finalY,
@@ -101,6 +102,7 @@ export default function ReportsTab() {
                     ['Total Pemasukan', `Rp ${income.toLocaleString('id-ID')}`],
                     ['Total Pengeluaran', `Rp ${expense.toLocaleString('id-ID')}`],
                     ['Laba / Rugi Bersih', `Rp ${(income - expense).toLocaleString('id-ID')}`],
+                    ['Stok Pakan (Saat Laporan Dibuat)', `${totalFeedStock.toLocaleString('id-ID')} Kg`]
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [66, 165, 245] }
