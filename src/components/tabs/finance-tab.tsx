@@ -349,7 +349,7 @@ export default function FinanceTab() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <TransactionTable title="Pembukuan Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
         <TransactionTable title="Pembukuan Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
       </div>
