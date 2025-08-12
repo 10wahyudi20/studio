@@ -1,5 +1,7 @@
 
 
+import type { PredictEggProductionOutput } from "@/ai/flows/predict-egg-production";
+
 export interface CompanyInfo {
     name: string;
     address: string;
@@ -108,4 +110,5 @@ export interface AppState {
     isAuthenticated: boolean;
     lastStockUpdate: string | null;
     activeTab: string;
+    lastPrediction: PredictEggProductionOutput | null;
 }

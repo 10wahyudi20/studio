@@ -33,7 +33,7 @@ const years = Array.from({ length: 5 }, (_, i) => currentYearForList - i);
 
 
 export default function ReportsTab() {
-  const { companyInfo, ducks, eggProduction, finance, feed } = useAppStore();
+  const { companyInfo, ducks, eggProduction, finance, feed, lastPrediction } = useAppStore();
   const { toast } = useToast();
 
   const currentYear = new Date().getFullYear();
@@ -63,11 +63,11 @@ export default function ReportsTab() {
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
 
-        if (dailyProdData.length === 0 && financeData.length === 0) {
+        if (dailyProdData.length === 0 && financeData.length === 0 && !lastPrediction) {
             toast({
                 variant: "destructive",
                 title: "Data Tidak Ditemukan",
-                description: `Tidak ada data produksi atau keuangan untuk ${monthName} ${year}.`
+                description: `Tidak ada data produksi, keuangan, atau prediksi AI untuk dicetak.`
             });
             setIsLoading(false);
             return;
@@ -158,6 +158,40 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
             
+            // --- AI PREDICTION ---
+            if (lastPrediction) {
+                doc.addPage();
+                doc.setFontSize(20);
+                doc.text('Hasil Prediksi AI', 14, 22);
+                finalY = 30;
+
+                const predictionHeader = `Total Prediksi: ${lastPrediction.totalPredictedProduction.toLocaleString('id-ID')} Butir`;
+                doc.setFontSize(12);
+                doc.text(predictionHeader, 14, finalY);
+                finalY += 10;
+                
+                autoTable(doc, {
+                    startY: finalY,
+                    head: [['Tanggal Prediksi', 'Jumlah Telur (Butir)']],
+                    body: lastPrediction.dailyPredictions.map(p => [
+                        p.day,
+                        p.predictedEggs.toLocaleString('id-ID')
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [149, 117, 205] }, // Deep Purple
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                });
+                finalY = (doc as any).lastAutoTable.finalY + 10;
+
+                doc.setFontSize(12);
+                doc.text('Analisis & Alasan Prediksi', 14, finalY);
+                finalY += 6;
+                doc.setFontSize(10);
+                
+                const splitReasoning = doc.splitTextToSize(lastPrediction.reasoning, 180);
+                doc.text(splitReasoning, 14, finalY);
+            }
+
             // Open the PDF in a new tab instead of an iframe
             doc.output('dataurlnewwindow');
 

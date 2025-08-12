@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord } from '@/lib/types';
 import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO, differenceInDays } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
+import type { PredictEggProductionOutput } from '@/ai/flows/predict-egg-production';
+
 
 let channel: BroadcastChannel | null = null;
 if (typeof window !== 'undefined') {
@@ -36,6 +38,7 @@ const getInitialState = (): AppState => ({
   isAuthenticated: false, 
   lastStockUpdate: null,
   activeTab: 'home',
+  lastPrediction: null,
 });
 
 const calculateDuckStatus = (ageMonths: number): Duck['status'] => {
@@ -113,6 +116,7 @@ export const useAppStore = create<AppState & {
   updateFeed: (id: number, feed: Partial<Omit<Feed, 'id' | 'pricePerKg'>>) => void;
   removeFeed: (id: number) => void;
   addDeathRecord: (record: DeathRecordInput) => void;
+  setLastPrediction: (prediction: PredictEggProductionOutput | null) => void;
   saveState: () => void;
   loadState: () => void;
   getFullState: () => Omit<AppState, 'isDirty' | 'isAuthenticated'>;
@@ -396,6 +400,10 @@ export const useAppStore = create<AppState & {
     });
   },
 
+  setLastPrediction: (prediction) => {
+    set({ lastPrediction: prediction, isDirty: true });
+  },
+
   updateStockBasedOnConsumption: () => {
     const { lastStockUpdate, ducks, feed } = get();
     const today = startOfDay(new Date());
@@ -483,6 +491,7 @@ export const useAppStore = create<AppState & {
             finance: parsedState.finance.map((t: any) => ({...t, date: new Date(t.date)})),
             deathRecords: (parsedState.deathRecords || []).map((r: any) => ({ ...r, date: new Date(r.date) })),
             lastStockUpdate: parsedState.lastStockUpdate || null,
+            lastPrediction: parsedState.lastPrediction || null,
         };
         
         revivedState.eggProduction.monthly = recalculateMonthlyProduction(revivedState.eggProduction.weekly);
@@ -506,7 +515,7 @@ export const useAppStore = create<AppState & {
         "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
         "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
         "addDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState",
-        "updateStockBasedOnConsumption"
+        "updateStockBasedOnConsumption", "setLastPrediction"
     ];
     functions.forEach(f => delete st[f]);
     return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;

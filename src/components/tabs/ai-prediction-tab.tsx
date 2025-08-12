@@ -60,10 +60,10 @@ const DataDisplayCard = ({ title, data, columns, footerData }: { title: string, 
 
 
 export default function AiPredictionTab() {
-  const { ducks, feed, eggProduction, companyInfo } = useAppStore();
+  const { ducks, feed, eggProduction, companyInfo, lastPrediction, setLastPrediction } = useAppStore();
   const { toast } = useToast();
   
-  const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(null);
+  const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(lastPrediction);
   const [audio, setAudio] = React.useState<TextToSpeechOutput | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = React.useState(false);
@@ -139,9 +139,11 @@ export default function AiPredictionTab() {
       };
       const result = await predictEggProduction(input);
       setPrediction(result);
+      setLastPrediction(result); // Save to global store
     } catch (e: any) {
       setError(`Gagal menghasilkan prediksi: ${e.message}`);
       console.error(e);
+      setLastPrediction(null); // Clear global state on error
     } finally {
       setIsLoading(false);
     }
