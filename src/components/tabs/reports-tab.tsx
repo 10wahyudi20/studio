@@ -192,7 +192,17 @@ export default function ReportsTab() {
                 doc.text(splitReasoning, 14, finalY);
             }
 
-            // Open the PDF in a new tab instead of an iframe
+            // --- FOOTER ---
+            const pageCount = doc.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const printDate = format(new Date(), "'Dicetak pada:' dd MMMM yyyy, HH:mm", { locale: idLocale });
+                doc.setFontSize(8);
+                doc.text(printDate, doc.internal.pageSize.getWidth() / 2, pageHeight - 10, { align: 'center' });
+            }
+
+            // Open the PDF in a new tab
             doc.output('dataurlnewwindow');
 
             toast({ title: "Laporan Dibuat!", description: "Laporan telah dibuka di tab baru." });
