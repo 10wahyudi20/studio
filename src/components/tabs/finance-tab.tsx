@@ -149,74 +149,103 @@ export default function FinanceTab() {
   
   const handlePrint = () => {
     const doc = new jsPDF();
-    
-    // --- Data Preparation ---
-    const allTransactions = [...finance].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    let balance = 0;
-    let totalDebit = 0;
-    let totalCredit = 0;
-
-    const tableBody = allTransactions.map(t => {
-        const debit = t.type === 'debit' ? t.total : 0;
-        const credit = t.type === 'credit' ? t.total : 0;
-        balance += debit - credit;
-        totalDebit += debit;
-        totalCredit += credit;
-
-        return [
-            format(new Date(t.date), "dd/MM/yyyy"),
-            t.description,
-            { content: debit > 0 ? `Rp ${debit.toLocaleString('id-ID')}` : '-', styles: { halign: 'right' } },
-            { content: credit > 0 ? `Rp ${credit.toLocaleString('id-ID')}` : '-', styles: { halign: 'right' } },
-            { content: `Rp ${balance.toLocaleString('id-ID')}`, styles: { halign: 'right' } }
-        ];
-    });
-
+    let finalY = 40; // Initial Y position
 
     // --- PDF Header ---
     doc.setFontSize(18);
-    doc.text("Buku Besar Keuangan", 14, 22);
+    doc.text("Laporan Keuangan", 14, 22);
     doc.setFontSize(12);
     doc.text(companyInfo.name, 14, 30);
     doc.setFontSize(10);
     doc.text(`Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}`, 14, 36);
 
+    const tableColumns = ['Tgl', 'Uraian', 'Jumlah', 'Harga Satuan', 'Total'];
+    const commonColumnStyles = {
+      0: { cellWidth: 25 },
+      1: { cellWidth: 'auto' },
+      2: { halign: 'right', cellWidth: 25 },
+      3: { halign: 'right', cellWidth: 35 },
+      4: { halign: 'right', cellWidth: 35 },
+    };
+    
+    // --- Debit Table ---
+    const debitData = debitTransactions.map(t => [
+        format(new Date(t.date), "dd/MM/yyyy"),
+        t.description,
+        t.quantity.toLocaleString('id-ID'),
+        `Rp ${t.unitPrice.toLocaleString('id-ID')}`,
+        `Rp ${t.total.toLocaleString('id-ID')}`
+    ]);
+    const totalDebit = debitTransactions.reduce((sum, t) => sum + t.total, 0);
 
-    // --- Main Table ---
     autoTable(doc, {
-        startY: 45,
-        head: [['Tanggal', 'Uraian', 'Debit', 'Kredit', 'Saldo']],
-        body: tableBody,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [41, 128, 185], // A professional blue
-            textColor: 255,
-            fontStyle: 'bold'
-        },
-        columnStyles: {
-            0: { cellWidth: 25 },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 35, halign: 'right' },
-            3: { cellWidth: 35, halign: 'right' },
-            4: { cellWidth: 35, halign: 'right' },
-        },
-        didDrawPage: (data) => {
-            // You can add headers/footers to every page here if needed
-        }
+        startY: finalY,
+        head: [['Pemasukan (Debit)']],
+        theme: 'plain',
+        headStyles: { fontStyle: 'bold', fontSize: 14 }
     });
+    finalY = (doc as any).lastAutoTable.finalY;
 
-    // --- Summary Footer ---
-    const finalY = (doc as any).lastAutoTable.finalY + 5;
+    autoTable(doc, {
+        startY: finalY,
+        head: [tableColumns],
+        body: debitData,
+        foot: [[
+          { content: 'Total Pemasukan', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: `Rp ${totalDebit.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }
+        ]],
+        theme: 'grid',
+        headStyles: { fillColor: [76, 175, 80] }, // Green
+        footStyles: { fillColor: [220, 220, 220] },
+        columnStyles: commonColumnStyles,
+    });
+    finalY = (doc as any).lastAutoTable.finalY + 10;
+    
+    // --- Credit Table ---
+    const creditData = creditTransactions.map(t => [
+        format(new Date(t.date), "dd/MM/yyyy"),
+        t.description,
+        t.quantity.toLocaleString('id-ID'),
+        `Rp ${t.unitPrice.toLocaleString('id-ID')}`,
+        `Rp ${t.total.toLocaleString('id-ID')}`
+    ]);
+    const totalCredit = creditTransactions.reduce((sum, t) => sum + t.total, 0);
+
+    autoTable(doc, {
+        startY: finalY,
+        head: [['Pengeluaran (Kredit)']],
+        theme: 'plain',
+        headStyles: { fontStyle: 'bold', fontSize: 14 }
+    });
+    finalY = (doc as any).lastAutoTable.finalY;
+
+    autoTable(doc, {
+        startY: finalY,
+        head: [tableColumns],
+        body: creditData,
+        foot: [[
+          { content: 'Total Pengeluaran', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: `Rp ${totalCredit.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }
+        ]],
+        theme: 'grid',
+        headStyles: { fillColor: [244, 67, 54] }, // Red
+        footStyles: { fillColor: [220, 220, 220] },
+        columnStyles: commonColumnStyles,
+    });
+    finalY = (doc as any).lastAutoTable.finalY + 15;
+
+    // --- Summary Section ---
+    const netProfitPDF = totalDebit - totalCredit;
     autoTable(doc, {
       startY: finalY,
       body: [
-          [{ content: 'Total Debit:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${totalDebit.toLocaleString('id-ID')}`, styles: { halign: 'right' } }],
-          [{ content: 'Total Kredit:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${totalCredit.toLocaleString('id-ID')}`, styles: { halign: 'right' } }],
-          [{ content: 'Saldo Akhir:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${balance.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }],
+          [{ content: 'Total Pemasukan:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${totalDebit.toLocaleString('id-ID')}`, styles: { halign: 'right' } }],
+          [{ content: 'Total Pengeluaran:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${totalCredit.toLocaleString('id-ID')}`, styles: { halign: 'right' } }],
+          [{ content: 'Laba / Rugi Bersih:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${netProfitPDF.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }],
       ],
       theme: 'plain',
-      tableWidth: 80,
-      margin: {left: 116} // Align to the right side of the page
+      tableWidth: 100,
+      margin: {left: 96} // Align to the right side of the page
     });
 
     // --- Open PDF ---
