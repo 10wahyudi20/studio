@@ -908,6 +908,88 @@ export default function ProductionTab() {
         printWindow.print();
     }, 250);
   };
+  
+  const handleMonthlyPrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        variant: "destructive",
+        title: "Gagal Membuka Jendela Cetak",
+        description: "Pastikan pop-up diizinkan untuk situs ini."
+      });
+      return;
+    }
+
+    const tableHeader = `
+        <tr>
+            <th>Bulan</th>
+            <th>Grade A</th>
+            <th>Grade B</th>
+            <th>Grade C</th>
+            <th>Konsumsi</th>
+            <th>Total Telur</th>
+        </tr>
+    `;
+
+    const tableBody = eggProduction.monthly.map(month => `
+      <tr>
+        <td>${month.month}</td>
+        <td>${month.gradeA.toLocaleString('id-ID')}</td>
+        <td>${month.gradeB.toLocaleString('id-ID')}</td>
+        <td>${month.gradeC.toLocaleString('id-ID')}</td>
+        <td>${month.consumption.toLocaleString('id-ID')}</td>
+        <td>${month.totalEggs.toLocaleString('id-ID')}</td>
+      </tr>
+    `).join('');
+
+    const tableFooter = `
+      <tr class="grandtotal">
+        <td>Grand Total</td>
+        <td>${monthlyGrandTotal.gradeA.toLocaleString('id-ID')}</td>
+        <td>${monthlyGrandTotal.gradeB.toLocaleString('id-ID')}</td>
+        <td>${monthlyGrandTotal.gradeC.toLocaleString('id-ID')}</td>
+        <td>${monthlyGrandTotal.consumption.toLocaleString('id-ID')}</td>
+        <td>${monthlyGrandTotal.totalEggs.toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+
+    const printContent = `
+      <html>
+        <head>
+          <title>Laporan Produksi Bulanan - ${companyInfo.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .header h1 { margin: 0; }
+            .header p { margin: 5px 0; color: #555; }
+            table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            th { background-color: #f2f2f2; }
+            .grandtotal { background-color: #d0e4fe; font-weight: bold; font-size: 11pt; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Laporan Produksi Bulanan</h1>
+            <p>${companyInfo.name}</p>
+            <p>Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}</p>
+          </div>
+          <table>
+            <thead>${tableHeader}</thead>
+            <tbody>${tableBody}</tbody>
+            <tfoot>${tableFooter}</tfoot>
+          </table>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+  };
 
 
   return (
@@ -1131,6 +1213,13 @@ export default function ProductionTab() {
                                 <span className="sr-only">Cetak Tabel Mingguan</span>
                             </Button>
                         </>
+                    )}
+
+                    {activeTab === 'monthly' && (
+                         <Button variant="outline" size="icon" onClick={handleMonthlyPrint}>
+                            <Printer className="h-4 w-4" />
+                            <span className="sr-only">Cetak Tabel Bulanan</span>
+                        </Button>
                     )}
 
 
@@ -1424,4 +1513,5 @@ export default function ProductionTab() {
     
 
     
+
 
