@@ -126,18 +126,36 @@ export default function ReportsTab() {
             }
 
             // --- DETAIL KEUANGAN (for selected period) ---
-            if(financeDataForPeriod.length > 0) {
+            const debitTransactions = financeDataForPeriod.filter(t => t.type === 'debit');
+            const creditTransactions = financeDataForPeriod.filter(t => t.type === 'credit');
+
+            if(debitTransactions.length > 0) {
                 autoTable(doc, {
                     startY: finalY,
-                    head: [[`Detail Keuangan (${monthName} ${year})`, 'Uraian', 'Jenis', 'Total (Rp)']],
-                    body: financeDataForPeriod.map(t => [
+                    head: [[`Detail Pemasukan (Debit) - ${monthName} ${year}`]],
+                    body: debitTransactions.map(t => [
                         format(new Date(t.date), 'dd/MM/yyyy'),
                         t.description,
-                        t.type === 'debit' ? 'Pemasukan' : 'Pengeluaran',
-                        t.total.toLocaleString('id-ID')
+                        `Rp ${t.total.toLocaleString('id-ID')}`
                     ]),
                     theme: 'striped',
-                    headStyles: { fillColor: [33, 150, 243] },
+                    headStyles: { fillColor: [76, 175, 80] }, // Green for income
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                });
+                finalY = (doc as any).lastAutoTable.finalY + 10;
+            }
+
+            if(creditTransactions.length > 0) {
+                autoTable(doc, {
+                    startY: finalY,
+                    head: [[`Detail Pengeluaran (Kredit) - ${monthName} ${year}`]],
+                    body: creditTransactions.map(t => [
+                        format(new Date(t.date), 'dd/MM/yyyy'),
+                        t.description,
+                        `Rp ${t.total.toLocaleString('id-ID')}`
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: [244, 67, 54] }, // Red for expense
                     didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
