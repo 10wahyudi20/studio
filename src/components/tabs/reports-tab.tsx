@@ -96,8 +96,8 @@ export default function ReportsTab() {
                 startY: finalY,
                 head: [['Ringkasan Umum']],
                 body: [
-                    ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} Ekor`],
-                    ['Total Produksi Telur', `${totalEggsMonth.toLocaleString('id-ID')} Butir`],
+                    ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} ekor`],
+                    ['Total Produksi Telur', `${totalEggsMonth.toLocaleString('id-ID')} butir`],
                     ['Total Pemasukan', `Rp ${income.toLocaleString('id-ID')}`],
                     ['Total Pengeluaran', `Rp ${expense.toLocaleString('id-ID')}`],
                     ['Laba / Rugi Bersih', `Rp ${(income - expense).toLocaleString('id-ID')}`],
