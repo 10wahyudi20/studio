@@ -589,7 +589,7 @@ export default function ProductionTab() {
     : null;
 
   const worstProductivityRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
+    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : best)
     : null;
   
   const getProductivityColor = (p: number) => {
@@ -1086,21 +1086,46 @@ export default function ProductionTab() {
                     
                     {activeTab === 'weekly' && (
                         <>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline">
-                                        {format(currentDate, "MMMM yyyy", { locale: idLocale })}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={currentDate}
-                                        onSelect={(date) => date && setCurrentDate(date)}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <div className="flex gap-1">
+                                <Select
+                                    value={String(currentDate.getMonth())}
+                                    onValueChange={(value) => {
+                                        const newDate = new Date(currentDate);
+                                        newDate.setMonth(parseInt(value));
+                                        setCurrentDate(newDate);
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[120px]">
+                                        <SelectValue placeholder="Pilih Bulan" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {monthOptions.map((month) => (
+                                            <SelectItem key={month.value} value={String(month.value)}>
+                                                {month.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Select
+                                    value={String(currentDate.getFullYear())}
+                                    onValueChange={(value) => {
+                                        const newDate = new Date(currentDate);
+                                        newDate.setFullYear(parseInt(value));
+                                        setCurrentDate(newDate);
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[80px]">
+                                        <SelectValue placeholder="Pilih Tahun" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {yearOptions.map((year) => (
+                                            <SelectItem key={year.value} value={String(year.value)}>
+                                                {year.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                              <Button variant="outline" size="icon" onClick={handleWeeklyPrint}>
                                 <Printer className="h-4 w-4" />
                                 <span className="sr-only">Cetak Tabel Mingguan</span>
