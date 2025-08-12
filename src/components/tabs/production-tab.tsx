@@ -712,7 +712,7 @@ export default function ProductionTab() {
     return formattedData;
   });
 
-  const handlePrint = () => {
+  const handleDailyPrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({
@@ -780,6 +780,127 @@ export default function ProductionTab() {
         </html>
     `;
     
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+    }, 250);
+  };
+
+  const handleWeeklyPrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        variant: "destructive",
+        title: "Gagal Membuka Jendela Cetak",
+        description: "Pastikan pop-up diizinkan untuk situs ini."
+      });
+      return;
+    }
+    
+    const tableHeader = `
+        <tr>
+            <th>Periode</th>
+            <th>Pembeli</th>
+            <th>Grade A</th>
+            <th>Grade B</th>
+            <th>Grade C</th>
+            <th>Konsumsi</th>
+            <th>Total Telur</th>
+            <th>Total Harga</th>
+        </tr>
+    `;
+
+    const tableBody = Object.keys(weeklyDataByPeriod).map(period => {
+      const weekEntries = weeklyDataByPeriod[period];
+      const subtotal = weekEntries.reduce(
+        (acc, week) => {
+          acc.gradeA += week.gradeA;
+          acc.gradeB += week.gradeB;
+          acc.gradeC += week.gradeC;
+          acc.consumption += week.consumption;
+          acc.totalEggs += week.totalEggs;
+          acc.totalValue += week.totalValue;
+          return acc;
+        },
+        { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, totalEggs: 0, totalValue: 0 }
+      );
+
+      const entryRows = weekEntries.map(week => `
+        <tr>
+          <td>
+            <div>${week.description}</div>
+            <div class="subtext">${format(new Date(week.startDate), 'dd/MM/yy')} - ${format(new Date(week.endDate), 'dd/MM/yy')}</div>
+          </td>
+          <td>${week.buyer}</td>
+          <td>${week.gradeA.toLocaleString('id-ID')} (Rp ${week.priceA.toLocaleString('id-ID')})</td>
+          <td>${week.gradeB.toLocaleString('id-ID')} (Rp ${week.priceB.toLocaleString('id-ID')})</td>
+          <td>${week.gradeC.toLocaleString('id-ID')} (Rp ${week.priceC.toLocaleString('id-ID')})</td>
+          <td>${week.consumption.toLocaleString('id-ID')} (Rp ${week.priceConsumption.toLocaleString('id-ID')})</td>
+          <td>${week.totalEggs.toLocaleString('id-ID')}</td>
+          <td>Rp ${week.totalValue.toLocaleString('id-ID')}</td>
+        </tr>
+      `).join('');
+
+      return entryRows + `
+        <tr class="subtotal">
+          <td colspan="2">Subtotal Periode</td>
+          <td>${subtotal.gradeA.toLocaleString('id-ID')}</td>
+          <td>${subtotal.gradeB.toLocaleString('id-ID')}</td>
+          <td>${subtotal.gradeC.toLocaleString('id-ID')}</td>
+          <td>${subtotal.consumption.toLocaleString('id-ID')}</td>
+          <td>${subtotal.totalEggs.toLocaleString('id-ID')}</td>
+          <td>Rp ${subtotal.totalValue.toLocaleString('id-ID')}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const tableFooter = `
+      <tr class="grandtotal">
+        <td colspan="2">Grand Total Bulanan</td>
+        <td>${weeklyGrandTotal.gradeA.toLocaleString('id-ID')}</td>
+        <td>${weeklyGrandTotal.gradeB.toLocaleString('id-ID')}</td>
+        <td>${weeklyGrandTotal.gradeC.toLocaleString('id-ID')}</td>
+        <td>${weeklyGrandTotal.consumption.toLocaleString('id-ID')}</td>
+        <td>${weeklyGrandTotal.totalEggs.toLocaleString('id-ID')}</td>
+        <td>Rp ${weeklyGrandTotal.totalValue.toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+
+    const printContent = `
+      <html>
+        <head>
+          <title>Laporan Produksi Mingguan - ${companyInfo.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .header h1 { margin: 0; }
+            .header p { margin: 5px 0; color: #555; }
+            table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; vertical-align: middle; }
+            th { background-color: #f2f2f2; }
+            td .subtext { font-size: 8pt; color: #777; }
+            .subtotal { background-color: #e8e8e8; font-weight: bold; }
+            .grandtotal { background-color: #d0e4fe; font-weight: bold; font-size: 11pt; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Laporan Produksi Mingguan</h1>
+            <p>${companyInfo.name}</p>
+            <p>Periode: ${format(currentDate, "MMMM yyyy", { locale: idLocale })}</p>
+            <p>Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}</p>
+          </div>
+          <table>
+            <thead>${tableHeader}</thead>
+            <tbody>${tableBody}</tbody>
+            <tfoot>${tableFooter}</tfoot>
+          </table>
+        </body>
+      </html>
+    `;
+
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
@@ -916,7 +1037,7 @@ export default function ProductionTab() {
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
-                             <Button variant="outline" size="icon" onClick={handlePrint}>
+                             <Button variant="outline" size="icon" onClick={handleDailyPrint}>
                                 <Printer className="h-4 w-4" />
                                 <span className="sr-only">Cetak Tabel Harian</span>
                             </Button>
@@ -963,22 +1084,28 @@ export default function ProductionTab() {
                         </>
                     )}
                     
-                    {activeTab !== 'daily' && activeTab !== 'monthly' && (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline">
-                                    {format(currentDate, "MMMM yyyy", { locale: idLocale })}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                    mode="single"
-                                    selected={currentDate}
-                                    onSelect={(date) => date && setCurrentDate(date)}
-                                    initialFocus
-                                />
-                            </PopoverContent>
-                        </Popover>
+                    {activeTab === 'weekly' && (
+                        <>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline">
+                                        {format(currentDate, "MMMM yyyy", { locale: idLocale })}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={currentDate}
+                                        onSelect={(date) => date && setCurrentDate(date)}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                             <Button variant="outline" size="icon" onClick={handleWeeklyPrint}>
+                                <Printer className="h-4 w-4" />
+                                <span className="sr-only">Cetak Tabel Mingguan</span>
+                            </Button>
+                        </>
                     )}
 
 
@@ -1268,5 +1395,7 @@ export default function ProductionTab() {
 }
 
 
+
+    
 
     
