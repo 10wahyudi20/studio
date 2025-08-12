@@ -63,7 +63,7 @@ export default function ReportsTab() {
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
 
-        if (dailyProdDataForPeriod.length === 0 && financeDataForPeriod.length === 0 && !lastPrediction && ducks.length === 0 && feed.length === 0) {
+        if (dailyProdDataForPeriod.length === 0 && financeDataForPeriod.length === 0 && ducks.length === 0 && feed.length === 0 && !lastPrediction) {
             toast({
                 variant: "destructive",
                 title: "Data Tidak Ditemukan",
