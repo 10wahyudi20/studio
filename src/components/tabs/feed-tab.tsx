@@ -183,7 +183,7 @@ export default function FeedTab() {
     ]);
     
     const tableFooter = [
-        ['Total', '', '', '', '', `Rp ${totalStockValue.toLocaleString('id-ID')}`]
+        ['Total', '', '', `${totalStock.toLocaleString('id-ID')} Kg`, '', `Rp ${totalStockValue.toLocaleString('id-ID')}`]
     ];
 
     doc.setFontSize(18);
