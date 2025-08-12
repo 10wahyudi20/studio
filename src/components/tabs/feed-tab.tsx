@@ -6,7 +6,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PlusCircle, Edit, Trash2, Package, Inbox, Sigma, Wheat } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Edit, Trash2, Package, Inbox, Sigma, Wheat, Printer } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 import { ScrollArea } from "../ui/scroll-area";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { id as idLocale } from "date-fns/locale";
 
 const feedSchema = z.object({
   name: z.string().min(1, "Nama pakan tidak boleh kosong"),
@@ -135,7 +138,7 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
 };
 
 export default function FeedTab() {
-  const { feed, addFeed, updateFeed, removeFeed, ducks } = useAppStore();
+  const { feed, addFeed, updateFeed, removeFeed, ducks, companyInfo } = useAppStore();
   const { toast } = useToast();
   
   const totalStock = feed.reduce((sum, item) => sum + item.stock, 0);
@@ -167,6 +170,55 @@ export default function FeedTab() {
       )}
     </Card>
   );
+
+  const handlePrint = () => {
+    const doc = new jsPDF();
+    const tableData = feed.map(item => [
+        item.name,
+        item.supplier,
+        format(new Date(item.lastUpdated), "dd/MM/yyyy"),
+        `${item.stock.toLocaleString('id-ID')} Kg`,
+        `Rp ${item.pricePerKg.toLocaleString('id-ID')}`,
+        `Rp ${(item.stock * item.pricePerKg).toLocaleString('id-ID')}`
+    ]);
+    
+    const tableFooter = [
+        ['Total', '', '', '', '', `Rp ${totalStockValue.toLocaleString('id-ID')}`]
+    ];
+
+    doc.setFontSize(18);
+    doc.text("Laporan Inventaris Pakan", 14, 22);
+    doc.setFontSize(12);
+    doc.text(companyInfo.name, 14, 30);
+    doc.setFontSize(10);
+    doc.text(`Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}`, 14, 36);
+
+    autoTable(doc, {
+        startY: 45,
+        head: [['Nama Pakan', 'Supplier', 'Update', 'Stok', 'Harga/Kg', 'Nilai Stok']],
+        body: tableData,
+        foot: tableFooter,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [41, 128, 185],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        footStyles: {
+            fillColor: [232, 232, 232],
+            textColor: 0,
+            fontStyle: 'bold'
+        },
+        columnStyles: {
+            3: { halign: 'right' },
+            4: { halign: 'right' },
+            5: { halign: 'right' }
+        }
+    });
+
+    doc.output('dataurlnewwindow');
+    toast({ title: "Laporan Dibuat!", description: "Laporan inventaris pakan telah dibuka di tab baru." });
+  };
 
   return (
     <div className="space-y-6">
@@ -248,7 +300,13 @@ export default function FeedTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Inventaris Pakan</CardTitle>
-          <FeedForm onSave={addFeed} />
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={handlePrint}>
+              <Printer className="h-4 w-4" />
+              <span className="sr-only">Cetak</span>
+            </Button>
+            <FeedForm onSave={addFeed} />
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -323,3 +381,5 @@ export default function FeedTab() {
     
 
     
+
+      
