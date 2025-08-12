@@ -22,6 +22,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { id as idLocale } from 'date-fns/locale';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const transactionSchema = z.object({
   date: z.string().nonempty("Tanggal harus diisi"),
@@ -145,83 +147,81 @@ export default function FinanceTab() {
     </Card>
   );
   
-  const handlePrint = (transactions: Transaction[], type: 'debit' | 'credit') => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      toast({
-        variant: "destructive",
-        title: "Gagal Membuka Jendela Cetak",
-        description: "Pastikan pop-up diizinkan untuk situs ini."
-      });
-      return;
-    }
+  const handlePrint = () => {
+    const doc = new jsPDF();
+    
+    // --- Data Preparation ---
+    const allTransactions = [...finance].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    let balance = 0;
+    let totalDebit = 0;
+    let totalCredit = 0;
 
-    const title = type === 'debit' ? 'Pemasukan' : 'Pengeluaran';
-    const totalAmount = transactions.reduce((sum, t) => sum + t.total, 0);
+    const tableBody = allTransactions.map(t => {
+        const debit = t.type === 'debit' ? t.total : 0;
+        const credit = t.type === 'credit' ? t.total : 0;
+        balance += debit - credit;
+        totalDebit += debit;
+        totalCredit += credit;
 
-    const tableRows = transactions.map(t => `
-        <tr>
-            <td>${format(new Date(t.date), "dd/MM/yyyy")}</td>
-            <td>${t.description}</td>
-            <td>${t.quantity.toLocaleString('id-ID')}</td>
-            <td>Rp ${t.unitPrice.toLocaleString('id-ID')}</td>
-            <td>Rp ${t.total.toLocaleString('id-ID')}</td>
-        </tr>
-    `).join('');
+        return [
+            format(new Date(t.date), "dd/MM/yyyy"),
+            t.description,
+            { content: debit > 0 ? `Rp ${debit.toLocaleString('id-ID')}` : '-', styles: { halign: 'right' } },
+            { content: credit > 0 ? `Rp ${credit.toLocaleString('id-ID')}` : '-', styles: { halign: 'right' } },
+            { content: `Rp ${balance.toLocaleString('id-ID')}`, styles: { halign: 'right' } }
+        ];
+    });
 
-    const printContent = `
-        <html>
-            <head>
-                <title>Laporan Pembukuan ${title} - ${companyInfo.name}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .header { text-align: center; margin-bottom: 20px; }
-                    .header h1 { margin: 0; }
-                    .header p { margin: 5px 0; color: #555; }
-                    table { width: 100%; border-collapse: collapse; font-size: 10pt; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                    th { background-color: #f2f2f2; }
-                    .totals { font-weight: bold; background-color: #e8e8e8; }
-                    .totals td { text-align: right; }
-                    .totals td:first-child { text-align: left; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <h1>Laporan Pembukuan ${title}</h1>
-                    <p>${companyInfo.name}</p>
-                    <p>Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}</p>
-                </div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tgl</th>
-                            <th>Uraian</th>
-                            <th>Jumlah</th>
-                            <th>Harga Satuan</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                    <tfoot>
-                        <tr class="totals">
-                            <td colspan="4">Total ${title}</td>
-                            <td>Rp ${totalAmount.toLocaleString('id-ID')}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </body>
-        </html>
-    `;
 
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => {
-        printWindow.print();
-    }, 250);
+    // --- PDF Header ---
+    doc.setFontSize(18);
+    doc.text("Buku Besar Keuangan", 14, 22);
+    doc.setFontSize(12);
+    doc.text(companyInfo.name, 14, 30);
+    doc.setFontSize(10);
+    doc.text(`Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}`, 14, 36);
+
+
+    // --- Main Table ---
+    autoTable(doc, {
+        startY: 45,
+        head: [['Tanggal', 'Uraian', 'Debit', 'Kredit', 'Saldo']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [41, 128, 185], // A professional blue
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 35, halign: 'right' },
+            3: { cellWidth: 35, halign: 'right' },
+            4: { cellWidth: 35, halign: 'right' },
+        },
+        didDrawPage: (data) => {
+            // You can add headers/footers to every page here if needed
+        }
+    });
+
+    // --- Summary Footer ---
+    const finalY = (doc as any).lastAutoTable.finalY + 5;
+    autoTable(doc, {
+      startY: finalY,
+      body: [
+          [{ content: 'Total Debit:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${totalDebit.toLocaleString('id-ID')}`, styles: { halign: 'right' } }],
+          [{ content: 'Total Kredit:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${totalCredit.toLocaleString('id-ID')}`, styles: { halign: 'right' } }],
+          [{ content: 'Saldo Akhir:', styles: { halign: 'right', fontStyle: 'bold' } }, { content: `Rp ${balance.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }],
+      ],
+      theme: 'plain',
+      tableWidth: 80,
+      margin: {left: 116} // Align to the right side of the page
+    });
+
+    // --- Open PDF ---
+    doc.output('dataurlnewwindow');
+    toast({ title: "Laporan Dibuat!", description: "Laporan telah dibuka di tab baru." });
   };
 
 
@@ -238,10 +238,12 @@ export default function FinanceTab() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{title}</CardTitle>
             <div className="flex items-center gap-2">
-                 <Button variant="outline" size="icon" onClick={() => handlePrint(transactions, type)}>
-                    <Printer className="h-4 w-4" />
-                    <span className="sr-only">Cetak</span>
-                </Button>
+                {type === 'debit' && (
+                    <Button variant="outline" size="icon" onClick={handlePrint}>
+                        <Printer className="h-4 w-4" />
+                        <span className="sr-only">Cetak</span>
+                    </Button>
+                )}
                 <TransactionForm onSave={addTransaction} defaultType={type} />
             </div>
           </CardHeader>
@@ -326,5 +328,3 @@ export default function FinanceTab() {
     </div>
   );
 }
-
-    
