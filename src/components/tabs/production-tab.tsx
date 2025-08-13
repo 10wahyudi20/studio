@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -1135,7 +1136,7 @@ export default function ProductionTab() {
                                         setCurrentDate(newDate);
                                     }}
                                 >
-                                    <SelectTrigger className="w-[120px]">
+                                    <SelectTrigger className="w-[120px] border-0">
                                         <SelectValue placeholder="Pilih Bulan" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1154,7 +1155,7 @@ export default function ProductionTab() {
                                         setCurrentDate(newDate);
                                     }}
                                 >
-                                    <SelectTrigger className="w-[80px]">
+                                    <SelectTrigger className="w-[80px] border-0">
                                         <SelectValue placeholder="Pilih Tahun" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1180,7 +1181,7 @@ export default function ProductionTab() {
                                         setCurrentDate(newDate);
                                     }}
                                 >
-                                    <SelectTrigger className="w-[120px]">
+                                    <SelectTrigger className="w-[120px] border-0">
                                         <SelectValue placeholder="Pilih Bulan" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1199,7 +1200,7 @@ export default function ProductionTab() {
                                         setCurrentDate(newDate);
                                     }}
                                 >
-                                    <SelectTrigger className="w-[80px]">
+                                    <SelectTrigger className="w-[80px] border-0">
                                         <SelectValue placeholder="Pilih Tahun" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1518,6 +1519,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
