@@ -574,7 +574,19 @@ export default function ProductionTab() {
     return dDate.getMonth() === currentDate.getMonth() && dDate.getFullYear() === currentDate.getFullYear();
   });
 
-  const monthProduction = monthlyProductionData.reduce((sum, d) => sum + d.totalEggs, 0);
+  const weeklyDataForMonth = eggProduction.weekly
+    .filter(w => {
+        if (!w || !w.endDate) return false;
+        const endDate = new Date(w.endDate);
+        return endDate.getMonth() === currentDate.getMonth() && endDate.getFullYear() === currentDate.getFullYear();
+    })
+    .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    
+  const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
+  const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
+
+  const totalRawMonthProduction = monthlyProductionData.reduce((sum, d) => sum + d.totalEggs, 0);
+  const monthProduction = totalRawMonthProduction - gradeCSum - consumptionSum;
 
   const bestProductionRecord = monthlyProductionData.length > 0
     ? monthlyProductionData.reduce((best, current) => current.totalEggs > best.totalEggs ? current : best)
@@ -642,19 +654,7 @@ export default function ProductionTab() {
     setEditingProduction(todayRecord); // Will be undefined if no record for today, which is correct
     setIsDailyFormOpen(true);
   }
-
-  const weeklyDataForMonth = eggProduction.weekly
-    .filter(w => {
-        if (!w || !w.endDate) return false;
-        const endDate = new Date(w.endDate);
-        // A week belongs to the month of its end date
-        return endDate.getMonth() === currentDate.getMonth() && endDate.getFullYear() === currentDate.getFullYear();
-    })
-    .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     
-  const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
-  const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
-
   const weeklyDataByPeriod = weeklyDataForMonth.reduce((acc, current) => {
     const period = `${format(new Date(current.startDate), 'dd MMM yyyy')} - ${format(new Date(current.endDate), 'dd MMM yyyy')}`;
     if (!acc[period]) {
@@ -1108,7 +1108,7 @@ export default function ProductionTab() {
                     </TabsList>
                     {(activeTab === 'daily') && (
                         <div className="hidden sm:block text-sm font-medium">
-                            Total Produksi Bulan Ini: <span className="text-primary font-bold">{monthProduction.toLocaleString('id-ID')} butir</span>
+                            Total Produksi Bulan Ini: <span className="text-primary font-bold">{totalRawMonthProduction.toLocaleString('id-ID')} butir</span>
                         </div>
                     )}
                 </div>
@@ -1516,6 +1516,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
