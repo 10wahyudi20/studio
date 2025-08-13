@@ -1087,7 +1087,7 @@ export default function ProductionTab() {
                     </Button>
                 )}
                  {activeTab === 'daily' && (
-                    <Button variant="outline" size="icon" onClick={() => setShowDailyChart(!showDailyChart)}>
+                    <Button variant="ghost" size="icon" onClick={() => setShowDailyChart(!showDailyChart)} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                         <LineChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
                     </Button>
@@ -1115,11 +1115,11 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))}>
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
                              <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
@@ -1518,6 +1518,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
