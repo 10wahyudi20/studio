@@ -513,9 +513,9 @@ export default function PopulationTab() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Inventaris Bebek</CardTitle>
           <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={handlePrint}>
-                  <Printer className="mr-2 h-4 w-4" />
-                  Cetak
+              <Button variant="ghost" size="icon" onClick={handlePrint}>
+                  <Printer className="h-4 w-4" />
+                  <span className="sr-only">Cetak</span>
               </Button>
               <DuckForm onSave={addDuck}>
                 <Button variant="outline" className="text-primary border-primary hover:bg-primary/10 hover:text-primary">
@@ -634,5 +634,3 @@ export default function PopulationTab() {
     </div>
   );
 }
-
-    
