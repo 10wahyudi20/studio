@@ -1122,7 +1122,7 @@ export default function ProductionTab() {
                             <Button variant="outline" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))}>
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
-                             <Button variant="outline" size="icon" onClick={handleDailyPrint}>
+                             <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <Printer className="h-4 w-4" />
                                 <span className="sr-only">Cetak Tabel Harian</span>
                             </Button>
@@ -1211,7 +1211,7 @@ export default function ProductionTab() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                             <Button variant="outline" size="icon" onClick={handleWeeklyPrint}>
+                             <Button variant="ghost" size="icon" onClick={handleWeeklyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <Printer className="h-4 w-4" />
                                 <span className="sr-only">Cetak Tabel Mingguan</span>
                             </Button>
@@ -1219,7 +1219,7 @@ export default function ProductionTab() {
                     )}
 
                     {activeTab === 'monthly' && (
-                         <Button variant="outline" size="icon" onClick={handleMonthlyPrint}>
+                         <Button variant="ghost" size="icon" onClick={handleMonthlyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                             <Printer className="h-4 w-4" />
                             <span className="sr-only">Cetak Tabel Bulanan</span>
                         </Button>
@@ -1516,6 +1516,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
