@@ -268,7 +268,7 @@ export default function FinanceTab() {
             <CardTitle>{title}</CardTitle>
             <div className="flex items-center gap-2">
                 {type === 'debit' && (
-                    <Button variant="ghost" size="icon" onClick={handlePrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <Button variant="ghost" size="icon" onClick={handlePrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                         <Printer className="h-4 w-4" />
                         <span className="sr-only">Cetak</span>
                     </Button>

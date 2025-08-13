@@ -1087,7 +1087,7 @@ export default function ProductionTab() {
                     </Button>
                 )}
                  {activeTab === 'daily' && (
-                    <Button variant="ghost" size="icon" onClick={() => setShowDailyChart(!showDailyChart)} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <Button variant="ghost" size="icon" onClick={() => setShowDailyChart(!showDailyChart)} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                         <LineChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
                     </Button>
@@ -1115,14 +1115,14 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
-                             <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                             <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <Printer className="h-4 w-4" />
                                 <span className="sr-only">Cetak Tabel Harian</span>
                             </Button>
@@ -1211,7 +1211,7 @@ export default function ProductionTab() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                             <Button variant="ghost" size="icon" onClick={handleWeeklyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                             <Button variant="ghost" size="icon" onClick={handleWeeklyPrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <Printer className="h-4 w-4" />
                                 <span className="sr-only">Cetak Tabel Mingguan</span>
                             </Button>
@@ -1219,7 +1219,7 @@ export default function ProductionTab() {
                     )}
 
                     {activeTab === 'monthly' && (
-                         <Button variant="ghost" size="icon" onClick={handleMonthlyPrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                         <Button variant="ghost" size="icon" onClick={handleMonthlyPrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                             <Printer className="h-4 w-4" />
                             <span className="sr-only">Cetak Tabel Bulanan</span>
                         </Button>
@@ -1518,6 +1518,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
