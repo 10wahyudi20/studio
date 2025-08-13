@@ -221,26 +221,28 @@ const RecordDeathForm = ({ record, onSave, onOpenChange, children }: { record?: 
                         <Input id="death_date" type="date" {...register("date")} />
                         {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
                     </div>
-                    <div className="space-y-2">
-                        <Label>Kandang</Label>
-                        <Controller 
-                            name="cage" 
-                            control={control}
-                            render={({ field }) => (
-                                <Select onValueChange={field.onChange} value={String(field.value || '')}>
-                                    <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
-                                    <SelectContent>
-                                        {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            )}
-                        />
-                        {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="quantity">Jumlah</Label>
-                        <Input id="quantity" type="number" {...register("quantity")} />
-                        {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Kandang</Label>
+                            <Controller 
+                                name="cage" 
+                                control={control}
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} value={String(field.value || '')}>
+                                        <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                            />
+                            {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="quantity">Jumlah</Label>
+                            <Input id="quantity" type="number" {...register("quantity")} />
+                            {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+                        </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="notes">Catatan (Opsional)</Label>
@@ -632,3 +634,5 @@ export default function PopulationTab() {
     </div>
   );
 }
+
+    
