@@ -1100,11 +1100,18 @@ export default function ProductionTab() {
             ) : (
           <Tabs defaultValue="daily" value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
-                <TabsList>
-                    <TabsTrigger value="daily">Harian</TabsTrigger>
-                    <TabsTrigger value="weekly">Mingguan</TabsTrigger>
-                    <TabsTrigger value="monthly">Bulanan</TabsTrigger>
-                </TabsList>
+                <div className="flex items-center gap-4">
+                    <TabsList>
+                        <TabsTrigger value="daily">Harian</TabsTrigger>
+                        <TabsTrigger value="weekly">Mingguan</TabsTrigger>
+                        <TabsTrigger value="monthly">Bulanan</TabsTrigger>
+                    </TabsList>
+                    {(activeTab === 'daily') && (
+                        <div className="hidden sm:block text-sm font-medium">
+                            Total Produksi Bulan Ini: <span className="text-primary font-bold">{monthProduction.toLocaleString('id-ID')} butir</span>
+                        </div>
+                    )}
+                </div>
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
@@ -1509,6 +1516,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
