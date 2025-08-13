@@ -647,7 +647,7 @@ export default function ProductionTab() {
     .filter(w => {
         if (!w || !w.startDate) return false;
         const startDate = new Date(w.startDate);
-        // Assign the week to the month of its start date
+        // Assign the week to the month of its start date to avoid duplication
         return startDate.getMonth() === currentDate.getMonth() && startDate.getFullYear() === currentDate.getFullYear();
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
@@ -1509,6 +1509,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
