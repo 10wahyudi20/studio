@@ -4,7 +4,7 @@
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter as CustomTableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle, Edit, Trash2, RefreshCw, Layers, Users, TrendingDown, ArrowRightLeft, ShieldOff, Notebook, Pencil, Printer } from "lucide-react";
 import {
@@ -239,6 +239,7 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
     const { deathRecords } = useAppStore();
     const [isRecordOpen, setIsRecordOpen] = React.useState(false);
     const sortedRecords = [...deathRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const totalDeaths = sortedRecords.reduce((sum, record) => sum + record.quantity, 0);
 
     return (
         <Dialog>
@@ -284,6 +285,13 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
                                 </TableRow>
                             ))}
                         </TableBody>
+                         <CustomTableFooter>
+                            <TableRow>
+                                <TableCell colSpan={2} className="font-bold">Total</TableCell>
+                                <TableCell className="font-bold">{totalDeaths}</TableCell>
+                                <TableCell></TableCell>
+                            </TableRow>
+                        </CustomTableFooter>
                     </Table>
                 </ScrollArea>
             </DialogContent>
@@ -601,3 +609,4 @@ export default function PopulationTab() {
     </div>
   );
 }
+
