@@ -315,10 +315,19 @@ export default function Header() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                <Wifi className="h-5 w-5 text-green-500" />
-                <span className="sr-only">Online</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                      <Wifi className="h-5 w-5 text-green-500" />
+                      <span className="sr-only">Online</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                  <p>Status: Online</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button size="icon" variant="ghost" onClick={handleLogout} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                 <LogOut className="h-5 w-5 text-red-500" />
                 <span className="sr-only">Logout</span>
@@ -330,4 +339,5 @@ export default function Header() {
 }
 
     
+
 
