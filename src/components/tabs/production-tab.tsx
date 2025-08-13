@@ -30,6 +30,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { TooltipProvider, Tooltip as CustomTooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
 
 
 // Daily Data Form
@@ -1082,13 +1083,13 @@ export default function ProductionTab() {
             <CardTitle>Tabel Produksi</CardTitle>
             <div className="flex items-center gap-2">
                  {(activeTab === 'monthly' || activeTab === 'weekly') && (
-                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
                         <BarChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan Grafik</span>
                     </Button>
                 )}
                  {activeTab === 'daily' && (
-                    <Button variant="ghost" size="icon" onClick={() => setShowDailyChart(!showDailyChart)} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <Button variant="ghost" size="icon" onClick={() => setShowDailyChart(!showDailyChart)} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
                         <LineChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
                     </Button>
@@ -1116,17 +1117,26 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
-                             <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                                <Printer className="h-4 w-4" />
-                                <span className="sr-only">Cetak Tabel Harian</span>
-                            </Button>
+                            <TooltipProvider>
+                                <CustomTooltip>
+                                    <CustomTooltipTrigger asChild>
+                                      <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                          <Printer className="h-4 w-4" />
+                                          <span className="sr-only">Cetak Tabel Harian</span>
+                                      </Button>
+                                    </CustomTooltipTrigger>
+                                    <CustomTooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                                      <p>Cetak</p>
+                                    </CustomTooltipContent>
+                                </CustomTooltip>
+                            </TooltipProvider>
                             <div className="flex gap-1">
                                 <Select
                                     value={String(currentDate.getMonth())}
@@ -1212,18 +1222,36 @@ export default function ProductionTab() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                             <Button variant="ghost" size="icon" onClick={handleWeeklyPrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                                <Printer className="h-4 w-4" />
-                                <span className="sr-only">Cetak Tabel Mingguan</span>
-                            </Button>
+                            <TooltipProvider>
+                                <CustomTooltip>
+                                    <CustomTooltipTrigger asChild>
+                                      <Button variant="ghost" size="icon" onClick={handleWeeklyPrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                          <Printer className="h-4 w-4" />
+                                          <span className="sr-only">Cetak Tabel Mingguan</span>
+                                      </Button>
+                                    </CustomTooltipTrigger>
+                                    <CustomTooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                                      <p>Cetak</p>
+                                    </CustomTooltipContent>
+                                </CustomTooltip>
+                            </TooltipProvider>
                         </>
                     )}
 
                     {activeTab === 'monthly' && (
-                         <Button variant="ghost" size="icon" onClick={handleMonthlyPrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                            <Printer className="h-4 w-4" />
-                            <span className="sr-only">Cetak Tabel Bulanan</span>
-                        </Button>
+                         <TooltipProvider>
+                            <CustomTooltip>
+                                <CustomTooltipTrigger asChild>
+                                  <Button variant="ghost" size="icon" onClick={handleMonthlyPrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                      <Printer className="h-4 w-4" />
+                                      <span className="sr-only">Cetak Tabel Bulanan</span>
+                                  </Button>
+                                </CustomTooltipTrigger>
+                                <CustomTooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                                  <p>Cetak</p>
+                                </CustomTooltipContent>
+                            </CustomTooltip>
+                         </TooltipProvider>
                     )}
 
 
@@ -1532,3 +1560,6 @@ export default function ProductionTab() {
 
 
 
+
+
+    

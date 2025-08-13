@@ -23,6 +23,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { id as idLocale } from "date-fns/locale";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 const feedSchema = z.object({
   name: z.string().min(1, "Nama pakan tidak boleh kosong"),
@@ -305,10 +306,19 @@ export default function FeedTab() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Inventaris Pakan</CardTitle>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handlePrint} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-              <Printer className="h-4 w-4" />
-              <span className="sr-only">Cetak</span>
-            </Button>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" onClick={handlePrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                        <Printer className="h-4 w-4" />
+                        <span className="sr-only">Cetak</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                      <p>Cetak</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
             <FeedForm onSave={addFeed} />
           </div>
         </CardHeader>
@@ -381,3 +391,5 @@ export default function FeedTab() {
     </div>
   );
 }
+
+    
