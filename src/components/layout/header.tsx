@@ -280,28 +280,47 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
             <ModeToggle />
-            <Button size="icon" variant="ghost" onClick={handleSave} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
-                <span className="sr-only">Simpan Data</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={handleSave} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                      <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
+                      <span className="sr-only">Simpan Data</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                  <p>Simpan Data</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
             <Dialog>
-                <DialogTrigger asChild>
-                    <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                        <Calculator className="h-5 w-5 text-black dark:text-yellow-500" />
-                        <span className="sr-only">Kalkulator</span>
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none">
-                    <DialogHeader className="sr-only">
-                        <DialogTitle>Kalkulator</DialogTitle>
-                        <DialogDescription>
-                            Kalkulator sederhana untuk perhitungan cepat.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <SimpleCalculator />
-                </DialogContent>
+              <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DialogTrigger asChild>
+                          <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                              <Calculator className="h-5 w-5 text-black dark:text-yellow-500" />
+                              <span className="sr-only">Kalkulator</span>
+                          </Button>
+                      </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                      <p>Kalkulator</p>
+                    </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none">
+                  <DialogHeader className="sr-only">
+                      <DialogTitle>Kalkulator</DialogTitle>
+                      <DialogDescription>
+                          Kalkulator sederhana untuk perhitungan cepat.
+                      </DialogDescription>
+                  </DialogHeader>
+                  <SimpleCalculator />
+              </DialogContent>
             </Dialog>
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -328,10 +347,19 @@ export default function Header() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <Button size="icon" variant="ghost" onClick={handleLogout} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                <LogOut className="h-5 w-5 text-red-500" />
-                <span className="sr-only">Logout</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={handleLogout} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                      <LogOut className="h-5 w-5 text-red-500" />
+                      <span className="sr-only">Logout</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                    <p>Logout</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
         </div>
       </div>
     </header>
@@ -341,3 +369,6 @@ export default function Header() {
     
 
 
+
+
+    
