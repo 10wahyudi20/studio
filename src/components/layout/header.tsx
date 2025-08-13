@@ -310,7 +310,7 @@ export default function Header() {
                       <span className="sr-only">Status Cloud</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="bg-transparent border-none shadow-none text-xs p-0">
+                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
                     <p>Status Mega Cloud: {isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}</p>
                 </TooltipContent>
               </Tooltip>
@@ -330,3 +330,4 @@ export default function Header() {
 }
 
     
+
