@@ -645,10 +645,10 @@ export default function ProductionTab() {
 
   const weeklyDataForMonth = eggProduction.weekly
     .filter(w => {
-        if (!w || !w.startDate) return false;
-        const startDate = new Date(w.startDate);
-        // Assign the week to the month of its start date to avoid duplication
-        return startDate.getMonth() === currentDate.getMonth() && startDate.getFullYear() === currentDate.getFullYear();
+        if (!w || !w.endDate) return false;
+        const endDate = new Date(w.endDate);
+        // A week belongs to the month of its end date
+        return endDate.getMonth() === currentDate.getMonth() && endDate.getFullYear() === currentDate.getFullYear();
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     
@@ -1509,6 +1509,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
