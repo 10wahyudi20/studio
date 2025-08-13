@@ -304,7 +304,7 @@ export default function FeedTab() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Inventaris Pakan</CardTitle>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={handlePrint}>
+            <Button variant="ghost" size="icon" onClick={handlePrint} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
               <Printer className="h-4 w-4" />
               <span className="sr-only">Cetak</span>
             </Button>
