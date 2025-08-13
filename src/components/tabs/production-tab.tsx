@@ -1117,11 +1117,11 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
                             <TooltipProvider>
