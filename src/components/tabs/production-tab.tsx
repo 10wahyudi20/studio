@@ -1081,7 +1081,7 @@ export default function ProductionTab() {
             <CardTitle>Tabel Produksi</CardTitle>
             <div className="flex items-center gap-2">
                  {(activeTab === 'monthly' || activeTab === 'weekly') && (
-                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="hover:bg-transparent">
+                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                         <BarChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan Grafik</span>
                     </Button>
@@ -1518,6 +1518,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
