@@ -645,14 +645,10 @@ export default function ProductionTab() {
 
   const weeklyDataForMonth = eggProduction.weekly
     .filter(w => {
-        if (!w || !w.startDate || !w.endDate) return false;
+        if (!w || !w.startDate) return false;
         const startDate = new Date(w.startDate);
-        const endDate = new Date(w.endDate);
-        const startOfSelectedMonth = startOfMonth(currentDate);
-        const endOfSelectedMonth = endOfMonth(currentDate);
-
-        // Check if the production period overlaps with the selected month
-        return startDate <= endOfSelectedMonth && endDate >= startOfSelectedMonth;
+        // Assign the week to the month of its start date
+        return startDate.getMonth() === currentDate.getMonth() && startDate.getFullYear() === currentDate.getFullYear();
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     
@@ -1513,5 +1509,6 @@ export default function ProductionTab() {
     
 
     
+
 
 
