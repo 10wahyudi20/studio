@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -79,7 +80,7 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
             <span className="text-green-500">Edit</span>
           </DropdownMenuItem>
         ) : (
-          <Button>
+          <Button variant="outline" className="text-primary border-primary hover:bg-primary/10 hover:text-primary">
             <PlusCircle className="mr-2 h-4 w-4" />
             Tambah Pakan
           </Button>
