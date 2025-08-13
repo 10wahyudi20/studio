@@ -116,7 +116,7 @@ const DuckForm = ({ duck, onSave, children }: { duck?: Duck; onSave: (data: any)
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="cage" className="text-right">Kandang</Label>
-                <Input id="cage" {...register("cage")} readOnly={!duck} className="col-span-3" />
+                <Input id="cage" {...register("cage")} readOnly={!!duck} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="quantity" className="text-right">Jumlah Bebek</Label>
@@ -176,67 +176,88 @@ const deathRecordSchema = z.object({
 });
 type DeathRecordFormData = z.infer<typeof deathRecordSchema>;
 
-const RecordDeathForm = ({ onOpenChange }: { onOpenChange: (open: boolean) => void }) => {
-    const { ducks, addDeathRecord } = useAppStore();
+const RecordDeathForm = ({ record, onSave, onOpenChange, children }: { record?: DeathRecord; onSave: (data: any) => void; onOpenChange: (open: boolean) => void; children: React.ReactNode; }) => {
+    const { ducks } = useAppStore();
     const { toast } = useToast();
+    const [isOpen, setIsOpen] = React.useState(false);
 
     const { control, register, handleSubmit, reset, formState: { errors } } = useForm<DeathRecordFormData>({
-        resolver: zodResolver(deathRecordSchema),
-        defaultValues: { date: format(new Date(), "yyyy-MM-dd"), cage: undefined, quantity: 1, notes: "" }
+        resolver: zodResolver(deathRecordSchema)
     });
 
+    React.useEffect(() => {
+        if (isOpen) {
+            const defaultValues = record 
+                ? { ...record, date: format(new Date(record.date), "yyyy-MM-dd") }
+                : { date: format(new Date(), "yyyy-MM-dd"), cage: undefined, quantity: 1, notes: "" };
+            reset(defaultValues);
+        }
+    }, [isOpen, record, reset]);
+
+    const handleOpen = (open: boolean) => {
+      setIsOpen(open);
+      onOpenChange(open);
+    }
+
     const onSubmit = (data: DeathRecordFormData) => {
-        addDeathRecord({
-            ...data,
-            date: parseISO(data.date),
-        });
-        onOpenChange(false);
-        reset();
-        toast({ title: `Catatan Kematian Disimpan`, description: `${data.quantity} bebek mati di kandang ${data.cage} telah dicatat.` });
+        const saveData = { ...data, date: parseISO(data.date) };
+        if (record) {
+            onSave({ ...saveData, id: record.id });
+        } else {
+            onSave(saveData);
+        }
+        handleOpen(false);
+        toast({ title: `Catatan Kematian ${record ? 'Diperbarui' : 'Disimpan'}`, description: `Data kematian di kandang ${data.cage} telah disimpan.` });
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
-            <div className="space-y-2">
-                <Label htmlFor="death_date">Tanggal Kematian</Label>
-                <Input id="death_date" type="date" {...register("date")} />
-                {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label>Kandang</Label>
-                <Controller 
-                    name="cage" 
-                    control={control}
-                    render={({ field }) => (
-                        <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
-                            <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
-                            <SelectContent>
-                                {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    )}
-                />
-                {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="quantity">Jumlah</Label>
-                <Input id="quantity" type="number" {...register("quantity")} />
-                {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="notes">Catatan (Opsional)</Label>
-                <Textarea id="notes" {...register("notes")} placeholder="cth: Sakit, stress, dll."/>
-            </div>
-            <DialogFooter>
-                <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>Batal</Button>
-                <Button type="submit">Simpan</Button>
-            </DialogFooter>
-        </form>
+        <Dialog open={isOpen} onOpenChange={handleOpen}>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader><DialogTitle>{record ? 'Edit' : 'Catat'} Bebek Mati</DialogTitle></DialogHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="death_date">Tanggal Kematian</Label>
+                        <Input id="death_date" type="date" {...register("date")} />
+                        {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Kandang</Label>
+                        <Controller 
+                            name="cage" 
+                            control={control}
+                            render={({ field }) => (
+                                <Select onValueChange={field.onChange} value={String(field.value || '')}>
+                                    <SelectTrigger><SelectValue placeholder="Pilih kandang..." /></SelectTrigger>
+                                    <SelectContent>
+                                        {ducks.map(d => <SelectItem key={d.id} value={String(d.cage)}>Kandang {d.cage}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        />
+                        {errors.cage && <p className="text-sm text-destructive">{errors.cage.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="quantity">Jumlah</Label>
+                        <Input id="quantity" type="number" {...register("quantity")} />
+                        {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="notes">Catatan (Opsional)</Label>
+                        <Textarea id="notes" {...register("notes")} placeholder="cth: Sakit, stress, dll."/>
+                    </div>
+                    <DialogFooter>
+                        <Button type="button" variant="secondary" onClick={() => handleOpen(false)}>Batal</Button>
+                        <Button type="submit">Simpan</Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 };
 
 const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => {
-    const { deathRecords } = useAppStore();
+    const { deathRecords, addDeathRecord, updateDeathRecord } = useAppStore();
     const [isRecordOpen, setIsRecordOpen] = React.useState(false);
     const sortedRecords = [...deathRecords].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     const totalDeaths = sortedRecords.reduce((sum, record) => sum + record.quantity, 0);
@@ -248,17 +269,11 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
                 <DialogHeader>
                   <div className="flex justify-between items-center">
                     <DialogTitle>Catatan Bebek Mati</DialogTitle>
-                     <Dialog open={isRecordOpen} onOpenChange={setIsRecordOpen}>
-                          <DialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="h-8">
-                                  <Pencil className="h-3 w-3 mr-1" /> Catat
-                              </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-md">
-                              <DialogHeader><DialogTitle>Catat Bebek Mati</DialogTitle></DialogHeader>
-                              <RecordDeathForm onOpenChange={setIsRecordOpen} />
-                          </DialogContent>
-                      </Dialog>
+                    <RecordDeathForm onSave={addDeathRecord} onOpenChange={setIsRecordOpen}>
+                         <Button variant="outline" size="sm" className="h-8">
+                             <Pencil className="h-3 w-3 mr-1" /> Catat
+                         </Button>
+                    </RecordDeathForm>
                   </div>
                 </DialogHeader>
                 <ScrollArea className="h-96">
@@ -269,12 +284,13 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
                                 <TableHead>Kandang</TableHead>
                                 <TableHead>Jumlah</TableHead>
                                 <TableHead>Catatan</TableHead>
+                                <TableHead className="text-right">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {sortedRecords.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center text-muted-foreground">Belum ada catatan kematian.</TableCell>
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground">Belum ada catatan kematian.</TableCell>
                                 </TableRow>
                             ) : sortedRecords.map(record => (
                                 <TableRow key={record.id}>
@@ -282,6 +298,13 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
                                     <TableCell>{record.cage}</TableCell>
                                     <TableCell>{record.quantity}</TableCell>
                                     <TableCell>{record.notes || '-'}</TableCell>
+                                    <TableCell className="text-right">
+                                       <RecordDeathForm record={record} onSave={(data) => updateDeathRecord(record.id, data)} onOpenChange={() => {}}>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                       </RecordDeathForm>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -289,7 +312,7 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
                             <TableRow>
                                 <TableCell colSpan={2} className="font-bold">Total</TableCell>
                                 <TableCell className="font-bold">{totalDeaths}</TableCell>
-                                <TableCell></TableCell>
+                                <TableCell colSpan={2}></TableCell>
                             </TableRow>
                         </CustomTableFooter>
                     </Table>
@@ -609,4 +632,3 @@ export default function PopulationTab() {
     </div>
   );
 }
-

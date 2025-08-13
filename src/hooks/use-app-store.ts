@@ -116,6 +116,7 @@ export const useAppStore = create<AppState & {
   updateFeed: (id: number, feed: Partial<Omit<Feed, 'id' | 'pricePerKg'>>) => void;
   removeFeed: (id: number) => void;
   addDeathRecord: (record: DeathRecordInput) => void;
+  updateDeathRecord: (id: number, data: Partial<DeathRecordInput>) => void;
   setLastPrediction: (prediction: PredictEggProductionOutput | null) => void;
   saveState: () => void;
   loadState: () => void;
@@ -400,6 +401,40 @@ export const useAppStore = create<AppState & {
     });
   },
 
+  updateDeathRecord: (id, data) => {
+    set(state => {
+        const oldRecord = state.deathRecords.find(r => r.id === id);
+        if (!oldRecord) return state;
+
+        const updatedRecord = { ...oldRecord, ...data, date: data.date ? parseISO(data.date as any) : oldRecord.date };
+        const quantityDifference = (updatedRecord.quantity) - oldRecord.quantity;
+
+        const updatedDucks = state.ducks.map(duck => {
+            // If cage is the same, just apply the difference
+            if (duck.cage === oldRecord.cage && duck.cage === updatedRecord.cage) {
+                return { ...duck, deaths: duck.deaths + quantityDifference };
+            }
+            // If cage has changed, remove old quantity from old cage
+            if (duck.cage === oldRecord.cage) {
+                return { ...duck, deaths: duck.deaths - oldRecord.quantity };
+            }
+            // And add new quantity to new cage
+            if (duck.cage === updatedRecord.cage) {
+                return { ...duck, deaths: duck.deaths + updatedRecord.quantity };
+            }
+            return duck;
+        });
+
+        const updatedDeathRecords = state.deathRecords.map(r => r.id === id ? updatedRecord : r);
+
+        return {
+            ducks: updatedDucks,
+            deathRecords: updatedDeathRecords,
+            isDirty: true
+        };
+    });
+  },
+
   setLastPrediction: (prediction) => {
     set({ lastPrediction: prediction, isDirty: true });
   },
@@ -514,7 +549,7 @@ export const useAppStore = create<AppState & {
         "updateDuck", "removeDuck", "resetDuck", "addDailyProduction", "updateDailyProduction",
         "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
         "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
-        "addDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState",
+        "addDeathRecord", "updateDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState",
         "updateStockBasedOnConsumption", "setLastPrediction"
     ];
     functions.forEach(f => delete st[f]);
