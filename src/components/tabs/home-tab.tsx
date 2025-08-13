@@ -49,7 +49,7 @@ export default function HomeTab() {
         return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
     });
   
-  const monthProduction = monthlyProductionData.reduce((sum, day) => sum + day.totalEggs, 0);
+  const totalMonthProduction = monthlyProductionData.reduce((sum, day) => sum + day.totalEggs, 0);
   
   const feedStock = feed.reduce((sum, item) => sum + item.stock, 0);
   
@@ -103,12 +103,15 @@ export default function HomeTab() {
   const feedStockStyling = getFeedStockStyling(feedStock);
 
   const weeklyDataForMonth = eggProduction.weekly.filter(w => {
-    const startDate = new Date(w.startDate);
-    return startDate.getMonth() === currentMonth && startDate.getFullYear() === currentYear;
+    const endDate = new Date(w.endDate);
+    return endDate.getMonth() === currentMonth && endDate.getFullYear() === currentYear;
   });
 
   const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
   const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
+  
+  // Update the monthProduction calculation
+  const monthProduction = totalMonthProduction - gradeCSum - consumptionSum;
 
   return (
     <div className="space-y-6">
