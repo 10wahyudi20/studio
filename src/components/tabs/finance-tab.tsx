@@ -359,9 +359,12 @@ export default function FinanceTab() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <TransactionTable title="Pembukuan Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
-        <TransactionTable title="Pembukuan Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Pembukuan</h2>
+        <div className="grid grid-cols-1 gap-6">
+            <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
+            <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
+        </div>
       </div>
 
     </div>
