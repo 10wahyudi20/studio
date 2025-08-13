@@ -1227,14 +1227,16 @@ export default function ProductionTab() {
 
 
                     {activeTab === 'daily' && (
-                        <Button onClick={handleInputDataClick}>
+                        <Button onClick={handleInputDataClick} variant="outline" className="text-primary border-primary hover:bg-primary/10 hover:text-primary">
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Input Data Harian
                         </Button>
                     )}
                     {activeTab === 'weekly' && (
                         <WeeklyDataForm onSave={addWeeklyProduction}>
-                            <Button><PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan</Button>
+                            <Button variant="outline" className="text-primary border-primary hover:bg-primary/10 hover:text-primary">
+                                <PlusCircle className="mr-2 h-4 w-4" />Input Data Mingguan
+                            </Button>
                         </WeeklyDataForm>
                     )}
                  </div>
@@ -1516,6 +1518,7 @@ export default function ProductionTab() {
     
 
     
+
 
 
 
