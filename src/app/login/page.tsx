@@ -69,7 +69,7 @@ export default function LoginPage() {
         setTimeout(() => {
             setIsBurning(false);
             setHasLoginError(false);
-        }, 30000);
+        }, 45000);
       }
       setIsLoading(false);
     }, 500); 
