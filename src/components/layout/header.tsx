@@ -321,32 +321,14 @@ export default function Header() {
               </DialogContent>
             </Dialog>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                      <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
-                      <span className="sr-only">Status Cloud</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
-                    <p>Status Mega Cloud: {isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                      <Wifi className="h-5 w-5 text-green-500" />
-                      <span className="sr-only">Online</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
-                  <p>Status: Online</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0" aria-label={`Status Mega Cloud: ${isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}`}>
+                <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
+            </Button>
+            
+            <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0" aria-label="Status: Online">
+                <Wifi className="h-5 w-5 text-green-500" />
+            </Button>
+            
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

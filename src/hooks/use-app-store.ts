@@ -130,6 +130,7 @@ export const useAppStore = create<AppState & {
 
   login: (username, password) => {
     const { companyInfo } = get();
+    // Allow login if no credentials are set, or if they match
     const noCredentialsSet = !companyInfo.username && !companyInfo.password;
     
     if (noCredentialsSet || (username === companyInfo.username && password === companyInfo.password)) {

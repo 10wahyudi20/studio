@@ -56,14 +56,14 @@ export default function ClientPage() {
           <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2 bg-background/80 backdrop-blur-sm">
             <div className="px-4 sm:px-6 lg:px-8">
                 <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0 gap-y-2">
-                  <NavLink value="home" icon={Home} label="Home" />
-                  <NavLink value="population" icon={Users} label="Populasi" />
-                  <NavLink value="production" icon={Egg} label="Produksi" />
-                  <NavLink value="feed" icon={Wheat} label="Pakan" />
-                  <NavLink value="finance" icon={DollarSign} label="Keuangan" />
-                  <NavLink value="reports" icon={FileText} label="Laporan" />
-                  <NavLink value="ai" icon={Sparkles} label="Prediksi AI" />
-                  <NavLink value="settings" icon={Settings} label="Pengaturan" />
+                  <NavLink key="home" value="home" icon={Home} label="Home" />
+                  <NavLink key="population" value="population" icon={Users} label="Populasi" />
+                  <NavLink key="production" value="production" icon={Egg} label="Produksi" />
+                  <NavLink key="feed" value="feed" icon={Wheat} label="Pakan" />
+                  <NavLink key="finance" value="finance" icon={DollarSign} label="Keuangan" />
+                  <NavLink key="reports" value="reports" icon={FileText} label="Laporan" />
+                  <NavLink key="ai" value="ai" icon={Sparkles} label="Prediksi AI" />
+                  <NavLink key="settings" value="settings" icon={Settings} label="Pengaturan" />
                 </TabsList>
             </div>
             <Separator className="mt-2" />
