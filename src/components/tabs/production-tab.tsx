@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Calendar as CalendarIcon, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon, Printer } from "lucide-react";
-import { format, addDays, startOfMonth, endOfMonth, isToday } from "date-fns";
+import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon, Printer } from "lucide-react";
+import { format, addDays, isToday } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { TooltipProvider, Tooltip as CustomTooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
@@ -1554,30 +1554,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-

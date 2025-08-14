@@ -11,11 +11,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Transaction } from "@/lib/types";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,7 +39,7 @@ const TransactionForm = ({ transaction, onSave, defaultType }: { transaction?: T
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
   
-  const { register, handleSubmit, control, watch, formState: { errors } } = useForm<TransactionFormData>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: transaction ? { ...transaction, date: new Date(transaction.date).toISOString().split('T')[0] } : {
       date: new Date().toISOString().split('T')[0],
@@ -126,7 +125,6 @@ export default function FinanceTab() {
   const { toast } = useToast();
   
   const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
   const monthlyIncome = finance.filter(t => new Date(t.date).getMonth() === currentMonth && t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
   const monthlyExpense = finance.filter(t => new Date(t.date).getMonth() === currentMonth && t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
   const netProfit = monthlyIncome - monthlyExpense;
@@ -370,7 +368,3 @@ export default function FinanceTab() {
     </div>
   );
 }
-
-    
-
-    

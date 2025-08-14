@@ -2,17 +2,16 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2, LineChart as LineChartIcon } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2 } from "lucide-react";
 import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Separator } from "../ui/separator";
 import { id as idLocale } from "date-fns/locale";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 
-const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
+const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, footer?: React.ReactNode }) => (
     <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -20,7 +19,6 @@ const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, des
         </CardHeader>
         <CardContent>
             <div className={cn("text-2xl font-bold", valueClassName)}>{value}</div>
-            {description && <div className="text-xs text-muted-foreground">{description}</div>}
         </CardContent>
         {footer && (
           <CardFooter className="text-xs text-muted-foreground pt-2 pb-4 border-t mt-auto mx-6">

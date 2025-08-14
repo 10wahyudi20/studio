@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,28 +56,29 @@ export default function LoginPage() {
     setIsLoading(true);
     setHasLoginError(false);
 
+    // Short delay to show loading state
     setTimeout(() => {
-      if (login(username, password)) {
-        toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
-        router.push("/");
-      } else {
-        toast({ 
-            variant: "destructive", 
-            title: "Login Gagal", 
-            description: "Username atau password salah. Formulir dinonaktifkan sementara." 
-        });
-        setHasLoginError(true);
-        setIsBurning(true);
-        setTimeout(() => {
-            setIsBurning(false);
-            setHasLoginError(false);
-        }, 15000);
-      }
-      setIsLoading(false);
-    }, 500); 
+        if (login(username, password)) {
+            toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
+            router.replace("/");
+        } else {
+            setHasLoginError(true);
+            setIsBurning(true);
+            toast({
+                variant: "destructive",
+                title: "Login Gagal",
+                description: "Username atau password salah. Formulir dinonaktifkan sementara."
+            });
+            setTimeout(() => {
+                setIsBurning(false);
+                setHasLoginError(false);
+            }, 15000); // 15 seconds cooldown
+        }
+        setIsLoading(false);
+    }, 500);
   };
   
-  if (!isMounted) {
+  if (!isMounted || isAuthenticated) {
     return null;
   }
 

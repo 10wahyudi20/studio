@@ -13,8 +13,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Upload, Download, Cloud, Trash2, Volume2, Loader2, Eye, EyeOff, ShieldCheck, ChevronRight } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
-import { Alert, AlertDescription, AlertTitle as AlertTitleComponent } from "@/components/ui/alert";
-import { Separator } from "../ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -143,7 +143,6 @@ export default function SettingsTab() {
     getFullState,
     loadFullState,
     resetState,
-    setDirty
   } = useAppStore();
   
   const [info, setInfo] = React.useState(companyInfo);
