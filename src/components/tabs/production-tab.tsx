@@ -610,7 +610,7 @@ export default function ProductionTab() {
     if (p > 100) return 'bg-blue-400 text-black';
     if (p >= 90) return 'bg-blue-800 text-white';
     if (p >= 80) return 'bg-green-500 text-black';
-    if (p >= 70) return 'bg-green-800 text-white';
+    if (p >= 70) return 'bg-green-800 text-black';
     if (p >= 60) return 'bg-yellow-400 text-black';
     if (p >= 50) return 'bg-yellow-600 text-black';
     if (p >= 40) return 'bg-red-500 text-black';
@@ -1083,7 +1083,7 @@ export default function ProductionTab() {
             <CardTitle>Tabel Produksi</CardTitle>
             <div className="flex items-center gap-2">
                  {(activeTab === 'monthly' || activeTab === 'weekly') && (
-                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <Button variant="ghost" size="icon" onClick={() => setShowChart(!showChart)} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                         <BarChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan Grafik</span>
                     </Button>
@@ -1117,11 +1117,11 @@ export default function ProductionTab() {
                  <div className="flex items-center gap-2">
                     {activeTab === 'daily' && (
                         <>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.max(50, prev - 5))} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomOut className="h-4 w-4" />
                             </Button>
                             <span className="text-sm font-medium w-12 text-center">{zoomLevel}%</span>
-                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
+                            <Button variant="ghost" size="icon" onClick={() => setZoomLevel(prev => Math.min(150, prev + 5))} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
                             <TooltipProvider>
@@ -1563,3 +1563,4 @@ export default function ProductionTab() {
 
 
     
+
