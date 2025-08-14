@@ -216,17 +216,30 @@ body {
   @keyframes burn-away-children {
     0%, 94% {
       color: inherit;
-      border-color: inherit;
       fill: inherit;
+      border-color: inherit;
     }
     95%, 100% {
       color: black !important;
-      border-color: black !important;
       fill: black !important;
+      border-color: black !important;
     }
   }
-
+  
   .card-burn-effect * {
       animation: burn-away-children 45s ease-out forwards;
+  }
+  
+  .card-burn-effect input::placeholder {
+      animation: burn-away-placeholder 45s ease-out forwards;
+  }
+
+  @keyframes burn-away-placeholder {
+      0%, 94% {
+          color: inherit;
+      }
+      95%, 100% {
+          color: black !important;
+      }
   }
 }
