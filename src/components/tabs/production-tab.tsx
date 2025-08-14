@@ -91,7 +91,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
         setValue('date', date);
         ducks.forEach(duck => {
             const cageValue = record?.perCage[duck.cage] || 0;
-            setValue(`perCage.${duck.cage}`, cageValue);
+            setValue(`perCage.${duck.cage}`, cageValue as any);
         });
     };
 
@@ -147,7 +147,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                                         id={`perCage.${duck.cage}`}
                                         type="number"
                                         className="w-24"
-                                        {...register(`perCage[${duck.cage}]`)}
+                                        {...register(`perCage.${duck.cage}` as const)}
                                     />
                                 </div>
                             ))}
@@ -188,7 +188,7 @@ const weeklySchema = z.object({
   priceC: z.coerce.number().min(0),
   priceConsumption: z.coerce.number().min(0),
 });
-type WeeklyFormData = z.infer<ReturnType<typeof weeklySchema>>;
+type WeeklyFormData = z.infer<typeof weeklySchema>;
 
 const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyProduction; onSave: (data: any) => void; children: React.ReactNode }) => {
   const { toast } = useToast();
