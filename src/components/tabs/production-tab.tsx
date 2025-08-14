@@ -396,6 +396,14 @@ const renderCustomizedLabel = (props: any) => {
     );
 };
 
+const chartConfigBase = {
+    gradeA: { label: "Grade A", color: "hsl(var(--chart-1))" },
+    gradeB: { label: "Grade B", color: "hsl(var(--chart-2))" },
+    gradeC: { label: "Grade C", color: "hsl(var(--chart-3))" },
+    consumption: { label: "Konsumsi", color: "hsl(var(--chart-4))" },
+    totalValue: { label: "Total (Rp)", color: "hsl(var(--chart-5))" },
+} satisfies ChartConfig;
+
 
 const MonthlyChart = ({ data }: { data: any[] }) => {
     const pieData = [
@@ -410,52 +418,52 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
             <Card>
                 <CardHeader><CardTitle>Total Produksi per Bulan</CardTitle></CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ChartContainer config={chartConfigBase} className="h-[300px] w-full">
                         <BarChart data={data}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" fontSize={12} />
                             <YAxis />
                             <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
-                            <Bar dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
-                            <Bar dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
-                            <Bar dataKey="gradeC" stackId="a" fill={CHART_COLORS[2]} name="Grade C" />
-                            <Bar dataKey="consumption" stackId="a" fill={CHART_COLORS[3]} name="Konsumsi" />
+                            <Bar dataKey="gradeA" stackId="a" fill="var(--color-gradeA)" name="Grade A" />
+                            <Bar dataKey="gradeB" stackId="a" fill="var(--color-gradeB)" name="Grade B" />
+                            <Bar dataKey="gradeC" stackId="a" fill="var(--color-gradeC)" name="Grade C" />
+                            <Bar dataKey="consumption" stackId="a" fill="var(--color-consumption)" name="Konsumsi" />
                         </BarChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader><CardTitle>Tren Produksi per Grade</CardTitle></CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                     <ChartContainer config={chartConfigBase} className="h-[300px] w-full">
                         <LineChart data={data}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" fontSize={12} />
                             <YAxis />
                             <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
-                            <Line type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
-                            <Line type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
-                            <Line type="monotone" dataKey="gradeC" stroke={CHART_COLORS[2]} name="Grade C" />
-                            <Line type="monotone" dataKey="consumption" stroke={CHART_COLORS[3]} name="Konsumsi" />
+                            <Line type="monotone" dataKey="gradeA" stroke="var(--color-gradeA)" name="Grade A" />
+                            <Line type="monotone" dataKey="gradeB" stroke="var(--color-gradeB)" name="Grade B" />
+                            <Line type="monotone" dataKey="gradeC" stroke="var(--color-gradeC)" name="Grade C" />
+                            <Line type="monotone" dataKey="consumption" stroke="var(--color-consumption)" name="Konsumsi" />
                         </LineChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
             <Card className="lg:col-span-2">
                 <CardHeader><CardTitle>Komposisi Total Produksi</CardTitle></CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ChartContainer config={chartConfigBase} className="h-[300px] w-full">
                         <RechartsPieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
                             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <ChartTooltip content={<ChartTooltipContent />} />
                         </RechartsPieChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
         </div>
@@ -480,56 +488,56 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
             <Card>
                 <CardHeader><CardTitle>Total Produksi dan Harga per Minggu</CardTitle></CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ChartContainer config={chartConfigBase} className="h-[300px] w-full">
                         <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="period" fontSize={12} />
-                            <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                            <YAxis yAxisId="right" orientation="right" stroke="#42A5F5" />
+                            <YAxis yAxisId="left" orientation="left" stroke="var(--color-gradeA)" />
+                            <YAxis yAxisId="right" orientation="right" stroke="var(--color-totalValue)" />
                             <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
-                            <Bar yAxisId="left" dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
-                            <Bar yAxisId="left" dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
-                            <Bar yAxisId="left" dataKey="gradeC" stackId="a" fill={CHART_COLORS[2]} name="Grade C" />
-                            <Bar yAxisId="left" dataKey="consumption" stackId="a" fill={CHART_COLORS[3]} name="Konsumsi" />
-                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="#42A5F5" name="Total (Rp)" />
+                            <Bar yAxisId="left" dataKey="gradeA" stackId="a" fill="var(--color-gradeA)" name="Grade A" />
+                            <Bar yAxisId="left" dataKey="gradeB" stackId="a" fill="var(--color-gradeB)" name="Grade B" />
+                            <Bar yAxisId="left" dataKey="gradeC" stackId="a" fill="var(--color-gradeC)" name="Grade C" />
+                            <Bar yAxisId="left" dataKey="consumption" stackId="a" fill="var(--color-consumption)" name="Konsumsi" />
+                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="var(--color-totalValue)" name="Total (Rp)" />
                         </ComposedChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader><CardTitle>Tren Produksi dan Harga Mingguan</CardTitle></CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ChartContainer config={chartConfigBase} className="h-[300px] w-full">
                         <ComposedChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="period" fontSize={12} />
-                            <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                            <YAxis yAxisId="right" orientation="right" stroke="#42A5F5" />
+                            <YAxis yAxisId="left" orientation="left" stroke="var(--color-gradeA)" />
+                            <YAxis yAxisId="right" orientation="right" stroke="var(--color-totalValue)" />
                             <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
-                            <Line yAxisId="left" type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
-                            <Line yAxisId="left" type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
-                            <Line yAxisId="left" type="monotone" dataKey="gradeC" stroke={CHART_COLORS[2]} name="Grade C" />
-                            <Line yAxisId="left" type="monotone" dataKey="consumption" stroke={CHART_COLORS[3]} name="Konsumsi" />
-                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="#42A5F5" name="Total (Rp)" />
+                            <Line yAxisId="left" type="monotone" dataKey="gradeA" stroke="var(--color-gradeA)" name="Grade A" />
+                            <Line yAxisId="left" type="monotone" dataKey="gradeB" stroke="var(--color-gradeB)" name="Grade B" />
+                            <Line yAxisId="left" type="monotone" dataKey="gradeC" stroke="var(--color-gradeC)" name="Grade C" />
+                            <Line yAxisId="left" type="monotone" dataKey="consumption" stroke="var(--color-consumption)" name="Konsumsi" />
+                            <Line yAxisId="right" type="monotone" dataKey="totalValue" stroke="var(--color-totalValue)" name="Total (Rp)" />
                         </ComposedChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
             <Card className="lg:col-span-2">
                 <CardHeader><CardTitle>Komposisi Total Produksi (Bulan Ini)</CardTitle></CardHeader>
                 <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
+                     <ChartContainer config={chartConfigBase} className="h-[300px] w-full">
                         <RechartsPieChart margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
                             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
                             <ChartTooltip content={<ChartTooltipContent />} />
                         </RechartsPieChart>
-                    </ResponsiveContainer>
+                    </ChartContainer>
                 </CardContent>
             </Card>
         </div>
@@ -1568,6 +1576,7 @@ export default function ProductionTab() {
 
 
     
+
 
 
 
