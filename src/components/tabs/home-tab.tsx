@@ -88,11 +88,14 @@ export default function HomeTab() {
   const chartConfig = {
     produksiTelur: {
       label: "Produksi Telur",
-      color: "hsl(var(--chart-1))",
+      theme: {
+        light: "hsl(var(--primary))",
+        dark: "hsl(var(--foreground))",
+      },
     },
     produktifitas: {
       label: "Produktifitas (%)",
-      color: "hsl(var(--chart-2))",
+      color: "hsl(24 95% 53%)", // Orange
     },
   } satisfies ChartConfig;
   
