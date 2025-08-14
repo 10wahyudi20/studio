@@ -39,7 +39,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [isBurning, setIsBurning] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -58,18 +58,18 @@ export default function LoginPage() {
     setTimeout(() => {
       if (login(username, password)) {
         toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
-        setLoginAttempts(0);
+        setIsBurning(false); // Make sure to reset on success
         router.push("/");
       } else {
-        const newAttemptCount = loginAttempts + 1;
-        setLoginAttempts(newAttemptCount);
-        if (newAttemptCount >= 3) {
-             toast({ variant: "destructive", title: "Terlalu Banyak Percobaan", description: "Formulir akan hancur sendiri." });
-        } else {
-            toast({ variant: "destructive", title: "Login Gagal", description: `Username atau password salah. Sisa percobaan: ${3-newAttemptCount}` });
-        }
+        toast({ variant: "destructive", title: "Login Gagal", description: "Username atau password salah. Formulir akan dinonaktifkan sementara." });
         setHasLoginError(true);
-        setTimeout(() => setHasLoginError(false), 3000);
+        setIsBurning(true);
+        
+        // Reset the burning effect and error state after 30 seconds
+        setTimeout(() => {
+            setIsBurning(false);
+            setHasLoginError(false);
+        }, 30000);
       }
       setIsLoading(false);
     }, 500); 
@@ -81,8 +81,7 @@ export default function LoginPage() {
 
   const backgroundStyle = companyInfo.loginBackground ? { backgroundImage: `url(${companyInfo.loginBackground})` } : {};
   const inputStyles = "bg-transparent border-white/30 placeholder:text-gray-300 dark:placeholder:text-gray-400 focus:ring-accent";
-  const isBurning = loginAttempts >= 3;
-
+  
   return (
     <div 
       className={cn(
