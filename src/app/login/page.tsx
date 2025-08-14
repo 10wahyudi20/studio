@@ -39,13 +39,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // If user is already authenticated (e.g., via another tab), redirect them.
-  // This check is simple and relies on the AuthWrapper to handle the initial redirect.
   useEffect(() => {
       if (isMounted && isAuthenticated) {
           router.replace('/');
@@ -59,22 +58,30 @@ export default function LoginPage() {
     setTimeout(() => {
       if (login(username, password)) {
         toast({ title: "Login Berhasil", description: "Selamat datang kembali!" });
+        setLoginAttempts(0);
         router.push("/");
       } else {
-        toast({ variant: "destructive", title: "Login Gagal", description: "Username atau password salah." });
+        const newAttemptCount = loginAttempts + 1;
+        setLoginAttempts(newAttemptCount);
+        if (newAttemptCount >= 3) {
+             toast({ variant: "destructive", title: "Terlalu Banyak Percobaan", description: "Formulir akan hancur sendiri." });
+        } else {
+            toast({ variant: "destructive", title: "Login Gagal", description: `Username atau password salah. Sisa percobaan: ${3-newAttemptCount}` });
+        }
         setHasLoginError(true);
         setTimeout(() => setHasLoginError(false), 3000);
       }
       setIsLoading(false);
-    }, 500); // Simulate network delay
+    }, 500); 
   };
   
   if (!isMounted) {
-    return null; // Return null or a minimal loader, AuthWrapper will handle the main loading screen
+    return null;
   }
 
   const backgroundStyle = companyInfo.loginBackground ? { backgroundImage: `url(${companyInfo.loginBackground})` } : {};
   const inputStyles = "bg-transparent border-white/30 placeholder:text-gray-300 dark:placeholder:text-gray-400 focus:ring-accent";
+  const isBurning = loginAttempts >= 3;
 
   return (
     <div 
@@ -84,7 +91,10 @@ export default function LoginPage() {
       )}
       style={backgroundStyle}
     >
-      <Card className="w-full max-w-sm bg-white/20 dark:bg-black/30 backdrop-blur-md border-white/20 dark:border-slate-500/30">
+      <Card className={cn(
+        "w-full max-w-sm bg-white/20 dark:bg-black/30 backdrop-blur-md border-white/20 dark:border-slate-500/30",
+         isBurning && "card-burn-effect"
+        )}>
         <CardHeader className="text-center">
             <div className="mx-auto mb-4">
                  {companyInfo.logo ? (
@@ -107,6 +117,7 @@ export default function LoginPage() {
                 required
                 placeholder="Username Anda"
                 className={inputStyles}
+                disabled={isBurning}
               />
             </div>
             <div className="space-y-2">
@@ -120,8 +131,9 @@ export default function LoginPage() {
                     required
                     placeholder="Password Anda"
                     className={cn(inputStyles, hasLoginError && 'border-destructive')}
+                    disabled={isBurning}
                 />
-                 <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8 text-white/70 hover:text-white" onClick={() => setShowPassword(!showPassword)}>
+                 <Button type="button" variant="ghost" size="icon" className="absolute top-1/2 right-1 -translate-y-1/2 h-8 w-8 text-white/70 hover:text-white" onClick={() => setShowPassword(!showPassword)} disabled={isBurning}>
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     <span className="sr-only">{showPassword ? "Sembunyikan" : "Tampilkan"} password</span>
                 </Button>
@@ -129,7 +141,7 @@ export default function LoginPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className={cn("w-full", hasLoginError && "animate-shake-red")} disabled={isLoading}>
+            <Button type="submit" className={cn("w-full", hasLoginError && "animate-shake-red")} disabled={isLoading || isBurning}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Masuk
             </Button>
