@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud } from "lucide-react";
+import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles, Cloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
