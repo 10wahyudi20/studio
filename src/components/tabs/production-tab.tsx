@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from "react";
@@ -30,6 +29,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { TooltipProvider, Tooltip as CustomTooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 
 // Daily Data Form
@@ -1554,3 +1554,5 @@ export default function ProductionTab() {
     </div>
   );
 }
+
+    
