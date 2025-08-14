@@ -113,7 +113,6 @@ export default function LoginPage() {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required
                 placeholder="Username Anda"
                 className={inputStyles}
                 disabled={isBurning}
@@ -127,7 +126,6 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    required
                     placeholder="Password Anda"
                     className={cn(inputStyles, hasLoginError && 'border-destructive')}
                     disabled={isBurning}
