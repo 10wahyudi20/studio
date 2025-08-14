@@ -212,4 +212,19 @@ body {
       transform: scale(0.95);
     }
   }
+
+  @keyframes burn-away-children {
+    0%, 94% {
+      color: inherit;
+      border-color: inherit;
+    }
+    95%, 100% {
+      color: black !important;
+      border-color: black !important;
+    }
+  }
+
+  .card-burn-effect * {
+      animation: burn-away-children 45s ease-out forwards;
+  }
 }
