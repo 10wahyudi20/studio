@@ -91,7 +91,7 @@ export default function LoginPage() {
       style={backgroundStyle}
     >
       <Card className={cn(
-        "w-full max-w-sm bg-white/20 dark:bg-black/30 backdrop-blur-md border-white/20 dark:border-slate-500/30",
+        "w-full max-w-xs bg-white/20 dark:bg-black/30 backdrop-blur-md border-white/20 dark:border-slate-500/30",
          isBurning && "card-burn-effect"
         )}>
         <CardHeader className="text-center">
