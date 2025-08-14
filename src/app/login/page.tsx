@@ -6,7 +6,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, Loader2, Wifi } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
