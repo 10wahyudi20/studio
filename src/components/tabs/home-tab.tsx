@@ -234,20 +234,18 @@ export default function HomeTab() {
           <CardTitle>Grafik Produksi 30 Hari Terakhir</CardTitle>
         </CardHeader>
         <CardContent>
-            <div className="h-80 w-full">
-                <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
-                  <RechartsBarChart accessibilityLayer data={chartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="produksiTelur" radius={4} fill="var(--color-produksiTelur)" />
-                    <Bar yAxisId="right" dataKey="produktifitas" radius={4} fill="var(--color-produktifitas)" />
-                  </RechartsBarChart>
-                </ChartContainer>
-            </div>
+            <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
+              <RechartsBarChart accessibilityLayer data={chartData}>
+                <CartesianGrid vertical={false} />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Legend />
+                <Bar yAxisId="left" dataKey="produksiTelur" radius={4} fill="var(--color-produksiTelur)" />
+                <Bar yAxisId="right" dataKey="produktifitas" radius={4} fill="var(--color-produktifitas)" />
+              </RechartsBarChart>
+            </ChartContainer>
         </CardContent>
       </Card>
     </div>
