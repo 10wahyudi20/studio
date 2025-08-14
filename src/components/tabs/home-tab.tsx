@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
-import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, Trophy } from "lucide-react";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2, LineChart as LineChartIcon } from "lucide-react";
 import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
@@ -51,6 +51,8 @@ export default function HomeTab() {
     });
   
   const totalMonthProduction = monthlyProductionData.reduce((sum, day) => sum + day.totalEggs, 0);
+  const averageDailyProduction = monthlyProductionData.length > 0 ? totalMonthProduction / monthlyProductionData.length : 0;
+
   
   const feedStock = feed.reduce((sum, item) => sum + item.stock, 0);
   
@@ -99,14 +101,6 @@ export default function HomeTab() {
     },
   } satisfies ChartConfig;
   
-  const bestProductionRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((best, current) => current.totalEggs > best.totalEggs ? current : best)
-    : null;
-
-  const worstProductionRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((worst, current) => current.totalEggs < worst.totalEggs ? current : worst)
-    : null;
-  
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
   
   const getFeedStockStyling = (stock: number) => {
@@ -125,7 +119,6 @@ export default function HomeTab() {
   const gradeCSum = weeklyDataForMonth.reduce((sum, week) => sum + week.gradeC, 0);
   const consumptionSum = weeklyDataForMonth.reduce((sum, week) => sum + week.consumption, 0);
   
-  // Update the monthProduction calculation
   const monthProduction = totalMonthProduction - gradeCSum - consumptionSum;
 
   return (
@@ -166,6 +159,25 @@ export default function HomeTab() {
                 )
             }
         />
+        <StatCard
+            title="Rata-rata Produksi/Hari"
+            value={averageDailyProduction.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+            icon={BarChart2}
+            valueClassName="text-yellow-500"
+            iconClassName="text-yellow-500"
+            footer={
+              <div className="w-full pt-2 space-y-1">
+                <div className="flex justify-between items-center">
+                  <span>Total Produksi Bulan Ini:</span>
+                  <span className="font-semibold">{totalMonthProduction.toLocaleString('id-ID')}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Jumlah Hari Tercatat:</span>
+                  <span className="font-semibold">{monthlyProductionData.length}</span>
+                </div>
+              </div>
+            }
+        />
         <StatCard 
             title={`Telur Bulan ${format(new Date(), 'MMMM', { locale: idLocale })}`} 
             value={monthProduction.toLocaleString('id-ID')}
@@ -175,23 +187,6 @@ export default function HomeTab() {
                 <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
                 <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
               </div>
-            }
-        />
-        <StatCard 
-            title="Stok Pakan (Kg)" 
-            value={`${feedStock.toLocaleString('id-ID')} Kg`} 
-            icon={Package} 
-            valueClassName={feedStockStyling.value}
-            iconClassName={feedStockStyling.icon}
-            footer={
-                <div className="w-full space-y-1 pt-2">
-                    {feed.map(item => (
-                        <div key={item.id} className="flex justify-between">
-                            <span>{item.name}:</span>
-                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
-                        </div>
-                    ))}
-                </div>
             }
         />
         <StatCard 
