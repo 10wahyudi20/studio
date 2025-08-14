@@ -27,7 +27,7 @@ import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { TooltipProvider, Tooltip as CustomTooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
@@ -710,6 +710,14 @@ export default function ProductionTab() {
     return formattedData;
   });
 
+  const dailyChartConfig = ducks.reduce((acc, duck, index) => {
+    acc[`Kdg ${duck.cage}`] = {
+      label: `Kdg ${duck.cage}`,
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    };
+    return acc;
+  }, {} as ChartConfig);
+
   const handleDailyPrint = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -1279,8 +1287,8 @@ export default function ProductionTab() {
                             <CardTitle>Grafik Produksi per Kandang (30 Hari Terakhir)</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={dailyChartData}>
+                            <ChartContainer config={dailyChartConfig} className="min-h-[300px] w-full">
+                                <LineChart accessibilityLayer data={dailyChartData}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" fontSize={12} />
                                     <YAxis />
@@ -1288,18 +1296,18 @@ export default function ProductionTab() {
                                         content={<ChartTooltipContent />}
                                     />
                                     <Legend />
-                                    {ducks.map((duck, index) => (
+                                    {ducks.map((duck) => (
                                         <Line
                                             key={duck.id}
                                             type="monotone"
                                             dataKey={`Kdg ${duck.cage}`}
-                                            stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                                            stroke={`var(--color-Kdg ${duck.cage})`}
                                             dot={false}
                                             connectNulls
                                         />
                                     ))}
                                 </LineChart>
-                            </ResponsiveContainer>
+                            </ChartContainer>
                         </CardContent>
                     </Card>
                 </CollapsibleContent>
@@ -1560,5 +1568,6 @@ export default function ProductionTab() {
 
 
     
+
 
 

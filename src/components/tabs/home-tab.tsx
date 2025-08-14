@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Separator } from "../ui/separator";
 import { id as idLocale } from "date-fns/locale";
-import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 
 const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card>
@@ -84,6 +84,17 @@ export default function HomeTab() {
     "Produksi Telur": d.totalEggs,
     "Produktifitas (%)": totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
   }));
+  
+  const chartConfig = {
+    "Produksi Telur": {
+      label: "Produksi Telur",
+      color: "hsl(var(--chart-1))",
+    },
+    "Produktifitas (%)": {
+      label: "Produktifitas (%)",
+      color: "hsl(var(--chart-2))",
+    },
+  } satisfies ChartConfig;
   
   const bestProductionRecord = monthlyProductionData.length > 0
     ? monthlyProductionData.reduce((best, current) => current.totalEggs > best.totalEggs ? current : best)
@@ -221,18 +232,18 @@ export default function HomeTab() {
         </CardHeader>
         <CardContent>
             <div className="h-80 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsBarChart data={chartData}>
-                      <CartesianGrid vertical={false} />
-                      <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} className="fill-blue-500 dark:fill-white" />
-                      <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} className="fill-orange-500" />
-                    </RechartsBarChart>
-                  </ResponsiveContainer>
+                <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
+                  <RechartsBarChart accessibilityLayer data={chartData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} fill="var(--color-Produksi Telur)" />
+                    <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} fill="var(--color-Produktifitas (%%))" />
+                  </RechartsBarChart>
+                </ChartContainer>
             </div>
         </CardContent>
       </Card>
