@@ -159,7 +159,7 @@ export default function FinanceTab() {
     doc.text(`Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}`, 14, 36);
 
     const tableColumns = ['Tgl', 'Uraian', 'Jumlah', 'Harga Satuan', 'Total'];
-    const commonColumnStyles = {
+    const commonColumnStyles: any = {
       0: { cellWidth: 25 },
       1: { cellWidth: 'auto' },
       2: { halign: 'right', cellWidth: 25 },
