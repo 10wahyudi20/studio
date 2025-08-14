@@ -51,10 +51,8 @@ export default function HomeTab() {
     });
   
   const totalMonthProduction = monthlyProductionData.reduce((sum, day) => sum + day.totalEggs, 0);
-  const averageDailyProduction = monthlyProductionData.length > 0 ? totalMonthProduction / monthlyProductionData.length : 0;
-
   
-  const feedStock = feed.reduce((sum, item) => sum + item.stock, 0);
+  const totalStock = feed.reduce((sum, item) => sum + item.stock, 0);
   
   const dailyFeedConsumptionKg = feed.reduce((sum, item) => {
     if (item.stock > 0 && totalDucks > 0) {
@@ -109,7 +107,7 @@ export default function HomeTab() {
     if (stock <= 500) return { value: 'text-green-500', icon: 'text-green-500' };
     return { value: 'text-blue-500', icon: 'text-blue-500' };
   };
-  const feedStockStyling = getFeedStockStyling(feedStock);
+  const feedStockStyling = getFeedStockStyling(totalStock);
 
   const weeklyDataForMonth = eggProduction.weekly.filter(w => {
     const endDate = new Date(w.endDate);
@@ -159,23 +157,21 @@ export default function HomeTab() {
                 )
             }
         />
-        <StatCard
-            title="Rata-rata Produksi/Hari"
-            value={averageDailyProduction.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-            icon={BarChart2}
-            valueClassName="text-yellow-500"
-            iconClassName="text-yellow-500"
+        <StatCard 
+            title="Total Stok Pakan" 
+            value={`${totalStock.toLocaleString('id-ID')} Kg`} 
+            icon={Package} 
+            valueClassName={feedStockStyling.value}
+            iconClassName={feedStockStyling.icon}
             footer={
-              <div className="w-full pt-2 space-y-1">
-                <div className="flex justify-between items-center">
-                  <span>Total Produksi Bulan Ini:</span>
-                  <span className="font-semibold">{totalMonthProduction.toLocaleString('id-ID')}</span>
+                 <div className="w-full pt-2 text-xs">
+                    {feed.map(item => (
+                        <div key={item.id} className="flex justify-between">
+                            <span>{item.name}:</span>
+                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
+                        </div>
+                    ))}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span>Jumlah Hari Tercatat:</span>
-                  <span className="font-semibold">{monthlyProductionData.length}</span>
-                </div>
-              </div>
             }
         />
         <StatCard 
