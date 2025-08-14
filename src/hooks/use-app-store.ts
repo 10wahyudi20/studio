@@ -21,7 +21,7 @@ const getInitialState = (): AppState => ({
     ttsVoice: "algenib",
     username: "",
     password: "",
-    loginBackground: "",
+    loginBackground: "https://placehold.co/1920x1080.png",
     megaUsername: "",
     megaPassword: ""
   },
