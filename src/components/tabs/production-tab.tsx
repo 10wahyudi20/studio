@@ -415,7 +415,7 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" fontSize={12} />
                             <YAxis />
-                            <Tooltip />
+                            <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
                             <Bar dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
                             <Bar dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
@@ -434,7 +434,7 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" fontSize={12} />
                             <YAxis />
-                            <Tooltip />
+                            <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
                             <Line type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
                             <Line type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
@@ -453,7 +453,7 @@ const MonthlyChart = ({ data }: { data: any[] }) => {
                             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
-                            <Tooltip />
+                            <ChartTooltip content={<ChartTooltipContent />} />
                         </RechartsPieChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -486,7 +486,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                             <XAxis dataKey="period" fontSize={12} />
                             <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
                             <YAxis yAxisId="right" orientation="right" stroke="#42A5F5" />
-                            <Tooltip />
+                            <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
                             <Bar yAxisId="left" dataKey="gradeA" stackId="a" fill={CHART_COLORS[0]} name="Grade A" />
                             <Bar yAxisId="left" dataKey="gradeB" stackId="a" fill={CHART_COLORS[1]} name="Grade B" />
@@ -507,7 +507,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                             <XAxis dataKey="period" fontSize={12} />
                             <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
                             <YAxis yAxisId="right" orientation="right" stroke="#42A5F5" />
-                            <Tooltip />
+                            <ChartTooltip content={<ChartTooltipContent />} />
                             <Legend />
                             <Line yAxisId="left" type="monotone" dataKey="gradeA" stroke={CHART_COLORS[0]} name="Grade A" />
                             <Line yAxisId="left" type="monotone" dataKey="gradeB" stroke={CHART_COLORS[1]} name="Grade B" />
@@ -527,7 +527,7 @@ const WeeklyChart = ({ data }: { data: any[] }) => {
                             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" labelLine={false} label={renderCustomizedLabel}>
                                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />)}
                             </Pie>
-                            <Tooltip />
+                            <ChartTooltip content={<ChartTooltipContent />} />
                         </RechartsPieChart>
                     </ResponsiveContainer>
                 </CardContent>
@@ -1284,11 +1284,8 @@ export default function ProductionTab() {
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" fontSize={12} />
                                     <YAxis />
-                                    <Tooltip
-                                        contentStyle={{
-                                            background: "hsl(var(--background))",
-                                            borderColor: "hsl(var(--border))",
-                                        }}
+                                    <ChartTooltip
+                                        content={<ChartTooltipContent />}
                                     />
                                     <Legend />
                                     {ducks.map((duck, index) => (
@@ -1563,4 +1560,5 @@ export default function ProductionTab() {
 
 
     
+
 

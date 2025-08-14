@@ -4,12 +4,13 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
 import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, Trophy } from "lucide-react";
-import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from "recharts";
+import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Separator } from "../ui/separator";
 import { id as idLocale } from "date-fns/locale";
+import { ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
 const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, description, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, description?: React.ReactNode, footer?: React.ReactNode }) => (
     <Card>
@@ -226,13 +227,7 @@ export default function HomeTab() {
                       <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
                       <YAxis yAxisId="left" />
                       <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip 
-                        contentStyle={{
-                          background: "hsl(var(--background))",
-                          borderColor: "hsl(var(--border))",
-                          color: "hsl(var(--foreground))"
-                        }}
-                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
                       <Legend />
                       <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} className="fill-blue-500 dark:fill-white" />
                       <Bar yAxisId="right" dataKey="Produktifitas (%)" radius={4} className="fill-orange-500" />
