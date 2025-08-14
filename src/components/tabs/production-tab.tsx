@@ -35,7 +35,7 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 // Daily Data Form
 const dailySchemaGenerator = (ducks: Duck[]) => {
   const cageSchema = ducks.reduce((acc, duck) => {
-    return { ...acc, [duck.cage]: z.coerce.number().min(0, "Jumlah tidak boleh negatif") };
+    return { ...acc, [`${duck.cage}`]: z.coerce.number().min(0, "Jumlah tidak boleh negatif") };
   }, {});
 
   return z.object({
@@ -68,13 +68,13 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                 ? {
                     date: new Date(record.date),
                     perCage: ducks.reduce(
-                        (acc, duck) => ({ ...acc, [duck.cage]: record.perCage[duck.cage] || 0 }),
+                        (acc, duck) => ({ ...acc, [`${duck.cage}`]: record.perCage[duck.cage] || 0 }),
                         {}
                     ),
                 }
                 : {
                     date: targetDate,
-                    perCage: ducks.reduce((acc, duck) => ({ ...acc, [duck.cage]: 0 }), {}),
+                    perCage: ducks.reduce((acc, duck) => ({ ...acc, [`${duck.cage}`]: 0 }), {}),
                 };
             reset(defaultValues);
         };
@@ -91,7 +91,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
         setValue('date', date);
         ducks.forEach(duck => {
             const cageValue = record?.perCage[duck.cage] || 0;
-            setValue(`perCage.${duck.cage}` as any, cageValue);
+            setValue(`perCage.${duck.cage}`, cageValue);
         });
     };
 
@@ -147,7 +147,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                                         id={`perCage.${duck.cage}`}
                                         type="number"
                                         className="w-24"
-                                        {...register(`perCage.${duck.cage}` as any)}
+                                        {...register(`perCage[${duck.cage}]`)}
                                     />
                                 </div>
                             ))}
@@ -1554,5 +1554,3 @@ export default function ProductionTab() {
     </div>
   );
 }
-
-    
