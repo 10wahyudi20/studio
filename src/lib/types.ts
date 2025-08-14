@@ -28,6 +28,13 @@ export interface Duck {
     cageSystem: 'baterai' | 'umbaran';
 }
 
+export type DuckUpdate = Partial<Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'>> & {
+  cageSizeLength?: number;
+  cageSizeWidth?: number;
+  entryDate?: Date;
+};
+
+
 export interface DailyProduction {
     date: Date;
     totalEggs: number;

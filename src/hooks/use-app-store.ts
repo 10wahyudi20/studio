@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord } from '@/lib/types';
+import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord, DuckUpdate } from '@/lib/types';
 import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO, differenceInDays } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import type { PredictEggProductionOutput } from '@/ai/flows/predict-egg-production';
@@ -21,7 +21,7 @@ const getInitialState = (): AppState => ({
     ttsVoice: "algenib",
     username: "",
     password: "",
-    loginBackground: "https://placehold.co/1920x1080.png",
+    loginBackground: "",
     megaUsername: "",
     megaPassword: ""
   },
@@ -101,7 +101,7 @@ export const useAppStore = create<AppState & {
   setActiveTab: (tab: string) => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'> & { cageSizeLength: number, cageSizeWidth: number }) => void;
-  updateDuck: (id: number, duck: Partial<Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'>> & { cageSizeLength?: number, cageSizeWidth?: number, entryDate?: Date }) => void;
+  updateDuck: (id: number, duck: DuckUpdate) => void;
   removeDuck: (id: number) => void;
   resetDuck: (id: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
@@ -480,8 +480,6 @@ export const useAppStore = create<AppState & {
             lastStockUpdate: today.toISOString(),
             isDirty: true,
         });
-        
-        console.log(`Stock updated for ${daysPassed} days. Consumption:`, totalConsumptionPerFeedType);
     } else if (!lastStockUpdate) {
         set({ lastStockUpdate: today.toISOString(), isDirty: true });
     }
