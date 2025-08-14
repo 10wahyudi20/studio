@@ -230,6 +230,7 @@ export default function HomeTab() {
                         contentStyle={{
                           background: "hsl(var(--background))",
                           borderColor: "hsl(var(--border))",
+                          color: "hsl(var(--foreground))"
                         }}
                       />
                       <Legend />
