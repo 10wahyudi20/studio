@@ -5,7 +5,6 @@
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon, Printer } from "lucide-react";
@@ -91,7 +90,8 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
         
         setValue('date', date);
         ducks.forEach(duck => {
-            setValue(`perCage.${duck.cage}`, record?.perCage[duck.cage] || 0);
+            const cageValue = record?.perCage[duck.cage] || 0;
+            setValue(`perCage.${duck.cage}` as any, cageValue);
         });
     };
 
@@ -147,7 +147,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                                         id={`perCage.${duck.cage}`}
                                         type="number"
                                         className="w-24"
-                                        {...register(`perCage.${duck.cage}`)}
+                                        {...register(`perCage.${duck.cage}` as any)}
                                     />
                                 </div>
                             ))}
