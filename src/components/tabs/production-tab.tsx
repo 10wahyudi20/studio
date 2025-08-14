@@ -357,7 +357,7 @@ const WeeklyDataForm = ({ production, onSave, children }: { production?: WeeklyP
 };
 
 const CHART_COLORS = [
-    '#3b82f6', '#ef4444', '#22c55e', '#f97316', '#8b5cf6', '#eab308',
+    'hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))',
     '#14b8a6', '#6366f1', '#f43f5e', '#d946ef', '#0ea5e9', '#10b981',
     '#f59e0b', '#a855f7', '#ec4899', '#64748b', '#7c3aed', '#db2777',
 ];
@@ -705,13 +705,13 @@ export default function ProductionTab() {
         name: format(new Date(d.date), 'dd/MM')
     };
     ducks.forEach(duck => {
-        formattedData[`Kdg ${duck.cage}`] = d.perCage[duck.cage] ?? null;
+        formattedData[`kdg_${duck.cage}`] = d.perCage[duck.cage] ?? null;
     });
     return formattedData;
   });
 
   const dailyChartConfig = ducks.reduce((acc, duck, index) => {
-    acc[`Kdg ${duck.cage}`] = {
+    acc[`kdg_${duck.cage}`] = {
       label: `Kdg ${duck.cage}`,
       color: CHART_COLORS[index % CHART_COLORS.length],
     };
@@ -1300,8 +1300,8 @@ export default function ProductionTab() {
                                         <Line
                                             key={duck.id}
                                             type="monotone"
-                                            dataKey={`Kdg ${duck.cage}`}
-                                            stroke={`var(--color-Kdg ${duck.cage})`}
+                                            dataKey={`kdg_${duck.cage}`}
+                                            stroke={`var(--color-kdg_${duck.cage})`}
                                             dot={false}
                                             connectNulls
                                         />
@@ -1568,6 +1568,7 @@ export default function ProductionTab() {
 
 
     
+
 
 
 

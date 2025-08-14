@@ -81,16 +81,16 @@ export default function HomeTab() {
 
   const chartData = eggProduction.daily.slice(-30).map(d => ({
     name: new Date(d.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
-    "Produksi Telur": d.totalEggs,
-    "Produktifitas": totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
+    produksiTelur: d.totalEggs,
+    produktifitas: totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
   }));
   
   const chartConfig = {
-    "Produksi Telur": {
+    produksiTelur: {
       label: "Produksi Telur",
       color: "hsl(var(--chart-1))",
     },
-    "Produktifitas": {
+    produktifitas: {
       label: "Produktifitas (%)",
       color: "hsl(var(--chart-2))",
     },
@@ -240,8 +240,8 @@ export default function HomeTab() {
                     <YAxis yAxisId="right" orientation="right" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Legend />
-                    <Bar yAxisId="left" dataKey="Produksi Telur" radius={4} fill="var(--color-Produksi Telur)" />
-                    <Bar yAxisId="right" dataKey="Produktifitas" radius={4} fill="var(--color-Produktifitas)" />
+                    <Bar yAxisId="left" dataKey="produksiTelur" radius={4} fill="var(--color-produksiTelur)" />
+                    <Bar yAxisId="right" dataKey="produktifitas" radius={4} fill="var(--color-produktifitas)" />
                   </RechartsBarChart>
                 </ChartContainer>
             </div>
