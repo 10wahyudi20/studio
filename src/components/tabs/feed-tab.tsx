@@ -148,6 +148,9 @@ export default function FeedTab() {
   const totalFeedPerDay = feed.reduce((sum, item) => sum + (item.stock > 0 ? (totalDucks * item.schema / 1000) : 0), 0);
   const totalStockValue = feed.reduce((sum, item) => sum + (item.stock * item.pricePerKg), 0);
   
+  const feedDaysLeft = totalFeedPerDay > 0 ? totalStock / totalFeedPerDay : Infinity;
+
+
   const getFeedStockStyling = (stock: number) => {
     if (stock <= 100) return { value: 'text-red-500', icon: 'text-red-500 animate-pulse' };
     if (stock <= 300) return { value: 'text-yellow-500', icon: 'text-yellow-500' };
@@ -235,13 +238,21 @@ export default function FeedTab() {
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
             footer={
-                 <div className="w-full pt-2 text-xs">
-                    {feed.map(item => (
-                        <div key={item.id} className="flex justify-between">
-                            <span>{item.name}:</span>
-                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
-                        </div>
-                    ))}
+                 <div className="w-full pt-2 text-xs space-y-2">
+                    <div className="space-y-1">
+                      {feed.map(item => (
+                          <div key={item.id} className="flex justify-between">
+                              <span>{item.name}:</span>
+                              <span>{item.stock.toLocaleString('id-ID')} Kg</span>
+                          </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between font-bold border-t pt-1">
+                      <span>Estimasi Habis:</span>
+                       <span>
+                          {isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} hari` : 'N/A'}
+                      </span>
+                    </div>
                 </div>
             }
         />
@@ -391,5 +402,7 @@ export default function FeedTab() {
     </div>
   );
 }
+
+    
 
     
