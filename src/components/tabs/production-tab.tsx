@@ -20,7 +20,7 @@ import { DailyProduction, Duck, WeeklyProduction } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -91,7 +91,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
         setValue('date', date);
         ducks.forEach(duck => {
             const cageValue = record?.perCage[duck.cage] || 0;
-            setValue(`perCage.${duck.cage}`, cageValue as any);
+            setValue(`perCage.${duck.cage}`, cageValue);
         });
     };
 

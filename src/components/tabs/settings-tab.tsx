@@ -5,7 +5,8 @@ import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -159,7 +160,7 @@ export default function SettingsTab() {
 
   const { toast } = useToast();
 
-  const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInfo({ ...info, [e.target.name]: e.target.value });
   };
   
