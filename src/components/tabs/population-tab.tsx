@@ -6,7 +6,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter as CustomTableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PlusCircle, Edit, Trash2, RefreshCw, Layers, Users, TrendingDown, ArrowRightLeft, ShieldOff, Notebook, Pencil, Printer } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Edit, Trash2, RefreshCw, Layers, Users, TrendingDown, ArrowRightLeft, ShieldOff, Notebook, Pencil, Printer, HelpCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -326,7 +326,7 @@ const ViewDeathRecordsDialog = ({ children }: { children: React.ReactNode }) => 
 };
 
 export default function PopulationTab() {
-  const { ducks, addDuck, updateDuck, removeDuck, resetDuck, companyInfo } = useAppStore();
+  const { ducks, addDuck, updateDuck, removeDuck, resetDuck, companyInfo, recalculateAllDucksAge } = useAppStore();
   const { toast } = useToast();
 
   const totalDucks = ducks.reduce((acc, duck) => acc + duck.quantity, 0);
@@ -335,6 +335,14 @@ export default function PopulationTab() {
   const petelurCount = ducks.filter(d => d.status === 'Bebek Petelur').reduce((acc, duck) => acc + duck.quantity, 0);
   const tuaCount = ducks.filter(d => d.status === 'Bebek Tua').reduce((acc, duck) => acc + duck.quantity, 0);
   const afkirCount = ducks.filter(d => d.status === 'Bebek Afkir').reduce((acc, duck) => acc + duck.quantity, 0);
+  
+  const handleRecalculateAge = () => {
+    recalculateAllDucksAge();
+    toast({
+      title: "Umur Bebek Dihitung Ulang!",
+      description: "Umur dan status semua bebek telah diperbarui.",
+    });
+  };
   
   const getStatusClasses = (status: Duck['status']) => {
     const baseClasses = "px-3 py-1 text-xs font-medium rounded-md border text-center inline-block";
@@ -527,6 +535,19 @@ export default function PopulationTab() {
                       </TooltipContent>
                   </Tooltip>
               </TooltipProvider>
+              <TooltipProvider>
+                  <Tooltip>
+                      <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={handleRecalculateAge} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                              <HelpCircle className="h-4 w-4" />
+                              <span className="sr-only">Hitung Ulang Umur</span>
+                          </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                          <p>Hitung Ulang Umur</p>
+                      </TooltipContent>
+                  </Tooltip>
+              </TooltipProvider>
               <DuckForm onSave={addDuck}>
                 <Button variant="outline" className="text-primary border-primary hover:bg-primary/10 hover:text-primary">
                   <PlusCircle className="mr-2 h-4 w-4" />
@@ -644,5 +665,3 @@ export default function PopulationTab() {
     </div>
   );
 }
-
-    

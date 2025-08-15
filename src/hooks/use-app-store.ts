@@ -10,7 +10,6 @@ if (typeof window !== 'undefined') {
     channel = new BroadcastChannel('clucksmart-sync');
 }
 
-
 const getInitialState = (): AppState => ({
   companyInfo: {
     name: "Nama Peternakan Anda",
@@ -102,6 +101,7 @@ export const useAppStore = create<AppState & {
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'> & { cageSizeLength: number, cageSizeWidth: number }) => void;
   updateDuck: (id: number, duck: DuckUpdate) => void;
+  recalculateAllDucksAge: () => void;
   removeDuck: (id: number) => void;
   resetDuck: (id: number) => void;
   addDailyProduction: (data: DailyProductionInput) => void;
@@ -169,10 +169,14 @@ export const useAppStore = create<AppState & {
 
   addDuck: (duck) => {
     set(state => {
-      const ageMonths = calculateAge(duck.entryDate);
-      const status = calculateDuckStatus(ageMonths);
       const cageSize = `${duck.cageSizeLength}m x ${duck.cageSizeWidth}m`;
-      const newDuck = { ...duck, id: Date.now(), ageMonths, status, cageSize };
+      const newDuck: Duck = { 
+          ...duck, 
+          id: Date.now(), 
+          ageMonths: 0, // Initial age, will be calculated on demand
+          status: 'Bebek Bayah', // Initial status
+          cageSize 
+      };
       return { ducks: [...state.ducks, newDuck], isDirty: true };
     });
   },
@@ -182,20 +186,26 @@ export const useAppStore = create<AppState & {
       ducks: state.ducks.map(d => {
         if (d.id === id) {
           const updated = { ...d, ...updatedDuck };
-          
-          const newEntryDate = updated.entryDate;
-          const ageMonths = calculateAge(newEntryDate);
-          const status = calculateDuckStatus(ageMonths);
-          
           const cageSizeLength = updatedDuck.cageSizeLength ?? (d.cageSize?.split('x')[0].replace(/m/g, '').trim() || '0');
           const cageSizeWidth = updatedDuck.cageSizeWidth ?? (d.cageSize?.split('x')[1]?.replace(/m/g, '').trim() || '0');
           const cageSize = `${cageSizeLength}m x ${cageSizeWidth}m`;
 
-          return { ...updated, entryDate: newEntryDate, ageMonths, status, cageSize };
+          return { ...updated, cageSize };
         }
         return d;
       }),
       isDirty: true
+    }));
+  },
+  
+  recalculateAllDucksAge: () => {
+    set(state => ({
+        ducks: state.ducks.map(d => {
+            const ageMonths = calculateAge(new Date(d.entryDate));
+            const status = calculateDuckStatus(ageMonths);
+            return { ...d, ageMonths, status };
+        }),
+        isDirty: true
     }));
   },
 
@@ -549,7 +559,7 @@ export const useAppStore = create<AppState & {
         "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
         "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
         "addDeathRecord", "updateDeathRecord", "saveState", "loadState", "getFullState", "loadFullState", "resetState", "getInitialState",
-        "updateStockBasedOnConsumption", "setLastPrediction"
+        "updateStockBasedOnConsumption", "setLastPrediction", "recalculateAllDucksAge"
     ];
     functions.forEach(f => delete st[f]);
     return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;
