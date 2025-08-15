@@ -247,7 +247,7 @@ export default function FeedTab() {
                           </div>
                       ))}
                     </div>
-                    <div className="flex justify-between font-bold border-t pt-1">
+                    <div className={cn("flex justify-between font-bold border-t pt-1", feedStockStyling.value)}>
                       <span>Estimasi Habis:</span>
                        <span>
                           {isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} hari` : 'N/A'}
