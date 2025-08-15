@@ -27,7 +27,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip as CustomTooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -91,7 +91,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
         setValue('date', date);
         ducks.forEach(duck => {
             const cageValue = record?.perCage[duck.cage] || 0;
-            setValue(`perCage.${duck.cage}`, cageValue);
+            setValue(`perCage.${duck.cage}` as const, cageValue);
         });
     };
 
