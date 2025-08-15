@@ -33,16 +33,13 @@ import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, Table
 
 
 // Daily Data Form
-const dailySchemaGenerator = (ducks: Duck[]) => {
-  const cageSchema = ducks.reduce((acc, duck) => {
-    return { ...acc, [`${duck.cage}`]: z.coerce.number().min(0, "Jumlah tidak boleh negatif") };
-  }, {});
-
+const dailySchemaGenerator = () => {
   return z.object({
     date: z.date({ required_error: "Tanggal harus diisi." }),
-    perCage: z.object(cageSchema),
+    perCage: z.record(z.coerce.number().min(0, "Jumlah tidak boleh negatif")),
   });
 };
+
 
 type DailyFormData = z.infer<ReturnType<typeof dailySchemaGenerator>>;
 
@@ -52,7 +49,7 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
     
     const isEditMode = !!production;
 
-    const dailySchema = dailySchemaGenerator(ducks);
+    const dailySchema = dailySchemaGenerator();
     
     const { control, handleSubmit, register, watch, formState: { errors }, reset, setValue } = useForm<DailyFormData>({
         resolver: zodResolver(dailySchema),
@@ -142,9 +139,9 @@ const DailyDataForm = ({ production, onSave, children, onOpenChange, open }: { p
                             <Label>Jumlah Telur per Kdg</Label>
                             {ducks.map(duck => (
                                 <div key={duck.cage} className="flex items-center justify-between">
-                                    <Label htmlFor={`perCage.${duck.cage}`} className="font-normal">Kdg {duck.cage}</Label>
+                                    <Label htmlFor={`perCage[${duck.cage}]`} className="font-normal">Kdg {duck.cage}</Label>
                                     <Input
-                                        id={`perCage.${duck.cage}`}
+                                        id={`perCage[${duck.cage}]`}
                                         type="number"
                                         className="w-24"
                                         {...register(`perCage.${duck.cage}` as const)}
@@ -611,7 +608,7 @@ export default function ProductionTab() {
     : null;
 
   const worstProductivityRecord = monthlyProductionData.length > 0
-    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
+    ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : best)
     : null;
   
   const getProductivityColor = (p: number) => {
@@ -1004,7 +1001,6 @@ export default function ProductionTab() {
         printWindow.print();
     }, 250);
   };
-
 
   return (
     <div className="space-y-6">
