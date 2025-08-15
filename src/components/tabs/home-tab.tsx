@@ -58,6 +58,8 @@ export default function HomeTab() {
     }
     return sum;
   }, 0);
+
+  const feedDaysLeft = dailyFeedConsumptionKg > 0 ? totalStock / dailyFeedConsumptionKg : Infinity;
   
   const dailyFeedCost = feed.reduce((sum, item) => {
     if (item.stock > 0 && totalDucks > 0) {
@@ -162,13 +164,21 @@ export default function HomeTab() {
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
             footer={
-                 <div className="w-full pt-2 text-xs">
-                    {feed.map(item => (
-                        <div key={item.id} className="flex justify-between">
-                            <span>{item.name}:</span>
-                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
-                        </div>
-                    ))}
+                 <div className="w-full pt-2 text-xs space-y-2">
+                    <div className="space-y-1">
+                      {feed.map(item => (
+                          <div key={item.id} className="flex justify-between">
+                              <span>{item.name}:</span>
+                              <span>{item.stock.toLocaleString('id-ID')} Kg</span>
+                          </div>
+                      ))}
+                    </div>
+                    <div className={cn("flex justify-between font-bold border-t pt-1", feedStockStyling.value)}>
+                      <span>Estimasi Habis:</span>
+                       <span>
+                          {isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} hari` : 'N/A'}
+                      </span>
+                    </div>
                 </div>
             }
         />
