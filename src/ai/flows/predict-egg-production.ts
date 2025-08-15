@@ -128,10 +128,6 @@ const predictEggProductionFlow = ai.defineFlow(
     outputSchema: PredictEggProductionOutputSchema,
   },
   async (input) => {
-    const { startDate, endDate } = input;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
     const response = await predictEggProductionPrompt(input);
 
     const output = response.output;
@@ -142,8 +138,8 @@ const predictEggProductionFlow = ai.defineFlow(
     // Sort predictions by date just in case the AI doesn't return them in order
     const sortedPredictions = output.dailyPredictions.sort((a, b) => {
         try {
-            const dateA = parse(a.day, 'dd MMMM yyyy', new Date(), { locale: idLocale });
-            const dateB = parse(b.day, 'dd MMMM yyyy', new Date(), { locale: idLocale });
+            const dateA = parse(a.day, 'dd MMMM yyyy', new Date(input.startDate), { locale: idLocale });
+            const dateB = parse(b.day, 'dd MMMM yyyy', new Date(input.startDate), { locale: idLocale });
             return dateA.getTime() - dateB.getTime();
         } catch (e) {
             // Handle parsing error if the date format is wrong
@@ -154,6 +150,3 @@ const predictEggProductionFlow = ai.defineFlow(
     return { ...output, dailyPredictions: sortedPredictions };
   }
 );
-
-
-
