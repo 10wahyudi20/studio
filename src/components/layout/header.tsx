@@ -315,7 +315,7 @@ export default function Header() {
                     <TooltipTrigger asChild>
                       <DialogTrigger asChild>
                           <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                              <Calculator className="h-5 w-5 text-black dark:text-yellow-500" />
+                              <Calculator className="h-5 w-5 text-foreground" />
                               <span className="sr-only">Kalkulator</span>
                           </Button>
                       </DialogTrigger>
