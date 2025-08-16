@@ -2,11 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import packageJson from "../../../package.json";
 
 export default function Footer() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const appVersion = packageJson.version;
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "0.0.0";
 
   useEffect(() => {
     // This ensures the year is up-to-date if the component stays mounted across a year change,
