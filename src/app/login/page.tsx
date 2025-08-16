@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Eye, EyeOff, Loader2, Wifi } from "lucide-react";
+import { Eye, EyeOff, Loader2, Wifi, WifiOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -40,9 +40,24 @@ export default function LoginPage() {
   const [hasLoginError, setHasLoginError] = useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isBurning, setIsBurning] = useState(false);
+  const [isOnline, setIsOnline] = React.useState(true);
   
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    if (typeof navigator !== 'undefined') {
+        setIsOnline(navigator.onLine);
+    }
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   useEffect(() => {
@@ -152,13 +167,17 @@ export default function LoginPage() {
         <TooltipProvider>
             <Tooltip>
             <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
-                    <Wifi className="h-5 w-5 text-green-500" />
-                    <span className="sr-only">Online</span>
+                 <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                    {isOnline ? (
+                        <Wifi className="h-5 w-5 text-green-500" />
+                    ) : (
+                        <WifiOff className="h-5 w-5 text-red-500" />
+                    )}
+                    <span className="sr-only">{isOnline ? "Online" : "Offline"}</span>
                 </Button>
             </TooltipTrigger>
             <TooltipContent>
-                <p>Status: Online</p>
+                <p>Status: {isOnline ? "Online" : "Offline"}</p>
             </TooltipContent>
             </Tooltip>
         </TooltipProvider>

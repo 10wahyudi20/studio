@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles, Cloud } from "lucide-react";
+import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles, Cloud, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -221,8 +221,27 @@ export default function Header() {
     const { companyInfo, isDirty, saveState, logout, getFullState } = useAppStore();
     const { toast } = useToast();
     const router = useRouter();
+    const [isOnline, setIsOnline] = React.useState(true);
 
     const isCloudConnected = !!companyInfo.megaUsername && !!companyInfo.megaPassword;
+
+    React.useEffect(() => {
+        const handleOnline = () => setIsOnline(true);
+        const handleOffline = () => setIsOnline(false);
+
+        // Set initial state
+        if (typeof navigator !== 'undefined') {
+            setIsOnline(navigator.onLine);
+        }
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
 
     const handleSave = () => {
@@ -325,9 +344,23 @@ export default function Header() {
                 <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
             </Button>
             
-            <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0" aria-label="Status: Online">
-                <Wifi className="h-5 w-5 text-green-500" />
-            </Button>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0" aria-label={`Status Koneksi: ${isOnline ? "Online" : "Offline"}`}>
+                            {isOnline ? (
+                                <Wifi className="h-5 w-5 text-green-500" />
+                            ) : (
+                                <WifiOff className="h-5 w-5 text-red-500" />
+                            )}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Status: {isOnline ? "Online" : "Offline"}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+
             
             <TooltipProvider>
               <Tooltip>
