@@ -527,11 +527,11 @@ export default function PopulationTab() {
                       <TooltipTrigger asChild>
                           <Button variant="ghost" size="icon" onClick={handlePrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                               <Printer className="h-4 w-4" />
-                              <span className="sr-only">Cetak</span>
+                              <span className="sr-only">Cetak ke PDF</span>
                           </Button>
                       </TooltipTrigger>
                       <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
-                          <p>Cetak</p>
+                          <p>Cetak ke PDF</p>
                       </TooltipContent>
                   </Tooltip>
               </TooltipProvider>

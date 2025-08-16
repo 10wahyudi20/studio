@@ -24,11 +24,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DateRange } from "react-day-picker";
 import { ScrollArea } from "../ui/scroll-area";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis, Cell, ComposedChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TooltipProvider, Tooltip as CustomTooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger as CustomTooltipTrigger, TooltipContent as CustomTooltipContent } from "../ui/tooltip";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 
@@ -1137,17 +1137,17 @@ export default function ProductionTab() {
                                 <ZoomIn className="h-4 w-4" />
                             </Button>
                             <TooltipProvider>
-                                <CustomTooltip>
+                                <Tooltip>
                                     <CustomTooltipTrigger asChild>
                                       <Button variant="ghost" size="icon" onClick={handleDailyPrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                           <Printer className="h-4 w-4" />
-                                          <span className="sr-only">Cetak Tabel Harian</span>
+                                          <span className="sr-only">Cetak ke PDF</span>
                                       </Button>
                                     </CustomTooltipTrigger>
                                     <CustomTooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
-                                      <p>Cetak</p>
+                                      <p>Cetak ke PDF</p>
                                     </CustomTooltipContent>
-                                </CustomTooltip>
+                                </Tooltip>
                             </TooltipProvider>
                             <div className="flex gap-1">
                                 <Select
@@ -1235,34 +1235,34 @@ export default function ProductionTab() {
                                 </Select>
                             </div>
                             <TooltipProvider>
-                                <CustomTooltip>
+                                <Tooltip>
                                     <CustomTooltipTrigger asChild>
                                       <Button variant="ghost" size="icon" onClick={handleWeeklyPrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                           <Printer className="h-4 w-4" />
-                                          <span className="sr-only">Cetak Tabel Mingguan</span>
+                                          <span className="sr-only">Cetak ke PDF</span>
                                       </Button>
                                     </CustomTooltipTrigger>
                                     <CustomTooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
-                                      <p>Cetak</p>
+                                      <p>Cetak ke PDF</p>
                                     </CustomTooltipContent>
-                                </CustomTooltip>
+                                </Tooltip>
                             </TooltipProvider>
                         </>
                     )}
 
                     {activeTab === 'monthly' && (
                          <TooltipProvider>
-                            <CustomTooltip>
+                            <Tooltip>
                                 <CustomTooltipTrigger asChild>
                                   <Button variant="ghost" size="icon" onClick={handleMonthlyPrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                                       <Printer className="h-4 w-4" />
-                                      <span className="sr-only">Cetak Tabel Bulanan</span>
+                                      <span className="sr-only">Cetak ke PDF</span>
                                   </Button>
                                 </CustomTooltipTrigger>
                                 <CustomTooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
-                                  <p>Cetak</p>
+                                  <p>Cetak ke PDF</p>
                                 </CustomTooltipContent>
-                            </CustomTooltip>
+                            </Tooltip>
                          </TooltipProvider>
                     )}
 
