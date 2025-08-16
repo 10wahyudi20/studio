@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Moon, Save, Sun, Wifi, Phone, Mail, Sparkles, Cloud, WifiOff } from "lucide-react";
+import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -229,7 +229,6 @@ export default function Header() {
         const handleOnline = () => setIsOnline(true);
         const handleOffline = () => setIsOnline(false);
 
-        // Set initial state
         if (typeof navigator !== 'undefined') {
             setIsOnline(navigator.onLine);
         }
@@ -243,12 +242,9 @@ export default function Header() {
         };
     }, []);
 
-
     const handleSave = () => {
-        // 1. Save to localStorage (internal persistence)
         saveState();
 
-        // 2. Trigger local file download (backup)
         const state = getFullState();
         const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
           JSON.stringify(state, null, 2)
@@ -340,9 +336,18 @@ export default function Header() {
               </DialogContent>
             </Dialog>
 
-            <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0" aria-label={`Status Mega Cloud: ${isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}`}>
-                <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" className="cursor-default bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0" aria-label={`Status Mega Cloud: ${isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}`}>
+                      <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Mega Cloud: {isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
             <TooltipProvider>
                 <Tooltip>
@@ -360,7 +365,6 @@ export default function Header() {
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-
             
             <TooltipProvider>
               <Tooltip>
