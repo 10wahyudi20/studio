@@ -89,7 +89,7 @@ export default function AiPredictionTab() {
   }));
 
   const lastDailyRecord = eggProduction.daily.at(-1);
-  const productionInfoForAI = lastDailyRecord ? Object.entries(lastDailyRecord.perCage).map(([cage, production]) => {
+  const productionInfoForDisplay = lastDailyRecord ? Object.entries(lastDailyRecord.perCage).map(([cage, production]) => {
       const duckInCage = ducks.find(d => String(d.cage) === cage);
       const productivity = (duckInCage && duckInCage.quantity > 0) ? (production / duckInCage.quantity) * 100 : 0;
       return {
@@ -110,7 +110,7 @@ export default function AiPredictionTab() {
   const totalSchema = feedInfoForAI.reduce((sum, f) => sum + f.schema, 0);
   const totalDailyConsumption = feedInfoForAI.reduce((sum, f) => sum + f.dailyConsumption, 0);
 
-  const canPredict = duckInfoForAI.length > 0 && productionInfoForAI.length > 0 && feedInfoForAI.length > 0 && dateRange?.from && dateRange?.to;
+  const canPredict = duckInfoForAI.length > 0 && productionHistoryForAI.length > 0 && feedInfoForAI.length > 0 && dateRange?.from && dateRange?.to;
 
   const handleSubmit = async () => {
     if (!canPredict) {
@@ -131,7 +131,7 @@ export default function AiPredictionTab() {
     try {
       const input: PredictEggProductionInput = {
         duckInfo: duckInfoForAI,
-        productionInfo: productionInfoForAI,
+        productionHistory: productionHistoryForAI,
         feedInfo: feedInfoForAI.map(({dailyConsumption, ...rest}) => rest), // Exclude dailyConsumption from AI input
         housingInformation: housingInfo,
         startDate: format(dateRange.from!, 'yyyy-MM-dd'),
@@ -196,8 +196,8 @@ export default function AiPredictionTab() {
                     ]}
                 />
                 <DataDisplayCard
-                    title={`Informasi Produksi (Data Terakhir)`}
-                    data={productionInfoForAI}
+                    title={`Informasi Produksi (Data Hari Terakhir)`}
+                    data={productionInfoForDisplay}
                     columns={[
                         { header: "Kdg", accessor: "cage" },
                         { header: "Telur/Kandang", accessor: "production" },

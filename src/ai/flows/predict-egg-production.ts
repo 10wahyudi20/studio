@@ -24,10 +24,9 @@ const DuckInfoSchema = z.object({
   cageSystem: z.string().describe('Sistem kandang (baterai atau umbaran)'),
 });
 
-const ProductionInfoSchema = z.object({
-    cage: z.number().describe('Nomor kandang'),
-    production: z.number().describe('Jumlah telur yang dihasilkan di kandang ini kemarin'),
-    productivity: z.number().describe('Tingkat produktivitas kandang ini kemarin (%)'),
+const ProductionHistorySchema = z.object({
+    date: z.string().describe('Tanggal produksi (YYYY-MM-DD)'),
+    totalEggs: z.number().describe('Jumlah telur total pada tanggal tersebut'),
 });
 
 const FeedInfoSchema = z.object({
@@ -38,7 +37,7 @@ const FeedInfoSchema = z.object({
 
 const PredictEggProductionInputSchema = z.object({
   duckInfo: z.array(DuckInfoSchema).describe('Informasi detail dari setiap kandang bebek.'),
-  productionInfo: z.array(ProductionInfoSchema).describe('Informasi produksi dari setiap kandang kemarin.'),
+  productionHistory: z.array(ProductionHistorySchema).describe('Data historis produksi telur selama 30 hari terakhir.'),
   feedInfo: z.array(FeedInfoSchema).describe('Informasi mengenai pakan yang digunakan.'),
   housingInformation: z.string().describe('Informasi tambahan mengenai lingkungan atau kondisi umum kandang.'),
   startDate: z.string().describe('Tanggal mulai prediksi dalam format ISO (YYYY-MM-DD).'),
@@ -70,15 +69,16 @@ const predictEggProductionPrompt = ai.definePrompt({
 
   Berdasarkan data komprehensif yang diberikan, lakukan analisis mendalam untuk memprediksi jumlah total telur yang akan diproduksi untuk periode dari **{{startDate}}** hingga **{{endDate}}**. Pertimbangkan semua variabel yang ada:
   - Data dari setiap kandang (jumlah bebek, usia, sistem). Usia sangat berpengaruh pada produktivitas.
-  - Data produksi dan produktivitas aktual dari hari sebelumnya untuk setiap kandang. Ini adalah indikator performa terkini.
+  - **Data historis produksi selama 30 hari terakhir**. Ini adalah indikator performa terkini yang paling penting untuk melihat tren.
   - Jenis pakan yang digunakan dan skemanya. Kualitas dan kuantitas pakan adalah faktor kunci.
   - Informasi tambahan mengenai lingkungan.
 
   **Tugas Anda:**
-  1.  **Prediksi Produksi**: Buat prediksi produksi telur untuk **SETIAP HARI** dalam rentang tanggal yang diminta. Format tanggal di output 'day' harus 'dd MMMM yyyy' dalam Bahasa Indonesia (contoh: 25 Juli 2024). Isi array 'dailyPredictions'.
-  2.  **Total Prediksi**: Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
-  3.  **Analisis & Rekomendasi Mendalam (Sertakan di 'reasoning')**:
-      a.  **Alasan Prediksi Telur**: Berikan alasan yang detail dan logis untuk prediksi Anda. Jelaskan bagaimana Anda menghubungkan berbagai data, potensi tren naik atau turun berdasarkan usia bebek atau faktor lain, untuk sampai pada kesimpulan Anda.
+  1.  **Analisis Tren**: Analisis data historis produksi untuk mengidentifikasi tren (naik, turun, atau stabil). Gunakan tren ini sebagai dasar utama prediksi Anda.
+  2.  **Prediksi Produksi**: Buat prediksi produksi telur untuk **SETIAP HARI** dalam rentang tanggal yang diminta, melanjutkan tren yang ada dan menyesuaikannya dengan faktor lain (usia bebek, pakan, dll). Format tanggal di output 'day' harus 'dd MMMM yyyy' dalam Bahasa Indonesia (contoh: 25 Juli 2024). Isi array 'dailyPredictions'.
+  3.  **Total Prediksi**: Hitung total prediksi produksi selama periode tersebut dan isi field 'totalPredictedProduction'.
+  4.  **Analisis & Rekomendasi Mendalam (Sertakan di 'reasoning')**:
+      a.  **Alasan Prediksi Telur**: Berikan alasan yang detail dan logis untuk prediksi Anda. Jelaskan tren yang Anda identifikasi dari data historis dan bagaimana Anda menghubungkannya dengan variabel lain untuk sampai pada kesimpulan Anda.
       b.  **Analisis Pakan & Nutrisi**: Berikan analisis mendalam tentang penggunaan pakan saat ini. Jelaskan tentang pentingnya komposisi nutrisi (protein, energi, kalsium) untuk bebek petelur. Berikan informasi nutrisi spesifik untuk pakan seperti **Kebi**, **144 MHD**, dan bahan baku seperti **bungkil kedelai**, termasuk perkiraan kandungan protein kasarnya (misal: Kebi ~17%, 144 MHD ~18-20%, Bungkil Kedelai ~46%).
       c.  **Pakan Pabrikan**: Sebutkan beberapa contoh merek pakan pabrikan yang populer di Indonesia (misalnya: Charoen Pokphand, Japfa Comfeed, New Hope). Jelaskan kelebihan pakan pabrikan seperti konsistensi nutrisi dan kepraktisan.
       d.  **Pakan Mixing (Campuran Sendiri)**: Berikan informasi mendalam tentang pakan mixing. Jelaskan potensi keuntungan (biaya lebih rendah) dan kerugian (inkonsistensi nutrisi, butuh tenaga lebih). Berikan contoh resep dasar pakan mixing (misal: kombinasi dedak, jagung giling, konsentrat, dan mineral) dan tips untuk menjaga kualitasnya.
@@ -92,7 +92,7 @@ const predictEggProductionPrompt = ai.definePrompt({
       { "day": "01 Januari 2025", "predictedEggs": 120 },
       { "day": "02 Januari 2025", "predictedEggs": 122 }
     ],
-    "reasoning": "Analisis prediksi telur...\\n\\n**Analisis Pakan & Nutrisi:**\\nKomposisi nutrisi pakan saat ini adalah... Pakan Kebi memiliki protein kasar sekitar 17%... Pakan 144 MHD memiliki protein... Bungkil kedelai adalah sumber protein tinggi (~46%).\\n\\n**Pakan Pabrikan:**\\nBeberapa merek pakan pabrikan yang populer adalah... Kelebihannya adalah...\\n\\n**Pakan Mixing (Campuran Sendiri):**\\nPakan mixing bisa menekan biaya karena... Namun, tantangannya adalah... Contoh resep dasar:...\\n\\n**Vitamin & Mineral:**\\nPenggunaan Vitachick dapat membantu meningkatkan...",
+    "reasoning": "Berdasarkan data historis, terdapat tren kenaikan produksi rata-rata 2 butir per hari. Tren ini diproyeksikan akan terus berlanjut...\\n\\n**Analisis Pakan & Nutrisi:**\\nKomposisi nutrisi pakan saat ini adalah... Pakan Kebi memiliki protein kasar sekitar 17%...\\n\\n**Pakan Pabrikan:**\\n...\\n\\n**Pakan Mixing (Campuran Sendiri):**\\n...\\n\\n**Vitamin & Mineral:**\\n...",
     "totalPredictedProduction": 242
   }
   \`\`\`
@@ -102,9 +102,9 @@ const predictEggProductionPrompt = ai.definePrompt({
   - Kandang {{cage}}: {{quantity}} ekor, Usia {{ageMonths}} bulan, Ukuran {{cageSize}}, Sistem {{cageSystem}}
   {{/each}}
   
-  DATA PRODUKSI PER KANDANG (KEMARIN):
-  {{#each productionInfo}}
-  - Kandang {{cage}}: {{production}} butir (Produktivitas {{productivity}}%)
+  DATA HISTORIS PRODUKSI (30 HARI TERAKHIR):
+  {{#each productionHistory}}
+  - {{date}}: {{totalEggs}} butir
   {{/each}}
 
   DATA PAKAN:
