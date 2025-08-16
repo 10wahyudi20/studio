@@ -206,7 +206,8 @@ export default function FeedTab() {
         headStyles: {
             fillColor: [41, 128, 185],
             textColor: 255,
-            fontStyle: 'bold'
+            fontStyle: 'bold',
+            halign: 'center'
         },
         footStyles: {
             fillColor: [232, 232, 232],
@@ -215,12 +216,12 @@ export default function FeedTab() {
             halign: 'right'
         },
         columnStyles: {
-            0: { halign: 'left' },
-            1: { halign: 'left' },
-            2: { halign: 'left' },
-            3: { halign: 'right' },
-            4: { halign: 'right' },
-            5: { halign: 'right' }
+            0: { halign: 'center' },
+            1: { halign: 'center' },
+            2: { halign: 'center' },
+            3: { halign: 'center' },
+            4: { halign: 'center' },
+            5: { halign: 'center' }
         }
     });
 
@@ -338,12 +339,12 @@ export default function FeedTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nama Pakan</TableHead>
-                  <TableHead>Supplier</TableHead>
-                  <TableHead>Update</TableHead>
-                  <TableHead>Stok (Kg)</TableHead>
-                  <TableHead>Harga/50 Kg</TableHead>
-                  <TableHead>Harga/Kg</TableHead>
+                  <TableHead className="text-center">Nama Pakan</TableHead>
+                  <TableHead className="text-center">Supplier</TableHead>
+                  <TableHead className="text-center">Update</TableHead>
+                  <TableHead className="text-center">Stok (Kg)</TableHead>
+                  <TableHead className="text-center">Harga/50 Kg</TableHead>
+                  <TableHead className="text-center">Harga/Kg</TableHead>
                   <TableHead className="text-center">Skema Pakan</TableHead>
                   <TableHead className="text-right">Aksi</TableHead>
                 </TableRow>
@@ -353,12 +354,12 @@ export default function FeedTab() {
                   const schemaPercentage = totalSchema > 0 ? (item.schema / totalSchema * 100) : 0;
                   return (
                     <TableRow key={item.id}>
-                      <TableCell>{item.name}</TableCell>
-                      <TableCell>{item.supplier}</TableCell>
-                      <TableCell>{format(new Date(item.lastUpdated), "dd/MM/yyyy")}</TableCell>
-                      <TableCell>{item.stock.toLocaleString('id-ID')}</TableCell>
-                      <TableCell>Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
-                      <TableCell>Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">{item.name}</TableCell>
+                      <TableCell className="text-center">{item.supplier}</TableCell>
+                      <TableCell className="text-center">{format(new Date(item.lastUpdated), "dd/MM/yyyy")}</TableCell>
+                      <TableCell className="text-center">{item.stock.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center">Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema} - {schemaPercentage.toFixed(1)}%</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
