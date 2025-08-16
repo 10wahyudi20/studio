@@ -343,7 +343,7 @@ export default function Header() {
                       <Cloud className={cn("h-5 w-5", isCloudConnected ? "text-green-500" : "text-red-500")} />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
                   <p>Mega Cloud: {isCloudConnected ? "Terkonfigurasi" : "Belum Terhubung"}</p>
                 </TooltipContent>
               </Tooltip>
@@ -360,7 +360,7 @@ export default function Header() {
                             )}
                         </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
                         <p>Status: {isOnline ? "Online" : "Offline"}</p>
                     </TooltipContent>
                 </Tooltip>
