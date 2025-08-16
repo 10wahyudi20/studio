@@ -116,13 +116,6 @@ export default function LoginPage() {
          isBurning && "card-burn-effect"
         )}>
         <CardHeader className="text-center">
-            <div className="mx-auto mb-4">
-                 {companyInfo.logo ? (
-                    <Image src={companyInfo.logo} alt="Company Logo" width={64} height={64} className="h-16 w-16 rounded-lg object-cover" data-ai-hint="company logo"/>
-                ) : (
-                    <DuckIcon className="h-16 w-16 text-primary" data-ai-hint="duck logo"/>
-                )}
-            </div>
           <CardTitle className="text-3xl font-bold">Login</CardTitle>
           <CardDescription>Silakan masuk untuk melanjutkan ke dasbor Anda</CardDescription>
         </CardHeader>
