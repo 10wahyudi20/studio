@@ -9,6 +9,9 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
 
 const nextConfig: NextConfig = {
   /* config options here */
+  serverActions: {
+    bodySizeLimit: '2mb',
+  },
   typescript: {
     ignoreBuildErrors: false,
   },
