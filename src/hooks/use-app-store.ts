@@ -557,7 +557,7 @@ export const useAppStore = create<AppState & {
   },
   
   getFullState: () => {
-    const { isDirty, isAuthenticated, isOnline, ...state } = get();
+    const { isDirty, isAuthenticated, ...state } = get();
     const st: any = state;
     const functions = [
         "login", "logout", "setDirty", "setActiveTab", "setIsOnline", "updateCompanyInfo", "addDuck",
@@ -568,7 +568,7 @@ export const useAppStore = create<AppState & {
         "updateStockBasedOnConsumption", "setLastPrediction", "recalculateAllDucksAge"
     ];
     functions.forEach(f => delete st[f]);
-    return st as Omit<AppState, 'isDirty' | 'isAuthenticated' | 'isOnline'>;
+    return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;
   },
 
   loadFullState: (state) => {
