@@ -115,6 +115,7 @@ export interface AppState {
     deathRecords: DeathRecord[];
     isDirty: boolean;
     isAuthenticated: boolean;
+    isOnline: boolean;
     lastStockUpdate: string | null;
     activeTab: string;
     lastPrediction: PredictEggProductionOutput | null;

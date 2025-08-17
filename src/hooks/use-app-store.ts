@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { AppState, Duck, Transaction, Feed, DailyProduction, WeeklyProduction, MonthlyProduction, DeathRecord, DuckUpdate } from '@/lib/types';
 import { format, getMonth, getYear, parse, startOfDay, subMonths, startOfWeek, startOfMonth, parseISO, differenceInDays } from 'date-fns';
@@ -34,7 +35,8 @@ const getInitialState = (): AppState => ({
   finance: [],
   deathRecords: [],
   isDirty: false,
-  isAuthenticated: false, 
+  isAuthenticated: false,
+  isOnline: true,
   lastStockUpdate: null,
   activeTab: 'home',
   lastPrediction: null,
@@ -98,6 +100,7 @@ export const useAppStore = create<AppState & {
   logout: () => void;
   setDirty: () => void;
   setActiveTab: (tab: string) => void;
+  setIsOnline: (status: boolean) => void;
   updateCompanyInfo: (info: AppState['companyInfo']) => void;
   addDuck: (duck: Omit<Duck, 'id' | 'ageMonths' | 'status' | 'cageSize'> & { cageSizeLength: number, cageSizeWidth: number }) => void;
   updateDuck: (id: number, duck: DuckUpdate) => void;
@@ -160,6 +163,8 @@ export const useAppStore = create<AppState & {
       return {};
     });
   },
+
+  setIsOnline: (status) => set({ isOnline: status }),
 
   getInitialState: getInitialState,
 
@@ -520,6 +525,7 @@ export const useAppStore = create<AppState & {
             ...parsedState,
             isAuthenticated,
             activeTab: savedTab || 'home',
+            isOnline: navigator.onLine,
             companyInfo: {
               ...getInitialState().companyInfo,
               ...parsedState.companyInfo,
@@ -543,7 +549,7 @@ export const useAppStore = create<AppState & {
         set(revivedState);
         get().updateStockBasedOnConsumption();
       } else {
-        set({ isAuthenticated, activeTab: savedTab || 'home' });
+        set({ isAuthenticated, activeTab: savedTab || 'home', isOnline: navigator.onLine });
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
@@ -551,10 +557,10 @@ export const useAppStore = create<AppState & {
   },
   
   getFullState: () => {
-    const { isDirty, isAuthenticated, ...state } = get();
+    const { isDirty, isAuthenticated, isOnline, ...state } = get();
     const st: any = state;
     const functions = [
-        "login", "logout", "setDirty", "setActiveTab", "updateCompanyInfo", "addDuck",
+        "login", "logout", "setDirty", "setActiveTab", "setIsOnline", "updateCompanyInfo", "addDuck",
         "updateDuck", "removeDuck", "resetDuck", "addDailyProduction", "updateDailyProduction",
         "addWeeklyProduction", "updateWeeklyProduction", "removeWeeklyProduction", "addTransaction",
         "updateTransaction", "removeTransaction", "addFeed", "updateFeed", "removeFeed",
@@ -562,7 +568,7 @@ export const useAppStore = create<AppState & {
         "updateStockBasedOnConsumption", "setLastPrediction", "recalculateAllDucksAge"
     ];
     functions.forEach(f => delete st[f]);
-    return st as Omit<AppState, 'isDirty' | 'isAuthenticated'>;
+    return st as Omit<AppState, 'isDirty' | 'isAuthenticated' | 'isOnline'>;
   },
 
   loadFullState: (state) => {
@@ -593,19 +599,29 @@ export const useAppStore = create<AppState & {
 }));
 
 
-if (channel) {
-    channel.onmessage = (event) => {
-        const { loadState } = useAppStore.getState();
-        if (event.data?.type === 'state-change') {
-            loadState(); // Force reload from storage if another tab saved
-        }
-        if (event.data?.type === 'auth-change') {
-            const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
-            useAppStore.setState({ isAuthenticated });
-        }
-        if (event.data?.type === 'tab-change') {
-            const activeTab = localStorage.getItem('clucksmart-activeTab') || 'home';
-            useAppStore.setState({ activeTab });
-        }
-    };
+if (typeof window !== 'undefined') {
+    const { setIsOnline } = useAppStore.getState();
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    if (channel) {
+        channel.onmessage = (event) => {
+            const { loadState } = useAppStore.getState();
+            if (event.data?.type === 'state-change') {
+                loadState(); // Force reload from storage if another tab saved
+            }
+            if (event.data?.type === 'auth-change') {
+                const isAuthenticated = localStorage.getItem('clucksmart-auth') === 'true';
+                useAppStore.setState({ isAuthenticated });
+            }
+            if (event.data?.type === 'tab-change') {
+                const activeTab = localStorage.getItem('clucksmart-activeTab') || 'home';
+                useAppStore.setState({ activeTab });
+            }
+        };
+    }
 }

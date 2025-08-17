@@ -15,10 +15,11 @@ import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function LoginPage() {
-  const { login, companyInfo, isAuthenticated } = useAppStore(state => ({
+  const { login, companyInfo, isAuthenticated, isOnline } = useAppStore(state => ({
     login: state.login,
     companyInfo: state.companyInfo,
     isAuthenticated: state.isAuthenticated,
+    isOnline: state.isOnline,
   }));
   const router = useRouter();
   const { toast } = useToast();
@@ -29,27 +30,9 @@ export default function LoginPage() {
   const [hasLoginError, setHasLoginError] = useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
   const [isBurning, setIsBurning] = useState(false);
-  const [isOnline, setIsOnline] = React.useState(true);
   
   useEffect(() => {
     setIsMounted(true);
-    // Check network status on initial mount
-    if (typeof navigator !== 'undefined') {
-        setIsOnline(navigator.onLine);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-        window.removeEventListener('online', handleOnline);
-        window.removeEventListener('offline', handleOffline);
-    };
   }, []);
 
   useEffect(() => {

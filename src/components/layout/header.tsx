@@ -218,29 +218,11 @@ const SimpleCalculator = () => {
 };
 
 export default function Header() {
-    const { companyInfo, isDirty, saveState, logout, getFullState } = useAppStore();
+    const { companyInfo, isDirty, saveState, logout, getFullState, isOnline } = useAppStore();
     const { toast } = useToast();
     const router = useRouter();
-    const [isOnline, setIsOnline] = React.useState(true);
 
     const isCloudConnected = !!companyInfo.megaUsername && !!companyInfo.megaPassword;
-
-    React.useEffect(() => {
-        const handleOnline = () => setIsOnline(true);
-        const handleOffline = () => setIsOnline(false);
-
-        if (typeof navigator !== 'undefined') {
-            setIsOnline(navigator.onLine);
-        }
-
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-
-        return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-        };
-    }, []);
 
     const handleSave = () => {
         saveState();

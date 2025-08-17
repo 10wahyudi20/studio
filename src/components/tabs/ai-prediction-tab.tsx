@@ -8,7 +8,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { BrainCircuit, Loader2, PlayCircle, Table, Info, Calendar as CalendarIcon } from "lucide-react";
+import { BrainCircuit, Loader2, PlayCircle, Table, Info, Calendar as CalendarIcon, WifiOff } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "../ui/label";
@@ -60,7 +60,7 @@ const DataDisplayCard = ({ title, data, columns, footerData }: { title: string, 
 
 
 export default function AiPredictionTab() {
-  const { ducks, feed, eggProduction, companyInfo, lastPrediction, setLastPrediction } = useAppStore();
+  const { ducks, feed, eggProduction, companyInfo, lastPrediction, setLastPrediction, isOnline } = useAppStore();
   const { toast } = useToast();
   
   const [prediction, setPrediction] = React.useState<PredictEggProductionOutput | null>(lastPrediction);
@@ -113,6 +113,15 @@ export default function AiPredictionTab() {
   const canPredict = duckInfoForAI.length > 0 && productionHistoryForAI.length > 0 && feedInfoForAI.length > 0 && dateRange?.from && dateRange?.to;
 
   const handleSubmit = async () => {
+    if (!isOnline) {
+        toast({
+            variant: "destructive",
+            title: "Anda Sedang Offline",
+            description: "Fitur AI membutuhkan koneksi internet untuk berfungsi."
+        });
+        return;
+    }
+    
     if (!canPredict) {
         toast({
             variant: "destructive",
@@ -151,6 +160,15 @@ export default function AiPredictionTab() {
 
   const handleGenerateAudio = async () => {
     if (!prediction) return;
+
+    if (!isOnline) {
+        toast({
+            variant: "destructive",
+            title: "Anda Sedang Offline",
+            description: "Fitur ini membutuhkan koneksi internet."
+        });
+        return;
+    }
     
     setIsGeneratingAudio(true);
     setAudioError(null);
@@ -172,6 +190,20 @@ export default function AiPredictionTab() {
   
   const predictionDays = dateRange?.from && dateRange?.to ? (differenceInDays(dateRange.to, dateRange.from) + 1) : 0;
 
+
+  if (!isOnline) {
+    return (
+        <Card className="flex flex-col items-center justify-center h-96">
+            <CardHeader className="text-center">
+                <WifiOff className="h-16 w-16 mx-auto text-muted-foreground" />
+                <CardTitle className="mt-4">Anda Sedang Offline</CardTitle>
+                <CardDescription>
+                    Fitur Prediksi AI membutuhkan koneksi internet untuk dapat berfungsi. Silakan hubungkan perangkat Anda ke internet dan coba lagi.
+                </CardDescription>
+            </CardHeader>
+        </Card>
+    );
+  }
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
