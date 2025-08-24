@@ -52,22 +52,16 @@ export default function HomeTab() {
   
   const totalStock = feed.reduce((sum, item) => sum + item.stock, 0);
   
-  const dailyFeedConsumptionKg = feed.reduce((sum, item) => {
-    if (item.stock > 0 && totalDucks > 0) {
-      return sum + (totalDucks * item.schema / 1000);
-    }
-    return sum;
+  const activeFeeds = feed.filter(f => f.stock > 0);
+  const totalDailySchema = activeFeeds.reduce((sum, item) => sum + item.schema, 0);
+  const dailyFeedConsumptionKg = (totalDucks * totalDailySchema) / 1000;
+
+  const dailyFeedCost = activeFeeds.reduce((sum, item) => {
+      const consumptionForFeed = (totalDucks * item.schema / 1000); // in kg for this specific feed
+      return sum + (consumptionForFeed * item.pricePerKg);
   }, 0);
 
   const feedDaysLeft = dailyFeedConsumptionKg > 0 ? totalStock / dailyFeedConsumptionKg : Infinity;
-  
-  const dailyFeedCost = feed.reduce((sum, item) => {
-    if (item.stock > 0 && totalDucks > 0) {
-      const consumptionForFeed = (totalDucks * item.schema / 1000); // in kg
-      return sum + (consumptionForFeed * item.pricePerKg);
-    }
-    return sum;
-  }, 0);
 
   const averageFeedCostPerKg = dailyFeedConsumptionKg > 0 ? dailyFeedCost / dailyFeedConsumptionKg : 0;
   
