@@ -197,9 +197,12 @@ export default function HomeTab() {
                       <span className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</span>
                       <span className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</span>
                   </div>
-                   <div className={cn("flex justify-between items-center font-bold border-t pt-1", monthlyEggProfit >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500")}>
-                        <span className="flex items-center"><DollarSign className="h-4 w-4 mr-1"/>Laba Telur:</span>
-                        <span>Rp {monthlyEggProfit.toLocaleString('id-ID')}</span>
+                   <div className={cn("border-t pt-1", monthlyEggProfit >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500")}>
+                        <div className="flex justify-between items-center font-bold">
+                            <span className="flex items-center"><DollarSign className="h-4 w-4 mr-1"/>Laba Telur:</span>
+                            <span>Rp {monthlyEggProfit.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div className="text-right text-[10px] italic">Laba Telur / Periode</div>
                    </div>
               </div>
             }
