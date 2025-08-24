@@ -3,11 +3,11 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2 } from "lucide-react";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2, DollarSign } from "lucide-react";
 import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, getDaysInMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 
@@ -119,6 +119,11 @@ export default function HomeTab() {
   
   const monthProduction = totalMonthProduction - gradeCSum - consumptionSum;
 
+  const totalMonthlySalesValue = weeklyDataForMonth.reduce((sum, week) => sum + week.totalValue, 0);
+  const daysInCurrentMonth = getDaysInMonth(new Date(currentYear, currentMonth));
+  const totalMonthlyFeedCost = dailyFeedCost * daysInCurrentMonth;
+  const monthlyEggProfit = totalMonthlySalesValue - totalMonthlyFeedCost;
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -187,9 +192,15 @@ export default function HomeTab() {
             value={monthProduction.toLocaleString('id-ID')}
             icon={CalendarDays}
             footer={
-              <div className="w-full flex justify-between pt-2">
-                <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
-                <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
+              <div className="w-full pt-2 space-y-2">
+                  <div className="flex justify-between text-sm">
+                      <span className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</span>
+                      <span className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</span>
+                  </div>
+                   <div className={cn("flex justify-between items-center font-bold border-t pt-1", monthlyEggProfit >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500")}>
+                        <span className="flex items-center"><DollarSign className="h-4 w-4 mr-1"/>Laba Telur:</span>
+                        <span>Rp {monthlyEggProfit.toLocaleString('id-ID')}</span>
+                   </div>
               </div>
             }
         />
