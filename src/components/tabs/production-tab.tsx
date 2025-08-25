@@ -1102,7 +1102,7 @@ export default function ProductionTab() {
                 )}
                  {activeTab === 'daily' && (
                     <Button variant="ghost" size="icon" onClick={() => setShowDailyChart(!showDailyChart)} className="text-foreground hover:text-foreground hover:bg-transparent bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0">
-                        <LineChartIcon className="h-4 w-4" />
+                        <BarChartIcon className="h-4 w-4" />
                         <span className="sr-only">Tampilkan/Sembunyikan Grafik Harian</span>
                     </Button>
                 )}
@@ -1292,7 +1292,7 @@ export default function ProductionTab() {
                         </CardHeader>
                         <CardContent>
                             <ChartContainer config={dailyChartConfig} className="min-h-[300px] w-full">
-                                <LineChart accessibilityLayer data={dailyChartData}>
+                                <BarChart accessibilityLayer data={dailyChartData}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="name" fontSize={12} />
                                     <YAxis />
@@ -1301,16 +1301,15 @@ export default function ProductionTab() {
                                     />
                                     <Legend />
                                     {ducks.map((duck) => (
-                                        <Line
+                                        <Bar
                                             key={duck.id}
-                                            type="monotone"
                                             dataKey={`kdg_${duck.cage}`}
-                                            stroke={`var(--color-kdg_${duck.cage})`}
-                                            dot={false}
-                                            connectNulls
+                                            stackId="a"
+                                            fill={`var(--color-kdg_${duck.cage})`}
+                                            name={`Kdg ${duck.cage}`}
                                         />
                                     ))}
-                                </LineChart>
+                                </BarChart>
                             </ChartContainer>
                         </CardContent>
                     </Card>
