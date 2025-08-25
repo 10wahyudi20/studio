@@ -128,25 +128,32 @@ const predictEggProductionFlow = ai.defineFlow(
     outputSchema: PredictEggProductionOutputSchema,
   },
   async (input) => {
-    const response = await predictEggProductionPrompt(input);
+    const {output} = await predictEggProductionPrompt(input);
 
-    const output = response.output;
     if (!output) {
-      throw new Error("AI tidak memberikan output yang valid.");
+      throw new Error('AI did not return a valid output.');
     }
-    
+
     // Sort predictions by date just in case the AI doesn't return them in order
     const sortedPredictions = output.dailyPredictions.sort((a, b) => {
-        try {
-            const dateA = parse(a.day, 'dd MMMM yyyy', new Date(input.startDate), { locale: idLocale });
-            const dateB = parse(b.day, 'dd MMMM yyyy', new Date(input.startDate), { locale: idLocale });
-            return dateA.getTime() - dateB.getTime();
-        } catch (e) {
-            // Handle parsing error if the date format is wrong
-            return 0;
+      try {
+        const dateA = parse(a.day, 'dd MMMM yyyy', new Date(input.startDate), {
+          locale: idLocale,
+        });
+        const dateB = parse(b.day, 'dd MMMM yyyy', new Date(input.startDate), {
+          locale: idLocale,
+        });
+        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+          return 0; // Don't sort if dates are invalid
         }
+        return dateA.getTime() - dateB.getTime();
+      } catch (e) {
+        // Handle parsing error if the date format is wrong
+        console.warn(`Could not parse date for sorting: ${a.day} or ${b.day}`);
+        return 0;
+      }
     });
 
-    return { ...output, dailyPredictions: sortedPredictions };
+    return {...output, dailyPredictions: sortedPredictions};
   }
 );
