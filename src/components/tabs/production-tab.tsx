@@ -6,8 +6,8 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, LineChart as LineChartIcon, Printer } from "lucide-react";
-import { format, addDays, isToday } from "date-fns";
+import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, DollarSign, Printer } from "lucide-react";
+import { format, addDays, isToday, getDaysInMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -553,7 +553,7 @@ const yearOptions = Array.from({ length: 5 }, (_, i) => ({
 }));
 
 export default function ProductionTab() {
-  const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction, companyInfo } = useAppStore();
+  const { ducks, eggProduction, addDailyProduction, updateDailyProduction, addWeeklyProduction, updateWeeklyProduction, removeWeeklyProduction, companyInfo, feed } = useAppStore();
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [activeTab, setActiveTab] = React.useState("daily");
@@ -610,6 +610,18 @@ export default function ProductionTab() {
   const worstProductivityRecord = monthlyProductionData.length > 0
     ? monthlyProductionData.reduce((worst, current) => current.productivity < worst.productivity ? current : worst)
     : null;
+
+  const activeFeeds = feed.filter(f => f.stock > 0);
+  const totalDailySchema = activeFeeds.reduce((sum, item) => sum + item.schema, 0);
+  const dailyFeedCost = activeFeeds.reduce((sum, item) => {
+      const consumptionForFeed = (totalDucks * item.schema / 1000); // in kg for this specific feed
+      return sum + (consumptionForFeed * item.pricePerKg);
+  }, 0);
+    
+  const totalMonthlySalesValue = weeklyDataForMonth.reduce((sum, week) => sum + week.totalValue, 0);
+  const daysInCurrentMonth = getDaysInMonth(currentDate);
+  const totalMonthlyFeedCost = dailyFeedCost * daysInCurrentMonth;
+  const monthlyEggProfit = totalMonthlySalesValue - totalMonthlyFeedCost;
   
   const getProductivityColor = (p: number) => {
     if (p > 100) return 'bg-blue-400 text-black';
@@ -1082,10 +1094,19 @@ export default function ProductionTab() {
             value={monthProduction.toLocaleString('id-ID')} 
             icon={CalendarDays} 
             footer={
-              <div className="w-full flex justify-between pt-2">
-                <div className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</div>
-                <div className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</div>
-              </div>
+                <div className="w-full pt-2 space-y-2">
+                    <div className="flex justify-between text-sm">
+                        <span className="font-medium text-red-500">Grade C: {gradeCSum.toLocaleString('id-ID')}</span>
+                        <span className="font-medium text-blue-500">Konsumsi: {consumptionSum.toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className={cn("border-t pt-1", monthlyEggProfit >= 0 ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500")}>
+                        <div className="flex justify-between items-center font-bold">
+                            <span className="flex items-center"><DollarSign className="h-4 w-4 mr-1"/>Laba Telur:</span>
+                            <span>Rp {monthlyEggProfit.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div className="text-right text-[10px] italic">Laba Telur / Periode</div>
+                    </div>
+                </div>
             }
         />
       </div>
