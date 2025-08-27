@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2, DollarSign } from "lucide-react";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2, DollarSign, AlertCircle, ShieldOff } from "lucide-react";
 import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
@@ -94,6 +94,8 @@ export default function HomeTab() {
   } satisfies ChartConfig;
   
   const totalDeaths = ducks.reduce((sum, duck) => sum + duck.deaths, 0);
+  const tuaCount = ducks.filter(d => d.status === 'Bebek Tua').reduce((acc, duck) => acc + duck.quantity, 0);
+  const afkirCount = ducks.filter(d => d.status === 'Bebek Afkir').reduce((acc, duck) => acc + duck.quantity, 0);
   
   const getFeedStockStyling = (stock: number) => {
     if (stock <= 100) return { value: 'text-red-500', icon: 'text-red-500 animate-pulse' };
@@ -126,11 +128,23 @@ export default function HomeTab() {
             value={totalDucks.toLocaleString('id-ID')} 
             icon={Users} 
             footer={
-                 <div className="w-full pt-2 text-xs">
+                 <div className="w-full pt-2 text-xs space-y-1">
                     <div className="flex justify-between items-center text-red-500 font-medium">
                         <span>Bebek Mati:</span>
                         <span>{totalDeaths}</span>
                     </div>
+                     {tuaCount > 0 && (
+                        <div className="flex justify-between items-center text-yellow-500 font-medium">
+                            <span className="flex items-center gap-1"><AlertCircle className="h-3 w-3"/>Bebek Tua:</span>
+                            <span>{tuaCount}</span>
+                        </div>
+                    )}
+                    {afkirCount > 0 && (
+                        <div className="flex justify-between items-center text-red-600 dark:text-red-500 font-medium">
+                            <span className="flex items-center gap-1"><ShieldOff className="h-3 w-3"/>Bebek Afkir:</span>
+                            <span>{afkirCount}</span>
+                        </div>
+                    )}
                 </div>
             }
         />
