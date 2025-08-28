@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat } from 'lucide-react';
+import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package } from 'lucide-react';
 import { Separator } from '../ui/separator';
+import { Button } from '../ui/button';
 
 const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number | string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-2">
@@ -30,56 +31,77 @@ const ResultDisplay = ({ label, value, icon: Icon, isProfit = false, isLoss = fa
     </div>
 );
 
+const FeedPriceCard = ({ name, pricePerBag, pricePerKg }: { name: string, pricePerBag: number, pricePerKg: number}) => (
+    <Card className="bg-secondary/50 p-3 flex-shrink-0">
+        <h5 className="font-semibold text-sm text-center">{name}</h5>
+        <Separator className="my-1.5" />
+        <div className="text-xs space-y-1 text-center">
+            <p>Rp {pricePerBag.toLocaleString('id-ID')}/zak</p>
+            <p className="font-bold text-primary">Rp {pricePerKg.toLocaleString('id-ID')}/Kg</p>
+        </div>
+    </Card>
+);
+
 export default function SimulationTab() {
     const { ducks, feed } = useAppStore();
 
-    const initialTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-    const activeFeeds = feed.filter(f => f.stock > 0);
-    const initialFeedSchema = activeFeeds.length > 0 ? activeFeeds.reduce((sum, f) => sum + f.schema, 0) / activeFeeds.length : 150;
-    const initialFeedPrice = activeFeeds.length > 0 ? activeFeeds.reduce((sum, f) => sum + f.pricePerBag, 0) / activeFeeds.length : 400000;
+    const getInitialState = () => {
+        const initialTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
+        const activeFeeds = feed.filter(f => f.stock > 0);
+        const initialFeedSchema = activeFeeds.length > 0 ? activeFeeds.reduce((sum, f) => sum + f.schema, 0) : 150;
+        
+        return {
+            totalDucks: initialTotalDucks,
+            feedSchema: Math.round(initialFeedSchema),
+            gradeA: 0,
+            gradeB: 0,
+            gradeC: 0,
+            consumption: 0,
+            priceA: '' as number | string,
+            priceB: '' as number | string,
+            priceC: '' as number | string,
+            priceConsumption: '' as number | string,
+        };
+    };
 
-    const [totalDucks, setTotalDucks] = useState(initialTotalDucks);
-    const [feedSchema, setFeedSchema] = useState(initialFeedSchema);
-    const [feedPricePer50Kg, setFeedPricePer50Kg] = useState(initialFeedPrice);
-    
-    const [gradeA, setGradeA] = useState(0);
-    const [gradeB, setGradeB] = useState(0);
-    const [gradeC, setGradeC] = useState(0);
-    const [consumption, setConsumption] = useState(0);
-
-    const [priceA, setPriceA] = useState<number | string>('');
-    const [priceB, setPriceB] = useState<number | string>('');
-    const [priceC, setPriceC] = useState<number | string>('');
-    const [priceConsumption, setPriceConsumption] = useState<number | string>('');
+    const [simulationState, setSimulationState] = useState(getInitialState());
 
     useEffect(() => {
-        const newTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-        const newActiveFeeds = feed.filter(f => f.stock > 0);
-        const newFeedSchema = newActiveFeeds.length > 0 ? newActiveFeeds.reduce((sum, f) => sum + f.schema, 0) / newActiveFeeds.length : 150;
-        const newFeedPrice = newActiveFeeds.length > 0 ? newActiveFeeds.reduce((sum, f) => sum + f.pricePerBag, 0) / newActiveFeeds.length : 400000;
-
-        setTotalDucks(newTotalDucks);
-        setFeedSchema(Math.round(newFeedSchema));
-        setFeedPricePer50Kg(Math.round(newFeedPrice));
+        setSimulationState(getInitialState());
     }, [ducks, feed]);
 
-    const handleNumberChange = (setter: React.Dispatch<React.SetStateAction<number | string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleReset = () => {
+        setSimulationState(getInitialState());
+    };
+
+    const handleInputChange = (field: keyof typeof simulationState) => (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setter(value === '' ? '' : Number(value));
+        setSimulationState(prevState => ({
+            ...prevState,
+            [field]: value === '' ? '' : Number(value)
+        }));
     };
 
     // Calculations
-    const eggYield = gradeA + gradeB + gradeC + consumption;
-    const feedPricePerKg = feedPricePer50Kg / 50;
-    const totalFeedConsumptionKg = (totalDucks * feedSchema) / 1000;
-    const totalFeedCostPerDay = totalFeedConsumptionKg * feedPricePerKg;
+    const activeFeedsForCalc = feed.filter(f => f.stock > 0);
+    const eggYield = simulationState.gradeA + simulationState.gradeB + simulationState.gradeC + simulationState.consumption;
     
-    const pA = typeof priceA === 'number' ? priceA : 0;
-    const pB = typeof priceB === 'number' ? priceB : 0;
-    const pC = typeof priceC === 'number' ? priceC : 0;
-    const pCons = typeof priceConsumption === 'number' ? priceConsumption : 0;
+    const totalFeedConsumptionKg = (simulationState.totalDucks * simulationState.feedSchema) / 1000;
+    
+    const totalFeedCostPerDay = activeFeedsForCalc.reduce((sum, item) => {
+        // Assume schema is a weighted representation of the mix
+        const totalSchemaAllFeeds = activeFeedsForCalc.reduce((s, i) => s + i.schema, 0);
+        const feedRatio = totalSchemaAllFeeds > 0 ? item.schema / totalSchemaAllFeeds : 0;
+        const consumptionForThisFeed = totalFeedConsumptionKg * feedRatio;
+        return sum + (consumptionForThisFeed * item.pricePerKg);
+    }, 0);
+    
+    const pA = typeof simulationState.priceA === 'number' ? simulationState.priceA : 0;
+    const pB = typeof simulationState.priceB === 'number' ? simulationState.priceB : 0;
+    const pC = typeof simulationState.priceC === 'number' ? simulationState.priceC : 0;
+    const pCons = typeof simulationState.priceConsumption === 'number' ? simulationState.priceConsumption : 0;
 
-    const grossIncomePerDay = (gradeA * pA) + (gradeB * pB) + (gradeC * pC) + (consumption * pCons);
+    const grossIncomePerDay = (simulationState.gradeA * pA) + (simulationState.gradeB * pB) + (simulationState.gradeC * pC) + (simulationState.consumption * pCons);
     const netIncomePerDay = grossIncomePerDay - totalFeedCostPerDay;
     const netIncomePerMonth = netIncomePerDay * 30;
 
@@ -90,35 +112,54 @@ export default function SimulationTab() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Kalkulator Simulasi Pendapatan</CardTitle>
-                <CardDescription>
-                    Gunakan alat ini untuk memproyeksikan pendapatan bersih harian Anda dengan menyesuaikan parameter kunci.
-                </CardDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle>Kalkulator Simulasi Pendapatan</CardTitle>
+                        <CardDescription>
+                            Gunakan alat ini untuk memproyeksikan pendapatan bersih dengan menyesuaikan parameter kunci.
+                        </CardDescription>
+                    </div>
+                     <Button variant="outline" size="sm" onClick={handleReset}>
+                        <RefreshCw className="mr-2 h-4 w-4" /> Reset Simulasi
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
-                    <SimulationInput label="Total Bebek" id="totalDucks" value={totalDucks} onChange={(e) => setTotalDucks(Number(e.target.value))} unit="ekor" />
-                    <SimulationInput label="Skema Pakan" id="feedSchema" value={feedSchema} onChange={(e) => setFeedSchema(Number(e.target.value))} unit="gram/ekor" />
-                    <SimulationInput label="Harga Pakan / 50 Kg" id="feedPrice" value={feedPricePer50Kg} onChange={(e) => setFeedPricePer50Kg(Number(e.target.value))} />
+                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" />
+                    <SimulationInput label="Total Skema Pakan" id="feedSchema" value={simulationState.feedSchema} onChange={handleInputChange('feedSchema')} unit="gram/ekor" />
+                    
+                    <div>
+                        <Label className="text-sm">Harga Pakan (dari Inventaris Aktif)</Label>
+                        <div className="flex gap-2 overflow-x-auto p-1">
+                             {activeFeedsForCalc.length > 0 ? (
+                                activeFeedsForCalc.map(f => (
+                                    <FeedPriceCard key={f.id} name={f.name} pricePerBag={f.pricePerBag} pricePerKg={f.pricePerKg} />
+                                ))
+                             ) : (
+                                <div className="text-xs text-muted-foreground p-3 bg-muted rounded-md w-full text-center">Tidak ada pakan aktif di inventaris.</div>
+                             )}
+                        </div>
+                    </div>
                     
                     <Separator />
                     
                     <div>
-                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur</h4>
+                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur Harian</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                           <SimulationInput label="Telur Grade A" id="gradeA" value={gradeA} onChange={(e) => setGradeA(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Grd. A" id="priceA" value={priceA} onChange={handleNumberChange(setPriceA)} />
+                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" />
+                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} />
                            
-                           <SimulationInput label="Telur Grade B" id="gradeB" value={gradeB} onChange={(e) => setGradeB(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Grd. B" id="priceB" value={priceB} onChange={handleNumberChange(setPriceB)} />
+                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" />
+                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} />
 
-                           <SimulationInput label="Telur Grade C" id="gradeC" value={gradeC} onChange={(e) => setGradeC(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Grd. C" id="priceC" value={priceC} onChange={handleNumberChange(setPriceC)} />
+                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" />
+                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} />
 
-                           <SimulationInput label="Telur Konsumsi" id="consumption" value={consumption} onChange={(e) => setConsumption(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={priceConsumption} onChange={handleNumberChange(setPriceConsumption)} />
+                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" />
+                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} />
                         </div>
                     </div>
                 </div>
@@ -134,7 +175,7 @@ export default function SimulationTab() {
                          <ResultDisplay label="Pendapatan Bersih / Hari" value={formatCurrency(netIncomePerDay)} icon={DollarSign} isProfit={netIncomePerDay > 0} isLoss={netIncomePerDay < 0} />
                          <ResultDisplay label="Pendapatan Bersih / Bulan" value={formatCurrency(netIncomePerMonth)} icon={DollarSign} isProfit={netIncomePerMonth > 0} isLoss={netIncomePerMonth < 0} />
                     </div>
-                    {initialTotalDucks === 0 && (
+                    {simulationState.totalDucks === 0 && (
                         <div className="flex items-start text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-700/50">
                             <AlertCircle className="h-4 w-4 mr-2 mt-0.5 shrink-0" />
                             <span>
