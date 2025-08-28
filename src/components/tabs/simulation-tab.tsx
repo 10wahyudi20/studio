@@ -108,11 +108,9 @@ export default function SimulationTab() {
                     priceConsumption: totals.consumption > 0 ? Math.round(totals.valueConsumption / totals.consumption) : 0,
                 }));
             } else {
-                // If no data, reset to avoid showing stale monthly data
                 handleReset();
             }
         } else {
-            // Reset to default when switching away from monthly
             handleReset();
         }
     }, [mode, eggProduction.weekly]);
@@ -141,7 +139,6 @@ export default function SimulationTab() {
         }));
     };
 
-    // Calculations
     const timeMultiplier = mode === 'weekly' ? 7 : mode === 'monthly' ? 30 : 1;
     const activeFeedsForCalc = feed.filter(f => f.stock > 0);
     const eggYield = simulationState.gradeA + simulationState.gradeB + simulationState.gradeC + simulationState.consumption;
@@ -189,7 +186,7 @@ export default function SimulationTab() {
             <CardContent className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                     <div className='space-y-2'>
-                        <Label>Pilih Mode Simulasi</Label>
+                        <h3 className="text-lg font-semibold">Pilih Mode Simulasi</h3>
                         <div className="flex gap-2">
                              <Button onClick={() => setMode('daily')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'daily' && "text-primary font-bold")}>Harian</Button>
                              <Button onClick={() => setMode('weekly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'weekly' && "text-primary font-bold")}>Mingguan</Button>
