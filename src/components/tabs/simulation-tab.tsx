@@ -156,9 +156,9 @@ export default function SimulationTab() {
                     <div className='space-y-2'>
                         <Label>Pilih Mode Simulasi</Label>
                         <div className="flex gap-2">
-                             <Button onClick={() => setMode('daily')} variant={mode === 'daily' ? 'default' : 'ghost'} className="w-full">Harian</Button>
-                             <Button onClick={() => setMode('weekly')} variant={mode === 'weekly' ? 'default' : 'ghost'} className="w-full">Mingguan</Button>
-                             <Button onClick={() => setMode('monthly')} variant={mode === 'monthly' ? 'default' : 'ghost'} className="w-full">Bulanan</Button>
+                             <Button onClick={() => setMode('daily')} variant="ghost" className={cn("w-full", mode === 'daily' && "text-primary font-bold")}>Harian</Button>
+                             <Button onClick={() => setMode('weekly')} variant="ghost" className={cn("w-full", mode === 'weekly' && "text-primary font-bold")}>Mingguan</Button>
+                             <Button onClick={() => setMode('monthly')} variant="ghost" className={cn("w-full", mode === 'monthly' && "text-primary font-bold")}>Bulanan</Button>
                         </div>
                     </div>
                     <Separator />
@@ -241,5 +241,3 @@ export default function SimulationTab() {
         </Card>
     );
 }
-
-    
