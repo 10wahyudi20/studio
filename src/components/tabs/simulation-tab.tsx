@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat } from 'lucide-react';
 import { Separator } from '../ui/separator';
 
-const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
+const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number | string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-2">
         <Label htmlFor={id} className="text-sm">{label}</Label>
         <div className="flex items-center">
@@ -47,10 +47,10 @@ export default function SimulationTab() {
     const [gradeC, setGradeC] = useState(0);
     const [consumption, setConsumption] = useState(0);
 
-    const [priceA, setPriceA] = useState(2500);
-    const [priceB, setPriceB] = useState(2400);
-    const [priceC, setPriceC] = useState(2300);
-    const [priceConsumption, setPriceConsumption] = useState(2000);
+    const [priceA, setPriceA] = useState<number | string>('');
+    const [priceB, setPriceB] = useState<number | string>('');
+    const [priceC, setPriceC] = useState<number | string>('');
+    const [priceConsumption, setPriceConsumption] = useState<number | string>('');
 
     useEffect(() => {
         const newTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -63,13 +63,23 @@ export default function SimulationTab() {
         setFeedPricePer50Kg(Math.round(newFeedPrice));
     }, [ducks, feed]);
 
+    const handleNumberChange = (setter: React.Dispatch<React.SetStateAction<number | string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setter(value === '' ? '' : Number(value));
+    };
 
     // Calculations
     const eggYield = gradeA + gradeB + gradeC + consumption;
     const feedPricePerKg = feedPricePer50Kg / 50;
     const totalFeedConsumptionKg = (totalDucks * feedSchema) / 1000;
     const totalFeedCostPerDay = totalFeedConsumptionKg * feedPricePerKg;
-    const grossIncomePerDay = (gradeA * priceA) + (gradeB * priceB) + (gradeC * priceC) + (consumption * priceConsumption);
+    
+    const pA = typeof priceA === 'number' ? priceA : 0;
+    const pB = typeof priceB === 'number' ? priceB : 0;
+    const pC = typeof priceC === 'number' ? priceC : 0;
+    const pCons = typeof priceConsumption === 'number' ? priceConsumption : 0;
+
+    const grossIncomePerDay = (gradeA * pA) + (gradeB * pB) + (gradeC * pC) + (consumption * pCons);
     const netIncomePerDay = grossIncomePerDay - totalFeedCostPerDay;
     const netIncomePerMonth = netIncomePerDay * 30;
 
@@ -99,16 +109,16 @@ export default function SimulationTab() {
                         <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                            <SimulationInput label="Telur Grade A" id="gradeA" value={gradeA} onChange={(e) => setGradeA(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Grd. A" id="priceA" value={priceA} onChange={(e) => setPriceA(Number(e.target.value))} />
+                           <SimulationInput label="Harga Grd. A" id="priceA" value={priceA} onChange={handleNumberChange(setPriceA)} />
                            
                            <SimulationInput label="Telur Grade B" id="gradeB" value={gradeB} onChange={(e) => setGradeB(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Grd. B" id="priceB" value={priceB} onChange={(e) => setPriceB(Number(e.target.value))} />
+                           <SimulationInput label="Harga Grd. B" id="priceB" value={priceB} onChange={handleNumberChange(setPriceB)} />
 
                            <SimulationInput label="Telur Grade C" id="gradeC" value={gradeC} onChange={(e) => setGradeC(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Grd. C" id="priceC" value={priceC} onChange={(e) => setPriceC(Number(e.target.value))} />
+                           <SimulationInput label="Harga Grd. C" id="priceC" value={priceC} onChange={handleNumberChange(setPriceC)} />
 
                            <SimulationInput label="Telur Konsumsi" id="consumption" value={consumption} onChange={(e) => setConsumption(Number(e.target.value))} unit="butir" />
-                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={priceConsumption} onChange={(e) => setPriceConsumption(Number(e.target.value))} />
+                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={priceConsumption} onChange={handleNumberChange(setPriceConsumption)} />
                         </div>
                     </div>
                 </div>
