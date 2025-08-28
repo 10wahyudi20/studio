@@ -16,7 +16,7 @@ const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label
     <div className="space-y-2">
         <Label htmlFor={id} className="text-sm">{label}</Label>
         <div className="flex items-center">
-            <Input id={id} type="number" value={value} onChange={onChange} className="h-9 text-primary font-semibold" {...props} />
+            <Input id={id} type="number" value={value} onChange={onChange} className={cn("text-primary font-semibold", props.className)} {...props} />
             {unit && <span className="ml-2 text-muted-foreground text-sm">{unit}</span>}
         </div>
     </div>
@@ -143,7 +143,7 @@ export default function SimulationTab() {
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
-                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" />
+                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" className="h-12 text-xl" />
                     
                     <div>
                         <Label className="text-sm">Harga Pakan (dari Inventaris Aktif)</Label>
@@ -164,7 +164,7 @@ export default function SimulationTab() {
                             {activeFeedsForCalc.map(f => (
                                 <div key={f.id}>
                                     <Label htmlFor={`schema-${f.id}`} className="text-xs text-muted-foreground">{f.name}</Label>
-                                    <Input id={`schema-${f.id}`} type="number" value={simulationState.feedSchemas[f.id] || ''} onChange={handleSchemaChange(f.id)} />
+                                    <Input id={`schema-${f.id}`} type="number" value={simulationState.feedSchemas[f.id] || ''} onChange={handleSchemaChange(f.id)} className="h-9"/>
                                 </div>
                             ))}
                          </div>
@@ -180,17 +180,17 @@ export default function SimulationTab() {
                     <div>
                         <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur Harian</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" />
-                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} />
+                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" />
+                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" />
                            
-                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" />
-                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} />
+                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" className="h-9" />
+                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} className="h-9" />
 
-                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" />
-                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} />
+                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" className="h-9" />
+                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} className="h-9" />
 
-                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" />
-                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} />
+                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" className="h-9" />
+                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} className="h-9" />
                         </div>
                     </div>
                 </div>
