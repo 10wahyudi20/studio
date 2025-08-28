@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package, Inbox } from 'lucide-react';
+import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package, Inbox, Scale } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import type { Feed } from '@/lib/types';
@@ -110,6 +110,8 @@ export default function SimulationTab() {
         const consumptionForThisFeedKg = (simulationState.totalDucks * schemaForThisFeed) / 1000;
         return sum + (consumptionForThisFeedKg * item.pricePerKg);
     }, 0);
+
+    const averageFeedCostPerKg = totalFeedConsumptionKg > 0 ? totalFeedCostPerDay / totalFeedConsumptionKg : 0;
     
     const pA = typeof simulationState.priceA === 'number' ? simulationState.priceA : 0;
     const pB = typeof simulationState.priceB === 'number' ? simulationState.priceB : 0;
@@ -200,6 +202,7 @@ export default function SimulationTab() {
                         <ResultDisplay label="Total Hasil Telur / Hari" value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
                         <ResultDisplay label="Total Konsumsi Pakan / Hari" value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
                         <ResultDisplay label="Biaya Pakan / Hari" value={formatCurrency(totalFeedCostPerDay)} icon={ArrowRight} />
+                        <ResultDisplay label="Biaya Pakan / Kg" value={formatCurrency(averageFeedCostPerKg)} icon={Scale} />
                         <ResultDisplay label="Pendapatan Kotor / Hari" value={formatCurrency(grossIncomePerDay)} icon={DollarSign} />
                     </div>
                     <div className="space-y-3 pt-4 border-t">
