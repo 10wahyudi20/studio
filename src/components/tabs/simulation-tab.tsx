@@ -156,9 +156,9 @@ export default function SimulationTab() {
                     <div className='space-y-2'>
                         <Label>Pilih Mode Simulasi</Label>
                         <div className="flex gap-2">
-                             <Button onClick={() => setMode('daily')} variant="ghost" className={cn("w-full", mode === 'daily' && "text-primary font-bold")}>Harian</Button>
-                             <Button onClick={() => setMode('weekly')} variant="ghost" className={cn("w-full", mode === 'weekly' && "text-primary font-bold")}>Mingguan</Button>
-                             <Button onClick={() => setMode('monthly')} variant="ghost" className={cn("w-full", mode === 'monthly' && "text-primary font-bold")}>Bulanan</Button>
+                             <Button onClick={() => setMode('daily')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'daily' && "text-primary font-bold")}>Harian</Button>
+                             <Button onClick={() => setMode('weekly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'weekly' && "text-primary font-bold")}>Mingguan</Button>
+                             <Button onClick={() => setMode('monthly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'monthly' && "text-primary font-bold")}>Bulanan</Button>
                         </div>
                     </div>
                     <Separator />
