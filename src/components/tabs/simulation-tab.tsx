@@ -146,9 +146,6 @@ export default function SimulationTab() {
                             Gunakan alat ini untuk memproyeksikan pendapatan bersih dengan menyesuaikan parameter kunci.
                         </CardDescription>
                     </div>
-                     <Button variant="outline" size="sm" onClick={handleReset}>
-                        <RefreshCw className="mr-2 h-4 w-4" /> Reset Simulasi
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-8">
@@ -216,7 +213,12 @@ export default function SimulationTab() {
                     </div>
                 </div>
                 <div className="space-y-6">
-                    <h3 className="text-lg font-semibold border-b pb-2">Hasil Simulasi</h3>
+                    <div className="flex justify-between items-center border-b pb-2">
+                        <h3 className="text-lg font-semibold">Hasil Simulasi</h3>
+                        <Button variant="outline" size="sm" onClick={handleReset} className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
+                            <RefreshCw className="mr-2 h-4 w-4" /> Reset
+                        </Button>
+                    </div>
                     <div className="space-y-3">
                         <ResultDisplay label={`Total Hasil Telur / ${periodLabel}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
                         <ResultDisplay label={`Total Konsumsi Pakan / ${periodLabel}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
