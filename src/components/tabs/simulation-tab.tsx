@@ -11,7 +11,7 @@ import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Pack
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import type { Feed, WeeklyProduction } from '@/lib/types';
-import { getMonth, getYear, format, startOfWeek, endOfWeek } from 'date-fns';
+import { getMonth, getYear, format, startOfWeek, endOfWeek, parse } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
@@ -249,7 +249,8 @@ export default function SimulationTab() {
                                 <SelectContent>
                                     {Object.keys(availableWeeks).length > 0 ? (
                                         Object.keys(availableWeeks).map(periodKey => {
-                                            const weekEndDate = endOfWeek(new Date(periodKey), { weekStartsOn: 1 });
+                                            const startDate = parse(periodKey, 'dd MMM yyyy', new Date(), { locale: idLocale });
+                                            const weekEndDate = endOfWeek(startDate, { weekStartsOn: 1 });
                                             return (
                                                 <SelectItem key={periodKey} value={periodKey}>
                                                     {`${periodKey} - ${format(weekEndDate, 'dd MMM yyyy', { locale: idLocale })}`}
