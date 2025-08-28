@@ -11,7 +11,7 @@ import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Pack
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import type { Feed, WeeklyProduction } from '@/lib/types';
-import { getMonth, getYear, format, startOfWeek, endOfWeek, parse } from 'date-fns';
+import { getMonth, getYear, format, startOfWeek, endOfWeek, parse, parseISO } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
@@ -120,16 +120,15 @@ export default function SimulationTab() {
                 }));
             }
         } else if (mode === 'weekly') {
-            const groupedByWeek = weeklyDataForMonth.reduce((acc, week) => {
-                const start = startOfWeek(new Date(week.startDate), { weekStartsOn: 1 });
-                const periodKey = format(start, 'dd MMM yyyy', { locale: idLocale });
-                 if (!acc[periodKey]) {
+             const groupedByPeriod = weeklyDataForMonth.reduce((acc, week) => {
+                const periodKey = `${format(new Date(week.startDate), 'dd/MM/yy', { locale: idLocale })} - ${format(new Date(week.endDate), 'dd/MM/yy', { locale: idLocale })}`;
+                if (!acc[periodKey]) {
                     acc[periodKey] = [];
                 }
                 acc[periodKey].push(week);
                 return acc;
             }, {} as Record<string, WeeklyProduction[]>);
-            setAvailableWeeks(groupedByWeek);
+            setAvailableWeeks(groupedByPeriod);
         }
     }, [mode, eggProduction.weekly]);
     
@@ -160,7 +159,7 @@ export default function SimulationTab() {
                 priceConsumption: subtotal.consumption > 0 ? Math.round(subtotal.valueConsumption / subtotal.consumption) : 0,
             }));
         } else if (mode === 'weekly' && !selectedWeek) {
-            handleReset(); // Reset if no week is selected
+            handleReset();
         }
     }, [selectedWeek, mode, availableWeeks]);
 
@@ -221,6 +220,12 @@ export default function SimulationTab() {
     const periodLabel = mode === 'daily' ? 'Hari' : mode === 'weekly' ? 'Minggu' : 'Bulan';
     const isDataAutoFilled = mode === 'monthly' || (mode === 'weekly' && !!selectedWeek);
 
+    const sortedWeekKeys = Object.keys(availableWeeks).sort((a, b) => {
+        const dateA = parse(a.split(' - ')[0], 'dd/MM/yy', new Date());
+        const dateB = parse(b.split(' - ')[0], 'dd/MM/yy', new Date());
+        return dateA.getTime() - dateB.getTime();
+    });
+
     return (
         <Card>
             <CardHeader className="text-center">
@@ -247,16 +252,12 @@ export default function SimulationTab() {
                                     <SelectValue placeholder="Pilih minggu dari tab Produksi..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {Object.keys(availableWeeks).length > 0 ? (
-                                        Object.keys(availableWeeks).map(periodKey => {
-                                            const startDate = parse(periodKey, 'dd MMM yyyy', new Date(), { locale: idLocale });
-                                            const weekEndDate = endOfWeek(startDate, { weekStartsOn: 1 });
-                                            return (
-                                                <SelectItem key={periodKey} value={periodKey}>
-                                                    {`${periodKey} - ${format(weekEndDate, 'dd MMM yyyy', { locale: idLocale })}`}
-                                                </SelectItem>
-                                            )
-                                        })
+                                    {sortedWeekKeys.length > 0 ? (
+                                        sortedWeekKeys.map(periodKey => (
+                                            <SelectItem key={periodKey} value={periodKey}>
+                                                {periodKey}
+                                            </SelectItem>
+                                        ))
                                     ) : (
                                         <div className="p-2 text-sm text-muted-foreground text-center">Tidak ada data mingguan di bulan ini.</div>
                                     )}
