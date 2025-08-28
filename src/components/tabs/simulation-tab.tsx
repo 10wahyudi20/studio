@@ -45,7 +45,7 @@ const FeedPriceCard = ({ name, pricePerBag, pricePerKg }: { name: string, priceP
 
 export default function SimulationTab() {
     const { ducks, feed } = useAppStore();
-    const [mode, setMode] = useState<'daily' | 'weekly'>('daily');
+    const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
     const getInitialState = () => {
         const initialTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -100,7 +100,7 @@ export default function SimulationTab() {
     };
 
     // Calculations
-    const timeMultiplier = mode === 'weekly' ? 7 : 1;
+    const timeMultiplier = mode === 'weekly' ? 7 : mode === 'monthly' ? 30 : 1;
     const activeFeedsForCalc = feed.filter(f => f.stock > 0);
     const eggYield = simulationState.gradeA + simulationState.gradeB + simulationState.gradeC + simulationState.consumption;
     
@@ -124,11 +124,17 @@ export default function SimulationTab() {
 
     const grossIncome = (simulationState.gradeA * pA) + (simulationState.gradeB * pB) + (simulationState.gradeC * pC) + (simulationState.consumption * pCons);
     const netIncome = grossIncome - totalFeedCost;
-    const netIncomePerMonth = mode === 'daily' ? netIncome * 30 : netIncome * 4;
+    
+    const projectedMonthlyIncome = 
+        mode === 'daily' ? netIncome * 30 : 
+        mode === 'weekly' ? netIncome * 4 : 
+        netIncome;
 
     const formatCurrency = (value: number) => {
         return `Rp ${value.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
     };
+
+    const periodLabel = mode === 'daily' ? 'Hari' : mode === 'weekly' ? 'Minggu' : 'Bulan';
 
     return (
         <Card>
@@ -150,8 +156,9 @@ export default function SimulationTab() {
                     <div className='space-y-2'>
                         <Label>Pilih Mode Simulasi</Label>
                         <div className="flex gap-2">
-                             <Button onClick={() => setMode('daily')} variant={mode === 'daily' ? 'default' : 'outline'} className="w-full">Simulasi Harian</Button>
-                             <Button onClick={() => setMode('weekly')} variant={mode === 'weekly' ? 'default' : 'outline'} className="w-full">Simulasi Mingguan</Button>
+                             <Button onClick={() => setMode('daily')} variant={mode === 'daily' ? 'default' : 'outline'} className="w-full">Harian</Button>
+                             <Button onClick={() => setMode('weekly')} variant={mode === 'weekly' ? 'default' : 'outline'} className="w-full">Mingguan</Button>
+                             <Button onClick={() => setMode('monthly')} variant={mode === 'monthly' ? 'default' : 'outline'} className="w-full">Bulanan</Button>
                         </div>
                     </div>
                     <Separator />
@@ -192,7 +199,7 @@ export default function SimulationTab() {
                     <Separator />
                     
                     <div>
-                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({mode === 'daily' ? 'Harian' : 'Mingguan'})</h4>
+                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({periodLabel})</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                            <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" />
                            <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" />
@@ -211,15 +218,15 @@ export default function SimulationTab() {
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold border-b pb-2">Hasil Simulasi</h3>
                     <div className="space-y-3">
-                        <ResultDisplay label={`Total Hasil Telur / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
-                        <ResultDisplay label={`Total Konsumsi Pakan / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
-                        <ResultDisplay label={`Biaya Pakan / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
+                        <ResultDisplay label={`Total Hasil Telur / ${periodLabel}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
+                        <ResultDisplay label={`Total Konsumsi Pakan / ${periodLabel}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
+                        <ResultDisplay label={`Biaya Pakan / ${periodLabel}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
                         <ResultDisplay label="Biaya Pakan / Kg" value={formatCurrency(averageFeedCostPerKg)} icon={Scale} />
-                        <ResultDisplay label={`Pendapatan Kotor / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={formatCurrency(grossIncome)} icon={DollarSign} />
+                        <ResultDisplay label={`Pendapatan Kotor / ${periodLabel}`} value={formatCurrency(grossIncome)} icon={DollarSign} />
                     </div>
                     <div className="space-y-3 pt-4 border-t">
-                         <ResultDisplay label={`Pendapatan Bersih / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={formatCurrency(netIncome)} icon={DollarSign} isProfit={netIncome > 0} isLoss={netIncome < 0} />
-                         <ResultDisplay label="Pendapatan Bersih / Bulan" value={formatCurrency(netIncomePerMonth)} icon={DollarSign} isProfit={netIncomePerMonth > 0} isLoss={netIncomePerMonth < 0} />
+                         <ResultDisplay label={`Pendapatan Bersih / ${periodLabel}`} value={formatCurrency(netIncome)} icon={DollarSign} isProfit={netIncome > 0} isLoss={netIncome < 0} />
+                         <ResultDisplay label="Proyeksi Pendapatan / Bulan" value={formatCurrency(projectedMonthlyIncome)} icon={DollarSign} isProfit={projectedMonthlyIncome > 0} isLoss={projectedMonthlyIncome < 0} />
                     </div>
                     {simulationState.totalDucks === 0 && (
                         <div className="flex items-start text-sm text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-md border border-yellow-200 dark:border-yellow-700/50">
@@ -234,3 +241,5 @@ export default function SimulationTab() {
         </Card>
     );
 }
+
+    
