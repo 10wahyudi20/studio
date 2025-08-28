@@ -11,6 +11,7 @@ import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Pack
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import type { Feed } from '@/lib/types';
+import { getMonth, getYear } from 'date-fns';
 
 const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number | string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-2">
@@ -44,7 +45,7 @@ const FeedPriceCard = ({ name, pricePerBag, pricePerKg }: { name: string, priceP
 );
 
 export default function SimulationTab() {
-    const { ducks, feed } = useAppStore();
+    const { ducks, feed, eggProduction } = useAppStore();
     const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
 
     const getInitialState = () => {
@@ -73,8 +74,49 @@ export default function SimulationTab() {
     const [simulationState, setSimulationState] = useState(getInitialState());
 
     useEffect(() => {
-        setSimulationState(getInitialState());
-    }, [ducks, feed]);
+        if (mode === 'monthly') {
+            const currentMonth = getMonth(new Date());
+            const currentYearValue = getYear(new Date());
+
+            const weeklyDataForMonth = eggProduction.weekly.filter(w => {
+                const endDate = new Date(w.endDate);
+                return getMonth(endDate) === currentMonth && getYear(endDate) === currentYearValue;
+            });
+
+            if (weeklyDataForMonth.length > 0) {
+                const totals = weeklyDataForMonth.reduce((acc, week) => {
+                    acc.gradeA += week.gradeA;
+                    acc.gradeB += week.gradeB;
+                    acc.gradeC += week.gradeC;
+                    acc.consumption += week.consumption;
+                    acc.valueA += week.gradeA * week.priceA;
+                    acc.valueB += week.gradeB * week.priceB;
+                    acc.valueC += week.gradeC * week.priceC;
+                    acc.valueConsumption += week.consumption * week.priceConsumption;
+                    return acc;
+                }, { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, valueA: 0, valueB: 0, valueC: 0, valueConsumption: 0 });
+
+                setSimulationState(prevState => ({
+                    ...prevState,
+                    gradeA: totals.gradeA,
+                    gradeB: totals.gradeB,
+                    gradeC: totals.gradeC,
+                    consumption: totals.consumption,
+                    priceA: totals.gradeA > 0 ? Math.round(totals.valueA / totals.gradeA) : 0,
+                    priceB: totals.gradeB > 0 ? Math.round(totals.valueB / totals.gradeB) : 0,
+                    priceC: totals.gradeC > 0 ? Math.round(totals.valueC / totals.gradeC) : 0,
+                    priceConsumption: totals.consumption > 0 ? Math.round(totals.valueConsumption / totals.consumption) : 0,
+                }));
+            } else {
+                // If no data, reset to avoid showing stale monthly data
+                handleReset();
+            }
+        } else {
+            // Reset to default when switching away from monthly
+            handleReset();
+        }
+    }, [mode, eggProduction.weekly]);
+
 
     const handleReset = () => {
         setSimulationState(getInitialState());
@@ -198,18 +240,24 @@ export default function SimulationTab() {
                     <div>
                         <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({periodLabel})</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" />
-                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" />
+                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" disabled={mode === 'monthly'} />
                            
-                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" className="h-9" />
-                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} className="h-9" />
+                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} className="h-9" disabled={mode === 'monthly'} />
 
-                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" className="h-9" />
-                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} className="h-9" />
+                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} className="h-9" disabled={mode === 'monthly'} />
 
-                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" className="h-9" />
-                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} className="h-9" />
+                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} className="h-9" disabled={mode === 'monthly'} />
                         </div>
+                         {mode === 'monthly' && (
+                             <div className="flex items-start text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 mt-3 rounded-md border border-blue-200 dark:border-blue-700/50">
+                                <AlertCircle className="h-3 w-3 mr-2 mt-0.5 shrink-0" />
+                                <span>Data kuantitas dan harga telur diambil secara otomatis dari Grand Total Penjualan Mingguan bulan ini.</span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="space-y-6">
