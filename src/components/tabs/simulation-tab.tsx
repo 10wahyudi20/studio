@@ -121,7 +121,7 @@ export default function SimulationTab() {
             }
         } else if (mode === 'weekly') {
              const groupedByPeriod = weeklyDataForMonth.reduce((acc, week) => {
-                const periodKey = `${format(new Date(week.startDate), 'dd/MM/yy', { locale: idLocale })} - ${format(new Date(week.endDate), 'dd/MM/yy', { locale: idLocale })}`;
+                const periodKey = `${format(new Date(week.startDate), 'dd MMM yyyy', { locale: idLocale })} - ${format(new Date(week.endDate), 'dd MMM yyyy', { locale: idLocale })}`;
                 if (!acc[periodKey]) {
                     acc[periodKey] = [];
                 }
@@ -221,8 +221,8 @@ export default function SimulationTab() {
     const isDataAutoFilled = mode === 'monthly' || (mode === 'weekly' && !!selectedWeek);
 
     const sortedWeekKeys = Object.keys(availableWeeks).sort((a, b) => {
-        const dateA = parse(a.split(' - ')[0], 'dd/MM/yy', new Date());
-        const dateB = parse(b.split(' - ')[0], 'dd/MM/yy', new Date());
+        const dateA = parse(a.split(' - ')[0], 'dd MMM yyyy', new Date(), { locale: idLocale });
+        const dateB = parse(b.split(' - ')[0], 'dd MMM yyyy', new Date(), { locale: idLocale });
         return dateA.getTime() - dateB.getTime();
     });
 
@@ -268,7 +268,7 @@ export default function SimulationTab() {
                     <Separator />
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
-                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" className="h-16 text-[40px]" />
+                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" className="h-16 text-[40px] font-bold" />
                     
                     <div>
                         <Label className="text-sm">Harga Pakan (dari Inventaris Aktif)</Label>
@@ -326,7 +326,7 @@ export default function SimulationTab() {
                     </div>
                 </div>
                 <div className="space-y-6">
-                     <div className="flex justify-between items-center border-b pb-2">
+                    <div className="flex justify-between items-center border-b pb-2">
                         <h3 className="text-lg font-semibold">Hasil Simulasi</h3>
                         <Button variant="outline" size="sm" onClick={handleReset} className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
                             <RefreshCw className="mr-2 h-4 w-4" /> Reset
