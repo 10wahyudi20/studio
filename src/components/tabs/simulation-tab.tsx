@@ -143,7 +143,7 @@ export default function SimulationTab() {
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
-                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" className="h-12 text-xl" />
+                    <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" className="h-16 text-[40px]" />
                     
                     <div>
                         <Label className="text-sm">Harga Pakan (dari Inventaris Aktif)</Label>
