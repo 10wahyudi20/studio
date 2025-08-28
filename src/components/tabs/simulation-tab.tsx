@@ -7,13 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package, Inbox, Scale } from 'lucide-react';
+import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package, Inbox, Scale, Printer } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import type { Feed, WeeklyProduction } from '@/lib/types';
 import { getMonth, getYear, format, startOfWeek, endOfWeek, parse, parseISO } from 'date-fns';
 import { id as idLocale } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number | string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-2">
@@ -47,7 +49,8 @@ const FeedPriceCard = ({ name, pricePerBag, pricePerKg }: { name: string, priceP
 );
 
 export default function SimulationTab() {
-    const { ducks, feed, eggProduction } = useAppStore();
+    const { ducks, feed, eggProduction, companyInfo } = useAppStore();
+    const { toast } = useToast();
     const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
     const [availableWeeks, setAvailableWeeks] = useState<Record<string, WeeklyProduction[]>>({});
     const [selectedWeek, setSelectedWeek] = useState<string>("");
@@ -217,7 +220,8 @@ export default function SimulationTab() {
         return `Rp ${value.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
     };
 
-    const periodLabel = mode === 'daily' ? 'Hari' : mode === 'weekly' ? 'Minggu' : 'Bulan';
+    const periodLabel = mode === 'daily' ? 'Harian' : mode === 'weekly' ? 'Mingguan' : 'Bulanan';
+    const periodLabelShort = mode === 'daily' ? 'Hari' : mode === 'weekly' ? 'Minggu' : 'Bulan';
     const isDataAutoFilled = mode === 'monthly' || (mode === 'weekly' && !!selectedWeek);
 
     const sortedWeekKeys = Object.keys(availableWeeks).sort((a, b) => {
@@ -225,6 +229,97 @@ export default function SimulationTab() {
         const dateB = parse(b.split(' - ')[0], 'dd MMM yyyy', new Date(), { locale: idLocale });
         return dateA.getTime() - dateB.getTime();
     });
+
+    const handlePrint = () => {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            toast({
+                variant: "destructive",
+                title: "Gagal Membuka Jendela Cetak",
+                description: "Pastikan pop-up diizinkan untuk situs ini."
+            });
+            return;
+        }
+
+        const feedSchemaHtml = activeFeedsForCalc.map(f => `
+            <tr>
+                <td>${f.name}</td>
+                <td class="text-right">${simulationState.feedSchemas[f.id] || 0} g</td>
+            </tr>
+        `).join('');
+        
+        const eggHtml = `
+            <tr><td>Grade A</td><td class="text-right">${simulationState.gradeA.toLocaleString('id-ID')} butir</td><td class="text-right">${formatCurrency(pA)}</td></tr>
+            <tr><td>Grade B</td><td class="text-right">${simulationState.gradeB.toLocaleString('id-ID')} butir</td><td class="text-right">${formatCurrency(pB)}</td></tr>
+            <tr><td>Grade C</td><td class="text-right">${simulationState.gradeC.toLocaleString('id-ID')} butir</td><td class="text-right">${formatCurrency(pC)}</td></tr>
+            <tr><td>Konsumsi</td><td class="text-right">${simulationState.consumption.toLocaleString('id-ID')} butir</td><td class="text-right">${formatCurrency(pCons)}</td></tr>
+        `;
+
+        const printContent = `
+            <html>
+                <head>
+                    <title>Laporan Simulasi Pendapatan - ${companyInfo.name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        h1, h2 { margin: 0; }
+                        p { margin: 5px 0; color: #555; }
+                        table { width: 100%; border-collapse: collapse; font-size: 10pt; margin-bottom: 20px;}
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-size: 14pt; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 5px; margin-bottom: 10px; }
+                        .summary-table td { font-size: 12pt; }
+                        .summary-table .label { font-weight: bold; }
+                        .summary-table .value { text-align: right; font-weight: bold; }
+                        .summary-table .profit { color: green; }
+                        .summary-table .loss { color: red; }
+                        .text-right { text-align: right; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Laporan Simulasi Pendapatan (${periodLabel})</h1>
+                        <p>${companyInfo.name}</p>
+                        <p>Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}</p>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Parameter Simulasi</div>
+                        <table>
+                            <tr><td width="50%">Total Bebek</td><td class="text-right">${simulationState.totalDucks.toLocaleString('id-ID')} ekor</td></tr>
+                            <tr><td colspan="2"><b>Skema Pakan</b></td></tr>
+                            ${feedSchemaHtml}
+                             <tr><td><b>Total Skema</b></td><td class="text-right"><b>${totalSchemaFromInputs.toLocaleString('id-ID')} g</b></td></tr>
+                            <tr><td colspan="2"><b>Hasil & Harga Telur / ${periodLabelShort}</b></td></tr>
+                            ${eggHtml}
+                        </table>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">Hasil Simulasi</div>
+                        <table class="summary-table">
+                            <tr><td class="label">Total Hasil Telur / ${periodLabelShort}</td><td class="value">${eggYield.toLocaleString('id-ID')} butir</td></tr>
+                            <tr><td class="label">Total Konsumsi Pakan / ${periodLabelShort}</td><td class="value">${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg</td></tr>
+                            <tr><td class="label">Biaya Pakan / Kg</td><td class="value">${formatCurrency(averageFeedCostPerKg)}</td></tr>
+                            <tr><td class="label">Total Biaya Pakan / ${periodLabelShort}</td><td class="value">${formatCurrency(totalFeedCost)}</td></tr>
+                            <tr><td class="label">Pendapatan Kotor / ${periodLabelShort}</td><td class="value">${formatCurrency(grossIncome)}</td></tr>
+                            <tr class="${netIncome >= 0 ? 'profit' : 'loss'}"><td class="label">Pendapatan Bersih / ${periodLabelShort}</td><td class="value">${formatCurrency(netIncome)}</td></tr>
+                            <tr class="${projectedMonthlyIncome >= 0 ? 'profit' : 'loss'}"><td class="label">Proyeksi Pendapatan / Bulan</td><td class="value">${formatCurrency(projectedMonthlyIncome)}</td></tr>
+                        </table>
+                    </div>
+
+                </body>
+            </html>
+        `;
+
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    };
 
     return (
         <Card>
@@ -303,7 +398,7 @@ export default function SimulationTab() {
                     <Separator />
                     
                     <div>
-                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({periodLabel})</h4>
+                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({periodLabelShort})</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                            <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" disabled={isDataAutoFilled} />
                            <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" disabled={isDataAutoFilled} />
@@ -328,19 +423,34 @@ export default function SimulationTab() {
                 <div className="space-y-6">
                     <div className="flex justify-between items-center border-b pb-2">
                         <h3 className="text-lg font-semibold">Hasil Simulasi</h3>
-                        <Button variant="outline" size="sm" onClick={handleReset} className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
-                            <RefreshCw className="mr-2 h-4 w-4" /> Reset
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" onClick={handlePrint} className="text-foreground hover:text-foreground bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                                            <Printer className="h-4 w-4" />
+                                            <span className="sr-only">Cetak</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                                        <p>Cetak</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <Button variant="outline" size="sm" onClick={handleReset} className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
+                                <RefreshCw className="mr-2 h-4 w-4" /> Reset
+                            </Button>
+                        </div>
                     </div>
                     <div className="space-y-3">
-                        <ResultDisplay label={`Total Hasil Telur / ${periodLabel}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
-                        <ResultDisplay label={`Total Konsumsi Pakan / ${periodLabel}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
+                        <ResultDisplay label={`Total Hasil Telur / ${periodLabelShort}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
+                        <ResultDisplay label={`Total Konsumsi Pakan / ${periodLabelShort}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
                         <ResultDisplay label="Biaya Pakan / Kg" value={formatCurrency(averageFeedCostPerKg)} icon={Scale} />
-                        <ResultDisplay label={`Biaya Pakan / ${periodLabel}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
-                        <ResultDisplay label={`Pendapatan Kotor / ${periodLabel}`} value={formatCurrency(grossIncome)} icon={DollarSign} />
+                        <ResultDisplay label={`Biaya Pakan / ${periodLabelShort}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
+                        <ResultDisplay label={`Pendapatan Kotor / ${periodLabelShort}`} value={formatCurrency(grossIncome)} icon={DollarSign} />
                     </div>
                     <div className="space-y-3 pt-4 border-t">
-                         <ResultDisplay label={`Pendapatan Bersih / ${periodLabel}`} value={formatCurrency(netIncome)} icon={DollarSign} isProfit={netIncome > 0} isLoss={netIncome < 0} />
+                         <ResultDisplay label={`Pendapatan Bersih / ${periodLabelShort}`} value={formatCurrency(netIncome)} icon={DollarSign} isProfit={netIncome > 0} isLoss={netIncome < 0} />
                          <ResultDisplay label="Proyeksi Pendapatan / Bulan" value={formatCurrency(projectedMonthlyIncome)} icon={DollarSign} isProfit={projectedMonthlyIncome > 0} isLoss={projectedMonthlyIncome < 0} />
                     </div>
                     {simulationState.totalDucks === 0 && (
