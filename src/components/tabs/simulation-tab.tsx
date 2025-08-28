@@ -180,15 +180,11 @@ export default function SimulationTab() {
 
     return (
         <Card>
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle>Kalkulator Simulasi Pendapatan</CardTitle>
-                        <CardDescription>
-                            Gunakan alat ini untuk memproyeksikan pendapatan bersih dengan menyesuaikan parameter kunci.
-                        </CardDescription>
-                    </div>
-                </div>
+            <CardHeader className="text-center">
+                <CardTitle>Kalkulator Simulasi Pendapatan</CardTitle>
+                <CardDescription>
+                    Gunakan alat ini untuk memproyeksikan pendapatan bersih dengan menyesuaikan parameter kunci.
+                </CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
