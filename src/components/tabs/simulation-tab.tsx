@@ -7,9 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package } from 'lucide-react';
+import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package, Inbox } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
+import type { Feed } from '@/lib/types';
 
 const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number | string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-2">
@@ -48,11 +49,15 @@ export default function SimulationTab() {
     const getInitialState = () => {
         const initialTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
         const activeFeeds = feed.filter(f => f.stock > 0);
-        const initialFeedSchema = activeFeeds.length > 0 ? activeFeeds.reduce((sum, f) => sum + f.schema, 0) : 150;
+        
+        const initialFeedSchemas = activeFeeds.reduce((acc, f) => {
+            acc[f.id] = f.schema;
+            return acc;
+        }, {} as Record<number, number>);
         
         return {
             totalDucks: initialTotalDucks,
-            feedSchema: Math.round(initialFeedSchema),
+            feedSchemas: initialFeedSchemas,
             gradeA: 0,
             gradeB: 0,
             gradeC: 0,
@@ -81,19 +86,29 @@ export default function SimulationTab() {
             [field]: value === '' ? '' : Number(value)
         }));
     };
+    
+    const handleSchemaChange = (feedId: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSimulationState(prevState => ({
+            ...prevState,
+            feedSchemas: {
+                ...prevState.feedSchemas,
+                [feedId]: value === '' ? 0 : Number(value)
+            }
+        }));
+    };
 
     // Calculations
     const activeFeedsForCalc = feed.filter(f => f.stock > 0);
     const eggYield = simulationState.gradeA + simulationState.gradeB + simulationState.gradeC + simulationState.consumption;
     
-    const totalFeedConsumptionKg = (simulationState.totalDucks * simulationState.feedSchema) / 1000;
+    const totalSchemaFromInputs = Object.values(simulationState.feedSchemas).reduce((sum, schema) => sum + (schema || 0), 0);
+    const totalFeedConsumptionKg = (simulationState.totalDucks * totalSchemaFromInputs) / 1000;
     
     const totalFeedCostPerDay = activeFeedsForCalc.reduce((sum, item) => {
-        // Assume schema is a weighted representation of the mix
-        const totalSchemaAllFeeds = activeFeedsForCalc.reduce((s, i) => s + i.schema, 0);
-        const feedRatio = totalSchemaAllFeeds > 0 ? item.schema / totalSchemaAllFeeds : 0;
-        const consumptionForThisFeed = totalFeedConsumptionKg * feedRatio;
-        return sum + (consumptionForThisFeed * item.pricePerKg);
+        const schemaForThisFeed = simulationState.feedSchemas[item.id] || 0;
+        const consumptionForThisFeedKg = (simulationState.totalDucks * schemaForThisFeed) / 1000;
+        return sum + (consumptionForThisFeedKg * item.pricePerKg);
     }, 0);
     
     const pA = typeof simulationState.priceA === 'number' ? simulationState.priceA : 0;
@@ -129,7 +144,6 @@ export default function SimulationTab() {
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
                     <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" />
-                    <SimulationInput label="Total Skema Pakan" id="feedSchema" value={simulationState.feedSchema} onChange={handleInputChange('feedSchema')} unit="gram/ekor" />
                     
                     <div>
                         <Label className="text-sm">Harga Pakan (dari Inventaris Aktif)</Label>
@@ -144,6 +158,23 @@ export default function SimulationTab() {
                         </div>
                     </div>
                     
+                    <div>
+                        <Label className="text-sm mb-2 block">Skema Pakan (gram/ekor)</Label>
+                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
+                            {activeFeedsForCalc.map(f => (
+                                <div key={f.id}>
+                                    <Label htmlFor={`schema-${f.id}`} className="text-xs text-muted-foreground">{f.name}</Label>
+                                    <Input id={`schema-${f.id}`} type="number" value={simulationState.feedSchemas[f.id] || ''} onChange={handleSchemaChange(f.id)} />
+                                </div>
+                            ))}
+                         </div>
+                         <div className="flex items-center gap-2 mt-3 p-2 bg-muted rounded-md">
+                            <Inbox className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm font-medium">Total Skema Pakan:</span>
+                            <span className="text-sm font-bold text-primary">{totalSchemaFromInputs.toLocaleString('id-ID')} g</span>
+                         </div>
+                    </div>
+
                     <Separator />
                     
                     <div>
