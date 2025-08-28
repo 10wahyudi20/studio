@@ -45,6 +45,7 @@ const FeedPriceCard = ({ name, pricePerBag, pricePerKg }: { name: string, priceP
 
 export default function SimulationTab() {
     const { ducks, feed } = useAppStore();
+    const [mode, setMode] = useState<'daily' | 'weekly'>('daily');
 
     const getInitialState = () => {
         const initialTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -99,28 +100,31 @@ export default function SimulationTab() {
     };
 
     // Calculations
+    const timeMultiplier = mode === 'weekly' ? 7 : 1;
     const activeFeedsForCalc = feed.filter(f => f.stock > 0);
     const eggYield = simulationState.gradeA + simulationState.gradeB + simulationState.gradeC + simulationState.consumption;
     
     const totalSchemaFromInputs = Object.values(simulationState.feedSchemas).reduce((sum, schema) => sum + (schema || 0), 0);
-    const totalFeedConsumptionKg = (simulationState.totalDucks * totalSchemaFromInputs) / 1000;
+    const totalFeedConsumptionKgPerDay = (simulationState.totalDucks * totalSchemaFromInputs) / 1000;
+    const totalFeedConsumptionKg = totalFeedConsumptionKgPerDay * timeMultiplier;
     
     const totalFeedCostPerDay = activeFeedsForCalc.reduce((sum, item) => {
         const schemaForThisFeed = simulationState.feedSchemas[item.id] || 0;
         const consumptionForThisFeedKg = (simulationState.totalDucks * schemaForThisFeed) / 1000;
         return sum + (consumptionForThisFeedKg * item.pricePerKg);
     }, 0);
+    const totalFeedCost = totalFeedCostPerDay * timeMultiplier;
 
-    const averageFeedCostPerKg = totalFeedConsumptionKg > 0 ? totalFeedCostPerDay / totalFeedConsumptionKg : 0;
+    const averageFeedCostPerKg = totalFeedConsumptionKgPerDay > 0 ? totalFeedCostPerDay / totalFeedConsumptionKgPerDay : 0;
     
     const pA = typeof simulationState.priceA === 'number' ? simulationState.priceA : 0;
     const pB = typeof simulationState.priceB === 'number' ? simulationState.priceB : 0;
     const pC = typeof simulationState.priceC === 'number' ? simulationState.priceC : 0;
     const pCons = typeof simulationState.priceConsumption === 'number' ? simulationState.priceConsumption : 0;
 
-    const grossIncomePerDay = (simulationState.gradeA * pA) + (simulationState.gradeB * pB) + (simulationState.gradeC * pC) + (simulationState.consumption * pCons);
-    const netIncomePerDay = grossIncomePerDay - totalFeedCostPerDay;
-    const netIncomePerMonth = netIncomePerDay * 30;
+    const grossIncome = (simulationState.gradeA * pA) + (simulationState.gradeB * pB) + (simulationState.gradeC * pC) + (simulationState.consumption * pCons);
+    const netIncome = grossIncome - totalFeedCost;
+    const netIncomePerMonth = mode === 'daily' ? netIncome * 30 : netIncome * 4;
 
     const formatCurrency = (value: number) => {
         return `Rp ${value.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
@@ -143,6 +147,14 @@ export default function SimulationTab() {
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
+                    <div className='space-y-2'>
+                        <Label>Pilih Mode Simulasi</Label>
+                        <div className="flex gap-2">
+                             <Button onClick={() => setMode('daily')} variant={mode === 'daily' ? 'default' : 'outline'} className="w-full">Simulasi Harian</Button>
+                             <Button onClick={() => setMode('weekly')} variant={mode === 'weekly' ? 'default' : 'outline'} className="w-full">Simulasi Mingguan</Button>
+                        </div>
+                    </div>
+                    <Separator />
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
                     <SimulationInput label="Total Bebek" id="totalDucks" value={simulationState.totalDucks} onChange={handleInputChange('totalDucks')} unit="ekor" className="h-16 text-[40px]" />
@@ -180,7 +192,7 @@ export default function SimulationTab() {
                     <Separator />
                     
                     <div>
-                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur Harian</h4>
+                        <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({mode === 'daily' ? 'Harian' : 'Mingguan'})</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                            <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" />
                            <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" />
@@ -199,14 +211,14 @@ export default function SimulationTab() {
                 <div className="space-y-6">
                     <h3 className="text-lg font-semibold border-b pb-2">Hasil Simulasi</h3>
                     <div className="space-y-3">
-                        <ResultDisplay label="Total Hasil Telur / Hari" value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
-                        <ResultDisplay label="Total Konsumsi Pakan / Hari" value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
-                        <ResultDisplay label="Biaya Pakan / Hari" value={formatCurrency(totalFeedCostPerDay)} icon={ArrowRight} />
+                        <ResultDisplay label={`Total Hasil Telur / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
+                        <ResultDisplay label={`Total Konsumsi Pakan / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
+                        <ResultDisplay label={`Biaya Pakan / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
                         <ResultDisplay label="Biaya Pakan / Kg" value={formatCurrency(averageFeedCostPerKg)} icon={Scale} />
-                        <ResultDisplay label="Pendapatan Kotor / Hari" value={formatCurrency(grossIncomePerDay)} icon={DollarSign} />
+                        <ResultDisplay label={`Pendapatan Kotor / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={formatCurrency(grossIncome)} icon={DollarSign} />
                     </div>
                     <div className="space-y-3 pt-4 border-t">
-                         <ResultDisplay label="Pendapatan Bersih / Hari" value={formatCurrency(netIncomePerDay)} icon={DollarSign} isProfit={netIncomePerDay > 0} isLoss={netIncomePerDay < 0} />
+                         <ResultDisplay label={`Pendapatan Bersih / ${mode === 'daily' ? 'Hari' : 'Minggu'}`} value={formatCurrency(netIncome)} icon={DollarSign} isProfit={netIncome > 0} isLoss={netIncome < 0} />
                          <ResultDisplay label="Pendapatan Bersih / Bulan" value={formatCurrency(netIncomePerMonth)} icon={DollarSign} isProfit={netIncomePerMonth > 0} isLoss={netIncomePerMonth < 0} />
                     </div>
                     {simulationState.totalDucks === 0 && (
