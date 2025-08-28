@@ -11,12 +11,13 @@ import ProductionTab from "@/components/tabs/production-tab";
 import FeedTab from "@/components/tabs/feed-tab";
 import FinanceTab from "@/components/tabs/finance-tab";
 import ReportsTab from "@/components/tabs/reports-tab";
+import SimulationTab from "@/components/tabs/simulation-tab";
 import AiPredictionTab from "@/components/tabs/ai-prediction-tab";
 import SettingsTab from "@/components/tabs/settings-tab";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Toaster } from "@/components/ui/toaster";
 import { Separator } from "@/components/ui/separator";
-import { Home, Users, Egg, Wheat, DollarSign, FileText, Sparkles, Settings } from "lucide-react";
+import { Home, Users, Egg, Wheat, DollarSign, FileText, Sparkles, Settings, TestTube } from "lucide-react";
 
 export default function ClientPage() {
   const { activeTab, setActiveTab } = useAppStore(state => ({
@@ -55,13 +56,14 @@ export default function ClientPage() {
         >
           <div className="sticky top-20 z-40 -mt-1 pt-1 pb-2 bg-background/80 backdrop-blur-sm">
             <div className="px-4 sm:px-6 lg:px-8">
-                <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-transparent p-0 gap-y-2">
+                <TabsList className="grid w-full h-auto grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 bg-transparent p-0 gap-y-2">
                   <NavLink key="home" value="home" icon={Home} label="Home" />
                   <NavLink key="population" value="population" icon={Users} label="Populasi" />
                   <NavLink key="production" value="production" icon={Egg} label="Produksi" />
                   <NavLink key="feed" value="feed" icon={Wheat} label="Pakan" />
                   <NavLink key="finance" value="finance" icon={DollarSign} label="Keuangan" />
                   <NavLink key="reports" value="reports" icon={FileText} label="Laporan" />
+                  <NavLink key="simulation" value="simulation" icon={TestTube} label="Simulasi" />
                   <NavLink key="ai" value="ai" icon={Sparkles} label="Prediksi AI" />
                   <NavLink key="settings" value="settings" icon={Settings} label="Pengaturan" />
                 </TabsList>
@@ -75,6 +77,7 @@ export default function ClientPage() {
               <TabsContent value="feed"><FeedTab /></TabsContent>
               <TabsContent value="finance"><FinanceTab /></TabsContent>
               <TabsContent value="reports"><ReportsTab /></TabsContent>
+              <TabsContent value="simulation"><SimulationTab /></TabsContent>
               <TabsContent value="ai"><AiPredictionTab /></TabsContent>
               <TabsContent value="settings"><SettingsTab /></TabsContent>
           </div>
