@@ -10,8 +10,10 @@ import { cn } from '@/lib/utils';
 import { AlertCircle, ArrowRight, DollarSign, Egg, Users, Wheat, RefreshCw, Package, Inbox, Scale } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
-import type { Feed } from '@/lib/types';
-import { getMonth, getYear } from 'date-fns';
+import type { Feed, WeeklyProduction } from '@/lib/types';
+import { getMonth, getYear, format, startOfWeek, endOfWeek } from 'date-fns';
+import { id as idLocale } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const SimulationInput = ({ label, id, value, onChange, unit, ...props }: { label: string, id: string, value: number | string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, unit?: string } & React.InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-2">
@@ -47,6 +49,8 @@ const FeedPriceCard = ({ name, pricePerBag, pricePerKg }: { name: string, priceP
 export default function SimulationTab() {
     const { ducks, feed, eggProduction } = useAppStore();
     const [mode, setMode] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+    const [availableWeeks, setAvailableWeeks] = useState<Record<string, WeeklyProduction[]>>({});
+    const [selectedWeek, setSelectedWeek] = useState<string>("");
 
     const getInitialState = () => {
         const initialTotalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
@@ -73,16 +77,23 @@ export default function SimulationTab() {
 
     const [simulationState, setSimulationState] = useState(getInitialState());
 
+    const handleReset = () => {
+        setSimulationState(getInitialState());
+        setSelectedWeek("");
+    };
+    
     useEffect(() => {
+        handleReset();
+
+        const currentMonth = getMonth(new Date());
+        const currentYearValue = getYear(new Date());
+
+        const weeklyDataForMonth = eggProduction.weekly.filter(w => {
+            const endDate = new Date(w.endDate);
+            return getMonth(endDate) === currentMonth && getYear(endDate) === currentYearValue;
+        });
+
         if (mode === 'monthly') {
-            const currentMonth = getMonth(new Date());
-            const currentYearValue = getYear(new Date());
-
-            const weeklyDataForMonth = eggProduction.weekly.filter(w => {
-                const endDate = new Date(w.endDate);
-                return getMonth(endDate) === currentMonth && getYear(endDate) === currentYearValue;
-            });
-
             if (weeklyDataForMonth.length > 0) {
                 const totals = weeklyDataForMonth.reduce((acc, week) => {
                     acc.gradeA += week.gradeA;
@@ -107,18 +118,52 @@ export default function SimulationTab() {
                     priceC: totals.gradeC > 0 ? Math.round(totals.valueC / totals.gradeC) : 0,
                     priceConsumption: totals.consumption > 0 ? Math.round(totals.valueConsumption / totals.consumption) : 0,
                 }));
-            } else {
-                handleReset();
             }
-        } else {
-            handleReset();
+        } else if (mode === 'weekly') {
+            const groupedByWeek = weeklyDataForMonth.reduce((acc, week) => {
+                const start = startOfWeek(new Date(week.startDate), { weekStartsOn: 1 });
+                const periodKey = format(start, 'dd MMM yyyy', { locale: idLocale });
+                 if (!acc[periodKey]) {
+                    acc[periodKey] = [];
+                }
+                acc[periodKey].push(week);
+                return acc;
+            }, {} as Record<string, WeeklyProduction[]>);
+            setAvailableWeeks(groupedByWeek);
         }
     }, [mode, eggProduction.weekly]);
+    
+    useEffect(() => {
+        if (mode === 'weekly' && selectedWeek && availableWeeks[selectedWeek]) {
+            const weekEntries = availableWeeks[selectedWeek];
+            const subtotal = weekEntries.reduce((acc, week) => {
+                acc.gradeA += week.gradeA;
+                acc.gradeB += week.gradeB;
+                acc.gradeC += week.gradeC;
+                acc.consumption += week.consumption;
+                acc.valueA += week.gradeA * week.priceA;
+                acc.valueB += week.gradeB * week.priceB;
+                acc.valueC += week.gradeC * week.priceC;
+                acc.valueConsumption += week.consumption * week.priceConsumption;
+                return acc;
+            }, { gradeA: 0, gradeB: 0, gradeC: 0, consumption: 0, valueA: 0, valueB: 0, valueC: 0, valueConsumption: 0 });
 
+            setSimulationState(prevState => ({
+                ...prevState,
+                gradeA: subtotal.gradeA,
+                gradeB: subtotal.gradeB,
+                gradeC: subtotal.gradeC,
+                consumption: subtotal.consumption,
+                priceA: subtotal.gradeA > 0 ? Math.round(subtotal.valueA / subtotal.gradeA) : 0,
+                priceB: subtotal.gradeB > 0 ? Math.round(subtotal.valueB / subtotal.gradeB) : 0,
+                priceC: subtotal.gradeC > 0 ? Math.round(subtotal.valueC / subtotal.gradeC) : 0,
+                priceConsumption: subtotal.consumption > 0 ? Math.round(subtotal.valueConsumption / subtotal.consumption) : 0,
+            }));
+        } else if (mode === 'weekly' && !selectedWeek) {
+            handleReset(); // Reset if no week is selected
+        }
+    }, [selectedWeek, mode, availableWeeks]);
 
-    const handleReset = () => {
-        setSimulationState(getInitialState());
-    };
 
     const handleInputChange = (field: keyof typeof simulationState) => (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -174,6 +219,7 @@ export default function SimulationTab() {
     };
 
     const periodLabel = mode === 'daily' ? 'Hari' : mode === 'weekly' ? 'Minggu' : 'Bulan';
+    const isDataAutoFilled = mode === 'monthly' || (mode === 'weekly' && !!selectedWeek);
 
     return (
         <Card>
@@ -188,11 +234,35 @@ export default function SimulationTab() {
                     <div className='space-y-2'>
                         <h3 className="text-lg font-semibold">Pilih Mode Simulasi</h3>
                         <div className="flex gap-2">
-                             <Button onClick={() => setMode('daily')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'daily' && "text-primary font-bold")}>Harian</Button>
-                             <Button onClick={() => setMode('weekly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'weekly' && "text-primary font-bold")}>Mingguan</Button>
-                             <Button onClick={() => setMode('monthly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'monthly' && "text-primary font-bold")}>Bulanan</Button>
+                             <Button onClick={() => setMode('daily')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'daily' ? "text-primary font-bold" : "text-muted-foreground")}>Harian</Button>
+                             <Button onClick={() => setMode('weekly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'weekly' ? "text-primary font-bold" : "text-muted-foreground")}>Mingguan</Button>
+                             <Button onClick={() => setMode('monthly')} variant="ghost" className={cn("w-full hover:bg-transparent", mode === 'monthly' ? "text-primary font-bold" : "text-muted-foreground")}>Bulanan</Button>
                         </div>
                     </div>
+                     {mode === 'weekly' && (
+                        <div className="space-y-2">
+                            <Label>Pilih Periode Mingguan</Label>
+                            <Select value={selectedWeek} onValueChange={setSelectedWeek}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Pilih minggu dari tab Produksi..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.keys(availableWeeks).length > 0 ? (
+                                        Object.keys(availableWeeks).map(periodKey => {
+                                            const weekEndDate = endOfWeek(new Date(periodKey), { weekStartsOn: 1 });
+                                            return (
+                                                <SelectItem key={periodKey} value={periodKey}>
+                                                    {`${periodKey} - ${format(weekEndDate, 'dd MMM yyyy', { locale: idLocale })}`}
+                                                </SelectItem>
+                                            )
+                                        })
+                                    ) : (
+                                        <div className="p-2 text-sm text-muted-foreground text-center">Tidak ada data mingguan di bulan ini.</div>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                     <Separator />
                     <h3 className="text-lg font-semibold border-b pb-2">Parameter Simulasi</h3>
                     
@@ -233,28 +303,28 @@ export default function SimulationTab() {
                     <div>
                         <h4 className="font-medium mb-3">Input Kuantitas & Harga Telur ({periodLabel})</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
-                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Telur Grade A" id="gradeA" value={simulationState.gradeA} onChange={handleInputChange('gradeA')} unit="butir" className="h-9" disabled={isDataAutoFilled} />
+                           <SimulationInput label="Harga Grd. A" id="priceA" value={simulationState.priceA} onChange={handleInputChange('priceA')} className="h-9" disabled={isDataAutoFilled} />
                            
-                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
-                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Telur Grade B" id="gradeB" value={simulationState.gradeB} onChange={handleInputChange('gradeB')} unit="butir" className="h-9" disabled={isDataAutoFilled} />
+                           <SimulationInput label="Harga Grd. B" id="priceB" value={simulationState.priceB} onChange={handleInputChange('priceB')} className="h-9" disabled={isDataAutoFilled} />
 
-                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
-                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Telur Grade C" id="gradeC" value={simulationState.gradeC} onChange={handleInputChange('gradeC')} unit="butir" className="h-9" disabled={isDataAutoFilled} />
+                           <SimulationInput label="Harga Grd. C" id="priceC" value={simulationState.priceC} onChange={handleInputChange('priceC')} className="h-9" disabled={isDataAutoFilled} />
 
-                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" className="h-9" disabled={mode === 'monthly'} />
-                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} className="h-9" disabled={mode === 'monthly'} />
+                           <SimulationInput label="Telur Konsumsi" id="consumption" value={simulationState.consumption} onChange={handleInputChange('consumption')} unit="butir" className="h-9" disabled={isDataAutoFilled} />
+                           <SimulationInput label="Harga Konsumsi" id="priceConsumption" value={simulationState.priceConsumption} onChange={handleInputChange('priceConsumption')} className="h-9" disabled={isDataAutoFilled} />
                         </div>
-                         {mode === 'monthly' && (
+                         {isDataAutoFilled && (
                              <div className="flex items-start text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 mt-3 rounded-md border border-blue-200 dark:border-blue-700/50">
                                 <AlertCircle className="h-3 w-3 mr-2 mt-0.5 shrink-0" />
-                                <span>Data kuantitas dan harga telur diambil secara otomatis dari Grand Total Penjualan Mingguan bulan ini.</span>
+                                <span>Data kuantitas dan harga telur diambil secara otomatis dari tab Produksi. Input dinonaktifkan.</span>
                             </div>
                         )}
                     </div>
                 </div>
                 <div className="space-y-6">
-                    <div className="flex justify-between items-center border-b pb-2">
+                     <div className="flex justify-between items-center border-b pb-2">
                         <h3 className="text-lg font-semibold">Hasil Simulasi</h3>
                         <Button variant="outline" size="sm" onClick={handleReset} className="text-destructive border-destructive hover:bg-destructive/10 hover:text-destructive">
                             <RefreshCw className="mr-2 h-4 w-4" /> Reset
@@ -263,8 +333,8 @@ export default function SimulationTab() {
                     <div className="space-y-3">
                         <ResultDisplay label={`Total Hasil Telur / ${periodLabel}`} value={`${eggYield.toLocaleString('id-ID')} butir`} icon={Egg} />
                         <ResultDisplay label={`Total Konsumsi Pakan / ${periodLabel}`} value={`${totalFeedConsumptionKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`} icon={Wheat} />
-                        <ResultDisplay label={`Biaya Pakan / ${periodLabel}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
                         <ResultDisplay label="Biaya Pakan / Kg" value={formatCurrency(averageFeedCostPerKg)} icon={Scale} />
+                        <ResultDisplay label={`Biaya Pakan / ${periodLabel}`} value={formatCurrency(totalFeedCost)} icon={ArrowRight} />
                         <ResultDisplay label={`Pendapatan Kotor / ${periodLabel}`} value={formatCurrency(grossIncome)} icon={DollarSign} />
                     </div>
                     <div className="space-y-3 pt-4 border-t">
