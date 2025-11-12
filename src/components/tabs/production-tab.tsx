@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React from "react";
@@ -6,8 +7,8 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, DollarSign, Printer } from "lucide-react";
-import { format, addDays, isToday, getDaysInMonth } from "date-fns";
+import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, DollarSign, Printer, AlertTriangle } from "lucide-react";
+import { format, addDays, isToday, getDaysInMonth, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -583,9 +584,9 @@ export default function ProductionTab() {
 
   const weeklyDataForMonth = eggProduction.weekly
     .filter(w => {
-        if (!w || !w.endDate) return false;
-        const endDate = new Date(w.endDate);
-        return endDate.getMonth() === currentDate.getMonth() && endDate.getFullYear() === currentDate.getFullYear();
+        if (!w || !w.startDate) return false;
+        const startDate = new Date(w.startDate);
+        return startDate.getMonth() === currentDate.getMonth() && startDate.getFullYear() === currentDate.getFullYear();
     })
     .sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
     
@@ -1371,7 +1372,12 @@ export default function ProductionTab() {
                                       <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "dd/MM/yyyy")}</TableCell>
                                       <TableCell className="align-middle text-center p-2">{format(new Date(day.date), "eeee", { locale: idLocale })}</TableCell>
                                       <TableCell className="align-middle text-center p-2">{day.totalEggs}</TableCell>
-                                      <TableCell className="align-middle text-center p-2">{day.productivity.toFixed(2)}%</TableCell>
+                                      <TableCell className={cn("align-middle text-center p-2 font-semibold", day.productivity < 45 && "text-red-500")}>
+                                          <div className="flex items-center justify-center gap-1">
+                                              {day.productivity < 45 && <AlertTriangle className="h-4 w-4" />}
+                                              {day.productivity.toFixed(2)}%
+                                          </div>
+                                      </TableCell>
                                       {ducks.map(duck => {
                                           const production = day.perCage[duck.cage];
                                           const productivity = duck.quantity > 0 && production != null
