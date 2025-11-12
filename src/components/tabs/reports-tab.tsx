@@ -166,13 +166,13 @@ export default function ReportsTab() {
              if(feed.length > 0) {
                 autoTable(doc, {
                     startY: finalY,
-                    head: [['Stok Pakan (Saat Laporan Dibuat)']],
+                    head: [['Stok Pakan (Saat Laporan Dibuat)', 'Jumlah Stok']],
                     body: feed.map(f => [
                         `${f.name} (${f.supplier})`,
-                        `${f.stock.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Kg`
+                        `${f.stock.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`
                     ]),
                     theme: 'grid',
-                    headStyles: { fillColor: [129, 199, 132] },
+                    headStyles: { fillColor: [255, 183, 77] }, // Amber for feed
                      didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
@@ -285,3 +285,5 @@ export default function ReportsTab() {
     </div>
   );
 }
+
+    
