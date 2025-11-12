@@ -69,6 +69,14 @@ export default function ReportsTab() {
         const totalIncomeAllTime = finance.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
         const totalExpenseAllTime = finance.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
         const netProfitAllTime = totalIncomeAllTime - totalExpenseAllTime;
+        
+        // --- FEED STOCK AND ESTIMATION CALCULATION ---
+        const totalStock = feed.reduce((sum, item) => sum + item.stock, 0);
+        const activeFeeds = feed.filter(f => f.stock > 0);
+        const totalDailySchema = activeFeeds.reduce((sum, item) => sum + item.schema, 0);
+        const dailyFeedConsumptionKg = (totalDucks * totalDailySchema) / 1000;
+        const feedDaysLeft = dailyFeedConsumptionKg > 0 ? totalStock / dailyFeedConsumptionKg : Infinity;
+        const feedEstimationText = isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} hari` : 'N/A';
 
         if (dailyProdDataForPeriod.length === 0 && financeDataForPeriod.length === 0 && ducks.length === 0 && feed.length === 0 && !lastPrediction) {
             toast({
@@ -96,7 +104,7 @@ export default function ReportsTab() {
             // --- ALL-TIME SUMMARY DATA ---
             autoTable(doc, {
                 startY: finalY,
-                head: [['Ringkasan Umum (Keseluruhan)']],
+                head: [['Ringkasan Umum (Keseluruhan)', 'Jumlah']],
                 body: [
                     ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} ekor`],
                     ['Total Produksi Telur', `${totalEggsAllTime.toLocaleString('id-ID')} butir`],
@@ -105,7 +113,8 @@ export default function ReportsTab() {
                     ['Laba / Rugi Bersih', `Rp ${netProfitAllTime.toLocaleString('id-ID')}`],
                 ],
                 theme: 'grid',
-                headStyles: { fillColor: [66, 165, 245] }
+                headStyles: { fillColor: [66, 165, 245] },
+                columnStyles: { 1: { halign: 'right' } }
             });
             finalY = (doc as any).lastAutoTable.finalY + 10;
             
@@ -121,7 +130,8 @@ export default function ReportsTab() {
                     ]),
                     theme: 'striped',
                     headStyles: { fillColor: [33, 150, 243] },
-                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; },
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
@@ -141,7 +151,8 @@ export default function ReportsTab() {
                     ]),
                     theme: 'striped',
                     headStyles: { fillColor: [76, 175, 80] }, // Green for income
-                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; },
+                    columnStyles: { 2: { halign: 'right' } }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
@@ -157,7 +168,8 @@ export default function ReportsTab() {
                     ]),
                     theme: 'striped',
                     headStyles: { fillColor: [244, 67, 54] }, // Red for expense
-                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; },
+                    columnStyles: { 2: { halign: 'right' } }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
@@ -167,13 +179,17 @@ export default function ReportsTab() {
                 autoTable(doc, {
                     startY: finalY,
                     head: [['Stok Pakan (Saat Laporan Dibuat)', 'Jumlah Stok']],
-                    body: feed.map(f => [
-                        `${f.name} (${f.supplier})`,
-                        `${f.stock.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`
-                    ]),
+                    body: [
+                        ...feed.map(f => [
+                            `${f.name} (${f.supplier})`,
+                            `${f.stock.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`
+                        ]),
+                        ['Estimasi Habis', { content: feedEstimationText, styles: { fontStyle: 'bold' } }]
+                    ],
                     theme: 'grid',
                     headStyles: { fillColor: [255, 183, 77] }, // Amber for feed
-                     didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; },
+                    columnStyles: { 1: { halign: 'right' } }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
@@ -199,7 +215,8 @@ export default function ReportsTab() {
                     ]),
                     theme: 'striped',
                     headStyles: { fillColor: [149, 117, 205] }, // Deep Purple
-                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; }
+                    didDrawPage: (data) => { if(data.cursor) finalY = data.cursor.y; },
+                    columnStyles: { 1: { halign: 'right' } }
                 });
                 finalY = (doc as any).lastAutoTable.finalY + 10;
 
