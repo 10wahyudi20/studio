@@ -260,13 +260,31 @@ export default function SettingsTab() {
   };
   
   const handleReset = () => {
+    // 1. Auto-export the current state
+    const state = getFullState();
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(state, null, 2)
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = `clucksmart_backup_auto_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+
+    // 2. Reset the state
     resetState();
-    // After reset, need to get the new initial state
+    
+    // 3. Update local component state to reflect the reset
     const newInitialState = useAppStore.getState().getInitialState();
     setInfo(newInitialState.companyInfo);
     setLogoPreview(newInitialState.companyInfo.logo);
     setBackgroundPreview(newInitialState.companyInfo.loginBackground || null);
-    toast({ variant: "destructive", title: "Reset Berhasil", description: "Semua data telah dikosongkan." });
+
+    // 4. Notify the user
+    toast({ 
+        variant: "destructive", 
+        title: "Lembaran Baru Dibuat!", 
+        description: "Data lama telah diekspor secara otomatis dan semua data aplikasi telah dikosongkan." 
+    });
   }
 
   // Effect to update local state when global state changes (e.g., after import)
@@ -435,7 +453,7 @@ export default function SettingsTab() {
                     <AlertDialogHeader>
                     <AlertDialogTitle>Buat Lembaran Baru?</AlertDialogTitle>
                     <AlertDialogDesc>
-                        Aksi ini akan menghapus semua data yang telah Anda masukkan (inventaris, produksi, keuangan, dll) secara permanen dan mengembalikan aplikasi ke keadaan kosong. Anda akan memulai dari awal. Aksi ini tidak dapat dibatalkan.
+                        Tindakan ini akan **menyimpan data Anda saat ini secara otomatis** ke file backup, lalu mengosongkan aplikasi. Anda akan memulai dari awal dengan lembaran baru.
                     </AlertDialogDesc>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -450,3 +468,5 @@ export default function SettingsTab() {
     </div>
   );
 }
+
+    
