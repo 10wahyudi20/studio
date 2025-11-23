@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription as AlertDialogDesc, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Upload, Download, Cloud, FilePlus, Volume2, Loader2, Eye, EyeOff, ShieldCheck, ChevronRight } from "lucide-react";
+import { Upload, Download, Cloud, FilePlus, Volume2, Loader2, Eye, EyeOff, ShieldCheck, ChevronRight, AlertTriangle } from "lucide-react";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { textToSpeech, TextToSpeechOutput } from "@/ai/flows/text-to-speech";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -287,6 +287,19 @@ export default function SettingsTab() {
     });
   }
 
+  const handleMasterReset = () => {
+    resetState();
+    const newInitialState = useAppStore.getState().getInitialState();
+    setInfo(newInitialState.companyInfo);
+    setLogoPreview(newInitialState.companyInfo.logo);
+    setBackgroundPreview(newInitialState.companyInfo.loginBackground || null);
+    toast({ 
+        variant: "destructive", 
+        title: "Master Reset Berhasil!", 
+        description: "Semua data aplikasi, termasuk pengaturan, telah dihapus permanen." 
+    });
+  }
+
   // Effect to update local state when global state changes (e.g., after import)
   React.useEffect(() => {
     setInfo(companyInfo);
@@ -445,8 +458,8 @@ export default function SettingsTab() {
             <MegaCloudAuthDialog />
             <AlertDialog>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                        <FilePlus className="mr-2 h-4 w-4" /> Buat Lembaran Baru (Reset)
+                    <Button>
+                        <FilePlus className="mr-2 h-4 w-4" /> Buat Lembaran Baru
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -458,7 +471,26 @@ export default function SettingsTab() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                     <AlertDialogCancel>Batal</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleReset} className="bg-destructive hover:bg-destructive/90">Ya, Buat Lembaran Baru</AlertDialogAction>
+                    <AlertDialogAction onClick={handleReset} className="bg-yellow-500 hover:bg-yellow-600">Ya, Buat Lembaran Baru</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
+                        <AlertTriangle className="mr-2 h-4 w-4" /> Master Reset Aplikasi
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Anda Yakin Ingin Melakukan Master Reset?</AlertDialogTitle>
+                    <AlertDialogDesc>
+                        Tindakan ini akan **MENGHAPUS SEMUA DATA** aplikasi secara permanen, termasuk semua pengaturan, informasi perusahaan, dan kredensial. Tindakan ini **TIDAK DAPAT DIBATALKAN** dan **TIDAK** menyimpan cadangan otomatis.
+                    </AlertDialogDesc>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleMasterReset} className="bg-destructive hover:bg-destructive/90">Ya, Hapus Semua Data</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -468,5 +500,3 @@ export default function SettingsTab() {
     </div>
   );
 }
-
-    
