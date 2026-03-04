@@ -6,7 +6,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, PlusCircle, Edit, Trash2, Package, Inbox, Sigma, Wheat, Printer } from "lucide-react";
+import { MoreHorizontal, PlusCircle, Edit, Trash2, Package, Inbox, Sigma, Wheat, Printer, Timer } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -177,17 +177,24 @@ export default function FeedTab() {
 
   const handlePrint = () => {
     const doc = new jsPDF();
-    const tableData = feed.map(item => [
-        item.name,
-        item.supplier,
-        format(new Date(item.lastUpdated), "dd/MM/yyyy"),
-        `${item.stock.toLocaleString('id-ID')} Kg`,
-        `Rp ${item.pricePerKg.toLocaleString('id-ID')}`,
-        `Rp ${(item.stock * item.pricePerKg).toLocaleString('id-ID')}`
-    ]);
+    const tableData = feed.map(item => {
+        const dailyCons = (totalDucks * item.schema) / 1000;
+        const itemDaysLeft = dailyCons > 0 ? item.stock / dailyCons : Infinity;
+        const estText = isFinite(itemDaysLeft) ? `${Math.floor(itemDaysLeft)} Hari` : '-';
+        
+        return [
+            item.name,
+            item.supplier,
+            format(new Date(item.lastUpdated), "dd/MM/yyyy"),
+            `${item.stock.toLocaleString('id-ID')} Kg`,
+            estText,
+            `Rp ${item.pricePerKg.toLocaleString('id-ID')}`,
+            `Rp ${(item.stock * item.pricePerKg).toLocaleString('id-ID')}`
+        ];
+    });
     
     const tableFooter = [
-        ['Total', '', '', `${totalStock.toLocaleString('id-ID')} Kg`, '', `Rp ${totalStockValue.toLocaleString('id-ID')}`]
+        ['Total', '', '', `${totalStock.toLocaleString('id-ID')} Kg`, '', '', `Rp ${totalStockValue.toLocaleString('id-ID')}`]
     ];
 
     doc.setFontSize(18);
@@ -199,7 +206,7 @@ export default function FeedTab() {
 
     autoTable(doc, {
         startY: 45,
-        head: [['Nama Pakan', 'Supplier', 'Update', 'Stok', 'Harga/Kg', 'Nilai Stok']],
+        head: [['Nama Pakan', 'Supplier', 'Update', 'Stok', 'Estimasi', 'Harga/Kg', 'Nilai Stok']],
         body: tableData,
         foot: tableFooter,
         theme: 'grid',
@@ -221,7 +228,8 @@ export default function FeedTab() {
             2: { halign: 'center' },
             3: { halign: 'center' },
             4: { halign: 'center' },
-            5: { halign: 'center' }
+            5: { halign: 'center' },
+            6: { halign: 'center' }
         }
     });
 
@@ -231,7 +239,7 @@ export default function FeedTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <StatCard 
             title="Total Stok Pakan" 
             value={`${totalStock.toLocaleString('id-ID')} Kg`} 
@@ -239,21 +247,35 @@ export default function FeedTab() {
             valueClassName={feedStockStyling.value}
             iconClassName={feedStockStyling.icon}
             footer={
-                 <div className="w-full pt-2 text-xs space-y-2">
-                    <div className="space-y-1">
-                      {feed.map(item => (
-                          <div key={item.id} className="flex justify-between">
-                              <span>{item.name}:</span>
-                              <span>{item.stock.toLocaleString('id-ID')} Kg</span>
-                          </div>
-                      ))}
-                    </div>
-                    <div className={cn("flex justify-between font-bold border-t pt-1", feedStockStyling.value)}>
-                      <span>Estimasi Habis:</span>
-                       <span>
-                          {isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} hari` : 'N/A'}
-                      </span>
-                    </div>
+                 <div className="w-full pt-2 text-xs space-y-1">
+                    {feed.map(item => (
+                        <div key={item.id} className="flex justify-between">
+                            <span>{item.name}:</span>
+                            <span>{item.stock.toLocaleString('id-ID')} Kg</span>
+                        </div>
+                    ))}
+                </div>
+            }
+        />
+        <StatCard 
+            title="Total Estimasi Pakan" 
+            value={isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} Hari` : 'N/A'} 
+            icon={Timer} 
+            valueClassName={feedStockStyling.value}
+            footer={
+                <div className="w-full pt-2 text-xs space-y-1">
+                    {feed.map(item => {
+                        const dailyCons = (totalDucks * item.schema) / 1000;
+                        const itemDaysLeft = dailyCons > 0 ? item.stock / dailyCons : Infinity;
+                        return (
+                            <div key={item.id} className="flex justify-between">
+                                <span>{item.name}:</span>
+                                <span className="font-semibold">
+                                    {item.stock.toLocaleString('id-ID')} Kg ({isFinite(itemDaysLeft) ? `${Math.floor(itemDaysLeft)} hr` : '-'})
+                                </span>
+                            </div>
+                        )
+                    })}
                 </div>
             }
         />
@@ -343,6 +365,7 @@ export default function FeedTab() {
                   <TableHead className="text-center">Supplier</TableHead>
                   <TableHead className="text-center">Update</TableHead>
                   <TableHead className="text-center">Stok (Kg)</TableHead>
+                  <TableHead className="text-center">Estimasi Pakan</TableHead>
                   <TableHead className="text-center">Harga/50 Kg</TableHead>
                   <TableHead className="text-center">Harga/Kg</TableHead>
                   <TableHead className="text-center">Skema Pakan</TableHead>
@@ -352,12 +375,17 @@ export default function FeedTab() {
               <TableBody>
                 {feed.map((item) => {
                   const schemaPercentage = totalSchema > 0 ? (item.schema / totalSchema * 100) : 0;
+                  const dailyCons = (totalDucks * item.schema) / 1000;
+                  const itemDaysLeft = dailyCons > 0 ? item.stock / dailyCons : Infinity;
                   return (
                     <TableRow key={item.id}>
                       <TableCell className="text-center">{item.name}</TableCell>
                       <TableCell className="text-center">{item.supplier}</TableCell>
                       <TableCell className="text-center">{format(new Date(item.lastUpdated), "dd/MM/yyyy")}</TableCell>
                       <TableCell className="text-center">{item.stock.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center font-semibold text-primary">
+                        {isFinite(itemDaysLeft) ? `${Math.floor(itemDaysLeft)} Hari` : '-'}
+                      </TableCell>
                       <TableCell className="text-center">Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-center">Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema} - {schemaPercentage.toFixed(1)}%</TableCell>
@@ -403,7 +431,3 @@ export default function FeedTab() {
     </div>
   );
 }
-
-    
-
-    
