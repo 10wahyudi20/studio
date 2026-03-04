@@ -18,12 +18,13 @@ import { Transaction } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { cn } from "@/lib/utils";
 import { id as idLocale } from 'date-fns/locale';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const transactionSchema = z.object({
   date: z.string().nonempty("Tanggal harus diisi"),
@@ -34,6 +35,17 @@ const transactionSchema = z.object({
 });
 
 type TransactionFormData = z.infer<typeof transactionSchema>;
+
+const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+    value: i,
+    label: format(new Date(0, i), 'MMMM', { locale: idLocale }),
+}));
+
+const currentYearForOptions = new Date().getFullYear();
+const yearOptions = Array.from({ length: 5 }, (_, i) => ({
+    value: currentYearForOptions - i,
+    label: String(currentYearForOptions - i),
+}));
 
 const TransactionForm = ({ transaction, onSave, defaultType }: { transaction?: Transaction, onSave: (data: any) => void, defaultType: "debit" | "credit" }) => {
   const { toast } = useToast();
@@ -123,15 +135,23 @@ const TransactionForm = ({ transaction, onSave, defaultType }: { transaction?: T
 export default function FinanceTab() {
   const { finance, addTransaction, updateTransaction, removeTransaction, companyInfo } = useAppStore();
   const { toast } = useToast();
+  const [currentDate, setCurrentDate] = React.useState(new Date());
   
-  const currentMonth = new Date().getMonth();
-  const monthlyIncome = finance.filter(t => new Date(t.date).getMonth() === currentMonth && t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
-  const monthlyExpense = finance.filter(t => new Date(t.date).getMonth() === currentMonth && t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+  const selectedMonth = currentDate.getMonth();
+  const selectedYear = currentDate.getFullYear();
+
+  const filteredFinance = finance.filter(t => {
+      const d = new Date(t.date);
+      return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+  });
+
+  const monthlyIncome = filteredFinance.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
+  const monthlyExpense = filteredFinance.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
   const netProfit = monthlyIncome - monthlyExpense;
   const profitMargin = monthlyIncome > 0 ? (netProfit / monthlyIncome * 100).toFixed(2) : 0;
   
-  const debitTransactions = finance.filter(t => t.type === 'debit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const creditTransactions = finance.filter(t => t.type === 'credit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const debitTransactions = filteredFinance.filter(t => t.type === 'debit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const creditTransactions = filteredFinance.filter(t => t.type === 'credit').sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 
   const StatCard = ({ title, value, icon: Icon, valueClassName, iconClassName }: { title: string, value: string, icon: React.ElementType, valueClassName?: string, iconClassName?: string }) => (
@@ -148,15 +168,17 @@ export default function FinanceTab() {
   
   const handlePrint = () => {
     const doc = new jsPDF();
-    let finalY = 40; // Initial Y position
+    let finalY = 40;
 
-    // --- PDF Header ---
     doc.setFontSize(18);
     doc.text("Laporan Keuangan", 14, 22);
     doc.setFontSize(12);
     doc.text(companyInfo.name, 14, 30);
     doc.setFontSize(10);
-    doc.text(`Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}`, 14, 36);
+    doc.text(`Periode: ${format(currentDate, "MMMM yyyy", { locale: idLocale })}`, 14, 36);
+    doc.text(`Dicetak pada: ${format(new Date(), "d MMMM yyyy, HH:mm", { locale: idLocale })}`, 14, 42);
+
+    finalY = 50;
 
     const tableColumns = ['Tgl', 'Uraian', 'Jumlah', 'Harga Satuan', 'Total'];
     const commonColumnStyles: any = {
@@ -167,7 +189,6 @@ export default function FinanceTab() {
       4: { halign: 'right', cellWidth: 35 },
     };
     
-    // --- Debit Table ---
     const debitData = debitTransactions.map(t => [
         format(new Date(t.date), "dd/MM/yyyy"),
         t.description,
@@ -194,13 +215,12 @@ export default function FinanceTab() {
           { content: `Rp ${totalDebit.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
         theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80] }, // Green
+        headStyles: { fillColor: [76, 175, 80] },
         footStyles: { fillColor: [220, 220, 220] },
         columnStyles: commonColumnStyles,
     });
     finalY = (doc as any).lastAutoTable.finalY + 10;
     
-    // --- Credit Table ---
     const creditData = creditTransactions.map(t => [
         format(new Date(t.date), "dd/MM/yyyy"),
         t.description,
@@ -227,13 +247,12 @@ export default function FinanceTab() {
           { content: `Rp ${totalCredit.toLocaleString('id-ID')}`, styles: { halign: 'right', fontStyle: 'bold' } }
         ]],
         theme: 'grid',
-        headStyles: { fillColor: [244, 67, 54] }, // Red
+        headStyles: { fillColor: [244, 67, 54] },
         footStyles: { fillColor: [220, 220, 220] },
         columnStyles: commonColumnStyles,
     });
     finalY = (doc as any).lastAutoTable.finalY + 15;
 
-    // --- Summary Section ---
     const netProfitPDF = totalDebit - totalCredit;
     autoTable(doc, {
       startY: finalY,
@@ -244,10 +263,9 @@ export default function FinanceTab() {
       ],
       theme: 'plain',
       tableWidth: 100,
-      margin: {left: 96} // Align to the right side of the page
+      margin: {left: 96}
     });
 
-    // --- Open PDF ---
     doc.output('dataurlnewwindow');
     toast({ title: "Laporan Dibuat!", description: "Laporan telah dibuka di tab baru." });
   };
@@ -299,7 +317,7 @@ export default function FinanceTab() {
                 </TableHeader>
                   <TableBody>
                     {transactions.length === 0 ? (
-                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data {type === 'debit' ? 'pemasukan' : 'pengeluaran'}.</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Tidak ada data {type === 'debit' ? 'pemasukan' : 'pengeluaran'} di bulan ini.</TableCell></TableRow>
                     ) : (
                       transactions.map((t) => (
                         <TableRow key={t.id}>
@@ -339,7 +357,7 @@ export default function FinanceTab() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Pendapatan Bulanan" value={`Rp ${monthlyIncome.toLocaleString('id-ID')}`} icon={TrendingUp} />
+        <StatCard title="Pemasukan Bulanan" value={`Rp ${monthlyIncome.toLocaleString('id-ID')}`} icon={TrendingUp} />
         <StatCard title="Pengeluaran Bulanan" value={`Rp ${monthlyExpense.toLocaleString('id-ID')}`} icon={TrendingDown} />
         <StatCard 
             title="Laba Bersih" 
@@ -357,8 +375,51 @@ export default function FinanceTab() {
         />
       </div>
 
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Pembukuan</h2>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-2xl font-bold">Pembukuan</h2>
+            <div className="flex items-center gap-2 self-end">
+                <Select
+                    value={String(selectedMonth)}
+                    onValueChange={(value) => {
+                        const newDate = new Date(currentDate);
+                        newDate.setMonth(parseInt(value));
+                        setCurrentDate(newDate);
+                    }}
+                >
+                    <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder="Pilih Bulan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {monthOptions.map((month) => (
+                            <SelectItem key={month.value} value={String(month.value)}>
+                                {month.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select
+                    value={String(selectedYear)}
+                    onValueChange={(value) => {
+                        const newDate = new Date(currentDate);
+                        newDate.setFullYear(parseInt(value));
+                        setCurrentDate(newDate);
+                    }}
+                >
+                    <SelectTrigger className="w-[100px]">
+                        <SelectValue placeholder="Tahun" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {yearOptions.map((year) => (
+                            <SelectItem key={year.value} value={String(year.value)}>
+                                {year.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
+        
         <div className="grid grid-cols-1 gap-6">
             <TransactionTable title="Pemasukan (Debit)" transactions={debitTransactions} type="debit" />
             <TransactionTable title="Pengeluaran (Kredit)" transactions={creditTransactions} type="credit" />
