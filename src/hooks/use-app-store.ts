@@ -232,14 +232,22 @@ export const useAppStore = create<AppState & {
   addDailyProduction: (data) => {
     set(state => {
         const totalEggs = Object.values(data.perCage).reduce((sum, count) => sum + count, 0);
-        const totalDucks = state.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-        const productivity = totalDucks > 0 ? (totalEggs / totalDucks) * 100 : 0;
+        
+        // Capture current populations per cage
+        const cagePopulations: { [cage: number]: number } = {};
+        state.ducks.forEach(duck => {
+            cagePopulations[duck.cage] = duck.quantity;
+        });
+        
+        const totalDucksAtTime = Object.values(cagePopulations).reduce((sum, qty) => sum + qty, 0);
+        const productivity = totalDucksAtTime > 0 ? (totalEggs / totalDucksAtTime) * 100 : 0;
         
         const newDailyRecord: DailyProduction = {
             date: data.date,
             totalEggs,
             productivity,
-            perCage: data.perCage
+            perCage: data.perCage,
+            cagePopulations
         };
 
         const updatedDaily = [...state.eggProduction.daily, newDailyRecord]
@@ -257,15 +265,30 @@ export const useAppStore = create<AppState & {
 
   updateDailyProduction: (date, data) => {
     set(state => {
+        const existingRecord = state.eggProduction.daily.find(d => 
+            new Date(d.date).toDateString() === new Date(date).toDateString()
+        );
+
         const totalEggs = Object.values(data.perCage).reduce((sum, count) => sum + count, 0);
-        const totalDucks = state.ducks.reduce((sum, duck) => sum + duck.quantity, 0);
-        const productivity = totalDucks > 0 ? (totalEggs / totalDucks) * 100 : 0;
+        
+        // Use stored population snapshot if it exists, otherwise fall back to current state (migration)
+        let cagePopulations = existingRecord?.cagePopulations;
+        if (!cagePopulations) {
+            cagePopulations = {};
+            state.ducks.forEach(duck => {
+                cagePopulations![duck.cage] = duck.quantity;
+            });
+        }
+        
+        const totalDucksAtTime = Object.values(cagePopulations).reduce((sum, qty) => sum + qty, 0);
+        const productivity = totalDucksAtTime > 0 ? (totalEggs / totalDucksAtTime) * 100 : 0;
         
         const updatedDailyRecord: DailyProduction = {
             date: data.date,
             totalEggs,
             productivity,
-            perCage: data.perCage
+            perCage: data.perCage,
+            cagePopulations
         };
         
         const updatedDaily = state.eggProduction.daily.map(d => 
@@ -533,7 +556,11 @@ export const useAppStore = create<AppState & {
             ducks: parsedState.ducks.map((d: any) => ({...d, id: d.id || d.cage, entryDate: new Date(d.entryDate)})),
             eggProduction: {
                 ...parsedState.eggProduction,
-                daily: parsedState.eggProduction.daily.map((d: any) => ({...d, date: new Date(d.date)})),
+                daily: parsedState.eggProduction.daily.map((d: any) => ({
+                    ...d, 
+                    date: new Date(d.date),
+                    cagePopulations: d.cagePopulations || null
+                })),
                 weekly: parsedState.eggProduction.weekly.map((w: any) => ({...w, id: w.id || Date.now(), startDate: new Date(w.startDate), endDate: new Date(w.endDate), description: w.description || '' })),
                 monthly: parsedState.eggProduction.monthly || [],
             },

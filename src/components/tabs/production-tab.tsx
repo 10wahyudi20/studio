@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React from "react";
@@ -1380,8 +1379,10 @@ export default function ProductionTab() {
                                       </TableCell>
                                       {ducks.map(duck => {
                                           const production = day.perCage[duck.cage];
-                                          const productivity = duck.quantity > 0 && production != null
-                                              ? (production / duck.quantity * 100)
+                                          // Use recorded population if available, otherwise current duck quantity
+                                          const populationAtTime = day.cagePopulations?.[duck.cage] ?? duck.quantity;
+                                          const productivity = populationAtTime > 0 && production != null
+                                              ? (production / populationAtTime * 100)
                                               : 0;
                                           return (
                                               <TableCell key={duck.id} className="p-0 text-center align-middle">

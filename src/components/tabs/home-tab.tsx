@@ -76,7 +76,7 @@ export default function HomeTab() {
   const chartData = eggProduction.daily.slice(-30).map(d => ({
     name: new Date(d.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
     produksiTelur: d.totalEggs,
-    produktifitas: totalDucks > 0 ? parseFloat(((d.totalEggs / totalDucks) * 100).toFixed(1)) : 0,
+    produktifitas: parseFloat(d.productivity.toFixed(1)),
   }));
   
   const chartConfig = {

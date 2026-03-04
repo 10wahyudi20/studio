@@ -1,5 +1,4 @@
 
-
 import type { PredictEggProductionOutput } from "@/ai/flows/predict-egg-production";
 
 export interface CompanyInfo {
@@ -40,6 +39,7 @@ export interface DailyProduction {
     totalEggs: number;
     productivity: number;
     perCage: { [cageNumber: number]: number };
+    cagePopulations: { [cageNumber: number]: number };
 }
 
 export interface WeeklyProduction {
