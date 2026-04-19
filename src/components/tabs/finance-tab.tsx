@@ -4,7 +4,7 @@
 import React from "react";
 import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusCircle, Edit, Trash2, TrendingUp, TrendingDown, Landmark, Scale, Printer } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -279,7 +279,10 @@ export default function FinanceTab() {
     title: string, 
     transactions: Transaction[], 
     type: "debit" | "credit" 
-  }) => (
+  }) => {
+    const totalValue = transactions.reduce((sum, t) => sum + t.total, 0);
+
+    return (
       <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>{title}</CardTitle>
@@ -348,11 +351,21 @@ export default function FinanceTab() {
                       ))
                     )}
                   </TableBody>
+                  {transactions.length > 0 && (
+                    <TableFooter>
+                        <TableRow className="bg-muted/50 font-bold">
+                            <TableCell colSpan={4} className="text-right">Total {title}</TableCell>
+                            <TableCell className="text-right">Rp {totalValue.toLocaleString('id-ID')}</TableCell>
+                            <TableCell></TableCell>
+                        </TableRow>
+                    </TableFooter>
+                  )}
               </Table>
             </div>
           </CardContent>
         </Card>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">
