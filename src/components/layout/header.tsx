@@ -48,13 +48,13 @@ const SimpleCalculator = () => {
 
     // Rincian State (Breakdown / Mixer)
     const [rincianRows, setRincianRows] = React.useState([
-        { name: '', value: '', percent: '' },
-        { name: '', value: '', percent: '' },
-        { name: '', value: '', percent: '' },
-        { name: '', value: '', percent: '' },
+        { name: '', value: '' },
+        { name: '', value: '' },
+        { name: '', value: '' },
+        { name: '', value: '' },
     ]);
 
-    const handleRincianChange = (index: number, field: 'name' | 'value' | 'percent', val: string) => {
+    const handleRincianChange = (index: number, field: 'name' | 'value', val: string) => {
         const newRows = [...rincianRows];
         newRows[index] = { ...newRows[index], [field]: val };
         setRincianRows(newRows);
@@ -62,15 +62,23 @@ const SimpleCalculator = () => {
 
     const clearRincian = () => {
         setRincianRows([
-            { name: '', value: '', percent: '' },
-            { name: '', value: '', percent: '' },
-            { name: '', value: '', percent: '' },
-            { name: '', value: '', percent: '' },
+            { name: '', value: '' },
+            { name: '', value: '' },
+            { name: '', value: '' },
+            { name: '', value: '' },
         ]);
     };
 
     const totalRincianValue = rincianRows.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
-    const totalRincianPercent = rincianRows.reduce((sum, r) => sum + (Number(r.percent) || 0), 0);
+    
+    // Auto-calculate percentages
+    const rincianWithPercents = rincianRows.map(row => {
+        const val = Number(row.value) || 0;
+        const percent = totalRincianValue > 0 ? (val / totalRincianValue) * 100 : 0;
+        return { ...row, percent: percent.toFixed(1) };
+    });
+
+    const totalRincianPercent = rincianWithPercents.reduce((sum, r) => sum + Number(r.percent), 0);
 
     const formatDisplay = (value: string) => {
         if (value === "Infinity" || value === "-Infinity") return "Error";
@@ -307,7 +315,7 @@ const SimpleCalculator = () => {
                         </div>
                         
                         <div className="space-y-2">
-                            {rincianRows.map((row, idx) => (
+                            {rincianWithPercents.map((row, idx) => (
                                 <div key={idx} className="grid grid-cols-12 gap-2">
                                     <Input 
                                         type="text" 
@@ -324,11 +332,10 @@ const SimpleCalculator = () => {
                                         className="col-span-3 h-10 text-sm text-center px-1 font-bold" 
                                     />
                                     <Input 
-                                        type="number" 
-                                        value={row.percent} 
-                                        onChange={(e) => handleRincianChange(idx, 'percent', e.target.value)} 
-                                        placeholder="0" 
-                                        className="col-span-3 h-10 text-sm text-center px-1" 
+                                        type="text" 
+                                        value={row.percent + "%"} 
+                                        readOnly 
+                                        className="col-span-3 h-10 text-[10px] text-center px-1 bg-muted/30 font-medium" 
                                     />
                                 </div>
                             ))}
@@ -342,10 +349,10 @@ const SimpleCalculator = () => {
                                 <div className="text-[10px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
                                 <div className="text-sm font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
                             </div>
-                            <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent !== 100 ? "bg-red-500/10" : "bg-green-500/10")}>
+                            <div className={cn("col-span-3 rounded py-1.5 text-center", (totalRincianPercent > 0 && Math.abs(totalRincianPercent - 100) > 0.5) ? "bg-red-500/10" : "bg-green-500/10")}>
                                 <div className="text-[10px] uppercase font-bold opacity-70">Total %</div>
-                                <div className={cn("text-sm font-black", totalRincianPercent !== 100 ? "text-red-600" : "text-green-600")}>
-                                    {totalRincianPercent}%
+                                <div className={cn("text-sm font-black", (totalRincianPercent > 0 && Math.abs(totalRincianPercent - 100) > 0.5) ? "text-red-600" : "text-green-600")}>
+                                    {totalRincianValue > 0 ? totalRincianPercent.toFixed(1) : "0"}%
                                 </div>
                             </div>
                         </div>
