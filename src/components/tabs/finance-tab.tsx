@@ -120,7 +120,7 @@ const TransactionForm = ({ transaction, onSave, defaultType }: { transaction?: T
                     {errors.unitPrice && <p className="text-sm text-destructive">{errors.unitPrice.message}</p>}
                 </div>
             </div>
-            <p className="text-sm font-medium">Total: Rp {(watch("quantity") * watch("unitPrice") || 0).toLocaleString('id-ID')}</p>
+            <p className="text-sm font-medium text-primary">Total Estimasi: Rp {(watch("quantity") * watch("unitPrice") || 0).toLocaleString('id-ID')}</p>
           <DialogFooter>
             <DialogClose asChild><Button type="button" variant="secondary">Batal</Button></DialogClose>
             <Button type="submit">Simpan</Button>
@@ -310,11 +310,11 @@ export default function FinanceTab() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">Tgl</TableHead>
+                    <TableHead className="w-[110px]">Tgl</TableHead>
                     <TableHead>Uraian</TableHead>
-                    <TableHead className="w-[100px] text-right">Jumlah</TableHead>
-                    <TableHead className="w-[120px] text-right">Harga Satuan</TableHead>
-                    <TableHead className="w-[120px] text-right">Total</TableHead>
+                    <TableHead className="w-[110px] text-right">Jumlah</TableHead>
+                    <TableHead className="w-[140px] text-right">Harga Satuan</TableHead>
+                    <TableHead className="w-[150px] text-right">Total</TableHead>
                     <TableHead className="w-[80px] text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
