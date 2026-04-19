@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, ArrowRight } from "lucide-react";
+import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -264,7 +264,7 @@ const SimpleCalculator = () => {
                     <div className="flex flex-col gap-4">
                         <div className="bg-muted text-right p-4 rounded-md text-foreground h-20 flex flex-col justify-center">
                              <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
-                             <div className={cn("font-code overflow-x-auto", displayFontSizeClass())}>
+                             <div className={cn("font-code overflow-x-auto no-scrollbar", displayFontSizeClass())}>
                                 {formattedDisplayValue}
                              </div>
                         </div>

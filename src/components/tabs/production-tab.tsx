@@ -6,7 +6,7 @@ import { useAppStore } from "@/hooks/use-app-store";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, ArrowUp, ArrowDown, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, DollarSign, Printer, AlertTriangle } from "lucide-react";
+import { Egg, Percent, CalendarDays, PlusCircle, Edit, Trash2, MoreHorizontal, BarChart as BarChartIcon, ZoomIn, ZoomOut, Trophy, TrendingUp, TrendingDown, DollarSign, Printer, AlertTriangle } from "lucide-react";
 import { format, addDays, isToday, getDaysInMonth, parse } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -1031,9 +1031,7 @@ export default function ProductionTab() {
                         'text-green-600 dark:text-green-500': productionDifference > 0,
                         'text-red-600 dark:text-red-500': productionDifference < 0,
                     })}>
-                        {productionDifference > 0 && <ArrowUp className="h-4 w-4 mr-1" />}
-                        {productionDifference < 0 && <ArrowDown className="h-4 w-4 mr-1" />}
-                        {productionDifference !== 0 ? `${Math.abs(productionDifference)} butir` : 'Tidak ada perubahan'}{" "}
+                        {productionDifference !== 0 ? `${productionDifference > 0 ? '+' : ''}${productionDifference} butir` : 'Tidak ada perubahan'}{" "}
                         dari kemarin
                     </div>
                 )

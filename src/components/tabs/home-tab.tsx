@@ -3,7 +3,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, ArrowUp, ArrowDown, CalendarDays, Users, BarChart2, DollarSign, AlertCircle, ShieldOff } from "lucide-react";
+import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, CalendarDays, Users, BarChart2, DollarSign, AlertCircle, ShieldOff } from "lucide-react";
 import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
@@ -162,9 +162,7 @@ export default function HomeTab() {
                         'text-green-600 dark:text-green-500': productionDifference > 0,
                         'text-red-600 dark:text-red-500': productionDifference < 0,
                     })}>
-                        {productionDifference > 0 && <ArrowUp className="h-4 w-4 mr-1" />}
-                        {productionDifference < 0 && <ArrowDown className="h-4 w-4 mr-1" />}
-                        {productionDifference !== 0 ? `${Math.abs(productionDifference)} butir` : 'Tidak ada perubahan'}{" "}
+                        {productionDifference !== 0 ? `${productionDifference > 0 ? '+' : ''}${productionDifference} butir` : 'Tidak ada perubahan'}{" "}
                         dari kemarin
                     </div>
                 )
