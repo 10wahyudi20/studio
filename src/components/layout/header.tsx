@@ -46,10 +46,31 @@ const SimpleCalculator = () => {
     const [bebekQty, setBebekQty] = React.useState<string>("");
     const [skemaGram, setSkemaGram] = React.useState<string>("");
 
-    // Rincian State
-    const [rincianQty, setRincianQty] = React.useState<string>("");
-    const [rincianPrice, setRincianPrice] = React.useState<string>("");
-    const [rincianCost, setRincianCost] = React.useState<string>("");
+    // Rincian State (Breakdown / Mixer)
+    const [rincianRows, setRincianRows] = React.useState([
+        { name: '', value: '', percent: '' },
+        { name: '', value: '', percent: '' },
+        { name: '', value: '', percent: '' },
+        { name: '', value: '', percent: '' },
+    ]);
+
+    const handleRincianChange = (index: number, field: 'name' | 'value' | 'percent', val: string) => {
+        const newRows = [...rincianRows];
+        newRows[index] = { ...newRows[index], [field]: val };
+        setRincianRows(newRows);
+    };
+
+    const clearRincian = () => {
+        setRincianRows([
+            { name: '', value: '', percent: '' },
+            { name: '', value: '', percent: '' },
+            { name: '', value: '', percent: '' },
+            { name: '', value: '', percent: '' },
+        ]);
+    };
+
+    const totalRincianValue = rincianRows.reduce((sum, r) => sum + (Number(r.value) || 0), 0);
+    const totalRincianPercent = rincianRows.reduce((sum, r) => sum + (Number(r.percent) || 0), 0);
 
     const formatDisplay = (value: string) => {
         if (value === "Infinity" || value === "-Infinity") return "Error";
@@ -208,13 +229,9 @@ const SimpleCalculator = () => {
 
     // Skema Logic
     const totalPakanKg = (Number(bebekQty) * Number(skemaGram)) / 1000;
-    
-    // Rincian Logic
-    const totalRincianIncome = Number(rincianQty) * Number(rincianPrice);
-    const totalRincianNet = totalRincianIncome - Number(rincianCost);
 
     return (
-        <div className="p-4 bg-background rounded-lg shadow-xl border w-72 flex flex-col gap-4">
+        <div className="p-4 bg-background rounded-lg shadow-xl border w-80 flex flex-col gap-4">
             <div className="flex gap-1 bg-muted/50 p-1 rounded-md">
                 <Button 
                     variant={calcMode === 'standart' ? 'secondary' : 'ghost'} 
@@ -282,34 +299,58 @@ const SimpleCalculator = () => {
                 </div>
             ) : (
                 <div className="space-y-3 py-1">
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                            <Label htmlFor="rincian_qty" className="text-[10px] text-muted-foreground">Jumlah (Butir/Kg)</Label>
-                            <Input id="rincian_qty" type="number" value={rincianQty} onChange={(e) => setRincianQty(e.target.value)} placeholder="0" className="h-9 font-bold" />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="rincian_price" className="text-[10px] text-muted-foreground">Harga Jual (Rp)</Label>
-                            <Input id="rincian_price" type="number" value={rincianPrice} onChange={(e) => setRincianPrice(e.target.value)} placeholder="0" className="h-9 font-bold" />
-                        </div>
+                    <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-muted-foreground uppercase px-1">
+                        <div className="col-span-3 text-center">Nilai</div>
+                        <div className="col-span-6 text-center">Nama Pakan</div>
+                        <div className="col-span-3 text-center">%</div>
                     </div>
-                    <div className="space-y-1">
-                        <Label htmlFor="rincian_cost" className="text-[10px] text-muted-foreground">Biaya / Modal (Rp)</Label>
-                        <Input id="rincian_cost" type="number" value={rincianCost} onChange={(e) => setRincianCost(e.target.value)} placeholder="0" className="h-9 font-bold border-red-200" />
+                    
+                    <div className="space-y-2">
+                        {rincianRows.map((row, idx) => (
+                            <div key={idx} className="grid grid-cols-12 gap-2">
+                                <Input 
+                                    type="number" 
+                                    value={row.value} 
+                                    onChange={(e) => handleRincianChange(idx, 'value', e.target.value)} 
+                                    placeholder="0" 
+                                    className="col-span-3 h-8 text-xs text-center px-1 font-bold" 
+                                />
+                                <Input 
+                                    type="text" 
+                                    value={row.name} 
+                                    onChange={(e) => handleRincianChange(idx, 'name', e.target.value)} 
+                                    placeholder="Pakan..." 
+                                    className="col-span-6 h-8 text-xs px-2" 
+                                />
+                                <Input 
+                                    type="number" 
+                                    value={row.percent} 
+                                    onChange={(e) => handleRincianChange(idx, 'percent', e.target.value)} 
+                                    placeholder="0" 
+                                    className="col-span-3 h-8 text-xs text-center px-1" 
+                                />
+                            </div>
+                        ))}
                     </div>
-                    <div className="space-y-2 mt-2">
-                        <div className="bg-muted p-2 rounded flex justify-between items-center text-xs">
-                            <span className="text-muted-foreground">Gross:</span>
-                            <span className="font-bold">Rp {totalRincianIncome.toLocaleString('id-ID')}</span>
+
+                    <div className="grid grid-cols-12 gap-2 mt-4 pt-2 border-t border-dashed">
+                        <div className="col-span-3 bg-primary/10 rounded py-1.5 text-center">
+                            <div className="text-[8px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
+                            <div className="text-xs font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
                         </div>
-                        <div className={cn("p-3 rounded-md border text-center shadow-inner", totalRincianNet >= 0 ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20")}>
-                            <div className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-70">Laba Bersih</div>
-                            <div className={cn("text-xl font-black", totalRincianNet >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>
-                                Rp {totalRincianNet.toLocaleString('id-ID')}
+                        <div className="col-span-6 flex items-center justify-center text-[10px] font-bold text-muted-foreground italic">
+                            Ringkasan Campuran
+                        </div>
+                        <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent > 100 ? "bg-red-500/10" : "bg-green-500/10")}>
+                            <div className="text-[8px] uppercase font-bold opacity-70">Total %</div>
+                            <div className={cn("text-xs font-black", totalRincianPercent > 100 ? "text-red-600" : "text-green-600")}>
+                                {totalRincianPercent}%
                             </div>
                         </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground mt-1" onClick={() => { setRincianQty(""); setRincianPrice(""); setRincianCost(""); }}>
-                        <Trash2 className="h-3 w-3 mr-2" /> Bersihkan
+
+                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground mt-2" onClick={clearRincian}>
+                        <Trash2 className="h-3 w-3 mr-2" /> Bersihkan Rincian
                     </Button>
                 </div>
             )}
@@ -396,7 +437,7 @@ export default function Header() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                       <DialogTrigger asChild>
-                          <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                          <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                               <Calculator className="h-5 w-5 text-foreground" />
                               <span className="sr-only">Kalkulator</span>
                           </Button>
@@ -451,7 +492,7 @@ export default function Header() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost" onClick={handleLogout} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                  <Button size="icon" variant="ghost" onClick={handleLogout} className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
                       <LogOut className="h-5 w-5 text-red-500" />
                       <span className="sr-only">Logout</span>
                   </Button>
