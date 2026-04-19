@@ -342,9 +342,9 @@ const SimpleCalculator = () => {
                                 <div className="text-[10px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
                                 <div className="text-sm font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
                             </div>
-                            <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent > 100 ? "bg-red-500/10" : "bg-green-500/10")}>
+                            <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent !== 100 ? "bg-red-500/10" : "bg-green-500/10")}>
                                 <div className="text-[10px] uppercase font-bold opacity-70">Total %</div>
-                                <div className={cn("text-sm font-black", totalRincianPercent > 100 ? "text-red-600" : "text-green-600")}>
+                                <div className={cn("text-sm font-black", totalRincianPercent !== 100 ? "text-red-600" : "text-green-600")}>
                                     {totalRincianPercent}%
                                 </div>
                             </div>
