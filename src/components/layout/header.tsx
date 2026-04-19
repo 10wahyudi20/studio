@@ -2,7 +2,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff } from "lucide-react";
+import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -18,7 +18,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -34,11 +35,21 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 // Simple Calculator Component
 const SimpleCalculator = () => {
+    const [calcMode, setCalcMode] = React.useState<'standart' | 'skema' | 'rincian'>('standart');
     const [display, setDisplay] = React.useState("0");
     const [history, setHistory] = React.useState("");
     const [firstOperand, setFirstOperand] = React.useState<number | null>(null);
     const [operator, setOperator] = React.useState<string | null>(null);
     const [waitingForSecondOperand, setWaitingForSecondOperand] = React.useState(false);
+
+    // Skema State
+    const [bebekQty, setBebekQty] = React.useState<string>("");
+    const [skemaGram, setSkemaGram] = React.useState<string>("");
+
+    // Rincian State
+    const [rincianQty, setRincianQty] = React.useState<string>("");
+    const [rincianPrice, setRincianPrice] = React.useState<string>("");
+    const [rincianCost, setRincianCost] = React.useState<string>("");
 
     const formatDisplay = (value: string) => {
         if (value === "Infinity" || value === "-Infinity") return "Error";
@@ -140,7 +151,7 @@ const SimpleCalculator = () => {
             setDisplay(resultString);
             setFirstOperand(null);
             setOperator(null);
-            setWaitingForSecondOperand(true); // Allow starting new calculation
+            setWaitingForSecondOperand(true);
         }
     };
     
@@ -154,6 +165,7 @@ const SimpleCalculator = () => {
     };
 
     React.useEffect(() => {
+        if (calcMode !== 'standart') return;
         const handleKeyDown = (event: KeyboardEvent) => {
             const { key } = event;
             if (/\d/.test(key)) {
@@ -176,7 +188,7 @@ const SimpleCalculator = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [display, firstOperand, operator, waitingForSecondOperand]);
+    }, [display, firstOperand, operator, waitingForSecondOperand, calcMode]);
 
     const buttons = [
       "AC", "DEL", "%", "/",
@@ -187,32 +199,120 @@ const SimpleCalculator = () => {
     ];
 
     const getButtonClass = (btn: string) => {
-        if (btn === "AC") return "bg-destructive hover:bg-destructive/90";
+        if (btn === "AC") return "bg-destructive hover:bg-destructive/90 text-destructive-foreground";
         if (btn === "0") return "col-span-2";
-        if (["/", "*", "-", "+", "="].includes(btn)) return "bg-accent hover:bg-accent/90";
-        if (["DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90";
+        if (["/", "*", "-", "+", "="].includes(btn)) return "bg-accent hover:bg-accent/90 text-accent-foreground";
+        if (["DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90 text-muted-foreground";
         return "bg-secondary hover:bg-secondary/80";
     };
 
+    // Skema Logic
+    const totalPakanKg = (Number(bebekQty) * Number(skemaGram)) / 1000;
+    
+    // Rincian Logic
+    const totalRincianIncome = Number(rincianQty) * Number(rincianPrice);
+    const totalRincianNet = totalRincianIncome - Number(rincianCost);
+
     return (
-        <div className="p-4 bg-background rounded-lg shadow-lg w-64">
-            <div className="bg-muted text-right p-4 rounded-md mb-4 text-foreground">
-                 <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
-                 <div className={cn("font-code overflow-x-auto", displayFontSizeClass())}>
-                    {formattedDisplayValue}
-                 </div>
+        <div className="p-4 bg-background rounded-lg shadow-xl border w-72 flex flex-col gap-4">
+            <div className="flex gap-1 bg-muted/50 p-1 rounded-md">
+                <Button 
+                    variant={calcMode === 'standart' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    className={cn("flex-1 h-8 text-[10px] uppercase font-bold", calcMode === 'standart' && "shadow-sm")} 
+                    onClick={() => setCalcMode('standart')}
+                >
+                    Standart
+                </Button>
+                <Button 
+                    variant={calcMode === 'skema' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    className={cn("flex-1 h-8 text-[10px] uppercase font-bold", calcMode === 'skema' && "shadow-sm")} 
+                    onClick={() => setCalcMode('skema')}
+                >
+                    Skema
+                </Button>
+                <Button 
+                    variant={calcMode === 'rincian' ? 'secondary' : 'ghost'} 
+                    size="sm" 
+                    className={cn("flex-1 h-8 text-[10px] uppercase font-bold", calcMode === 'rincian' && "shadow-sm")} 
+                    onClick={() => setCalcMode('rincian')}
+                >
+                    Rincian
+                </Button>
             </div>
-            <div className="grid grid-cols-4 gap-2">
-                 {buttons.map(btn => (
-                    <Button
-                        key={btn}
-                        onClick={() => handleButtonClick(btn)}
-                        className={cn("text-xl font-bold h-14 text-foreground", getButtonClass(btn))}
-                    >
-                        {btn}
+
+            {calcMode === 'standart' ? (
+                <>
+                    <div className="bg-muted text-right p-4 rounded-md text-foreground">
+                         <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
+                         <div className={cn("font-code overflow-x-auto", displayFontSizeClass())}>
+                            {formattedDisplayValue}
+                         </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                         {buttons.map(btn => (
+                            <Button
+                                key={btn}
+                                onClick={() => handleButtonClick(btn)}
+                                className={cn("text-xl font-bold h-12", getButtonClass(btn))}
+                            >
+                                {btn}
+                            </Button>
+                        ))}
+                    </div>
+                </>
+            ) : calcMode === 'skema' ? (
+                <div className="space-y-4 py-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="skema_bebek" className="text-xs text-muted-foreground">Jumlah Bebek (Ekor)</Label>
+                        <Input id="skema_bebek" type="number" value={bebekQty} onChange={(e) => setBebekQty(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="skema_gram" className="text-xs text-muted-foreground">Skema Pakan (Gram/Ekor)</Label>
+                        <Input id="skema_gram" type="number" value={skemaGram} onChange={(e) => setSkemaGram(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
+                    </div>
+                    <div className="bg-primary/10 p-4 rounded-md border border-primary/20 text-center">
+                        <div className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">Total Kebutuhan Pakan</div>
+                        <div className="text-3xl font-black text-primary">{totalPakanKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-sm font-bold">Kg</span></div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => { setBebekQty(""); setSkemaGram(""); }}>
+                        <Trash2 className="h-3 w-3 mr-2" /> Bersihkan
                     </Button>
-                ))}
-            </div>
+                </div>
+            ) : (
+                <div className="space-y-3 py-1">
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                            <Label htmlFor="rincian_qty" className="text-[10px] text-muted-foreground">Jumlah (Butir/Kg)</Label>
+                            <Input id="rincian_qty" type="number" value={rincianQty} onChange={(e) => setRincianQty(e.target.value)} placeholder="0" className="h-9 font-bold" />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="rincian_price" className="text-[10px] text-muted-foreground">Harga Jual (Rp)</Label>
+                            <Input id="rincian_price" type="number" value={rincianPrice} onChange={(e) => setRincianPrice(e.target.value)} placeholder="0" className="h-9 font-bold" />
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="rincian_cost" className="text-[10px] text-muted-foreground">Biaya / Modal (Rp)</Label>
+                        <Input id="rincian_cost" type="number" value={rincianCost} onChange={(e) => setRincianCost(e.target.value)} placeholder="0" className="h-9 font-bold border-red-200" />
+                    </div>
+                    <div className="space-y-2 mt-2">
+                        <div className="bg-muted p-2 rounded flex justify-between items-center text-xs">
+                            <span className="text-muted-foreground">Gross:</span>
+                            <span className="font-bold">Rp {totalRincianIncome.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div className={cn("p-3 rounded-md border text-center shadow-inner", totalRincianNet >= 0 ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20")}>
+                            <div className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-70">Laba Bersih</div>
+                            <div className={cn("text-xl font-black", totalRincianNet >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400")}>
+                                Rp {totalRincianNet.toLocaleString('id-ID')}
+                            </div>
+                        </div>
+                    </div>
+                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground mt-1" onClick={() => { setRincianQty(""); setRincianPrice(""); setRincianCost(""); }}>
+                        <Trash2 className="h-3 w-3 mr-2" /> Bersihkan
+                    </Button>
+                </div>
+            )}
         </div>
     );
 };
@@ -307,11 +407,11 @@ export default function Header() {
                     </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none">
+              <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none outline-none">
                   <DialogHeader className="sr-only">
-                      <DialogTitle>Kalkulator</DialogTitle>
+                      <DialogTitle>Kalkulator Multimode</DialogTitle>
                       <DialogDescription>
-                          Kalkulator sederhana untuk perhitungan cepat.
+                          Kalkulator serbaguna untuk kebutuhan peternakan.
                       </DialogDescription>
                   </DialogHeader>
                   <SimpleCalculator />
