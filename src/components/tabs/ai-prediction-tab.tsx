@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -150,16 +149,17 @@ export default function AiPredictionTab() {
       setPrediction(result);
       setLastPrediction(result); // Save to global store
     } catch (e: any) {
-      console.error("AI Prediction Error:", e);
-      // Handle Quota and Rate Limit errors specifically
-      if (e.message?.includes('429') || e.message?.toLowerCase().includes('quota') || e.message?.toLowerCase().includes('too many requests')) {
-          setError("Kuota harian AI telah habis atau terlalu banyak permintaan (Error 429). Silakan tunggu sejenak atau coba lagi besok.");
-      } else if (e.message?.includes('503')) {
-          setError("Layanan AI sedang sibuk (Error 503). Silakan coba lagi dalam beberapa saat.");
+      console.error("Caught AI Error:", e);
+      // Detailed error parsing
+      const errorMsg = e.message || "";
+      if (errorMsg.includes('429') || errorMsg.includes('QUOTA') || errorMsg.toLowerCase().includes('quota')) {
+          setError("Kuota harian AI Gemini Anda telah habis atau terlalu banyak permintaan dalam waktu singkat. Silakan tunggu beberapa saat atau coba lagi besok.");
+      } else if (errorMsg.includes('503')) {
+          setError("Layanan AI sedang sibuk (Server Busy). Silakan coba lagi dalam beberapa saat.");
       } else {
-          setError(`Gagal menghasilkan prediksi: ${e.message || 'Terjadi kesalahan tidak dikenal pada server AI.'}`);
+          setError(`Gagal menghasilkan prediksi: ${errorMsg || 'Terjadi kesalahan sistem AI.'}`);
       }
-      setLastPrediction(null); // Clear global state on error
+      setLastPrediction(null); 
     } finally {
       setIsLoading(false);
     }
@@ -186,7 +186,7 @@ export default function AiPredictionTab() {
     } catch (e: any) {
       console.error("Audio generation failed:", e);
       if (e.message?.includes('429') || e.message?.toLowerCase().includes('quota')) {
-          setAudioError("Kuota API harian untuk suara telah habis atau terlalu banyak permintaan. Silakan coba lagi besok.");
+          setAudioError("Kuota suara AI telah habis untuk hari ini. Silakan coba lagi besok.");
       } else {
           setAudioError(`Gagal membuat audio: ${e.message || 'Terjadi kesalahan'}`);
       }
@@ -335,7 +335,7 @@ export default function AiPredictionTab() {
                 <p className="mt-2 text-muted-foreground">AI sedang berpikir...</p>
               </div>
             )}
-            {error && <Alert variant="destructive"><AlertTitle>Error Layanan AI</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
+            {error && <Alert variant="destructive"><AlertTitle>Peringatan Kuota AI</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
             {!isLoading && !error && !prediction && (
                  <div className="text-center text-muted-foreground h-48 flex items-center justify-center">
                     <p>Hasil prediksi akan muncul di sini.</p>

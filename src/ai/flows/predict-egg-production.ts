@@ -128,32 +128,41 @@ const predictEggProductionFlow = ai.defineFlow(
     outputSchema: PredictEggProductionOutputSchema,
   },
   async (input) => {
-    const {output} = await predictEggProductionPrompt(input);
+    try {
+        const {output} = await predictEggProductionPrompt(input);
 
-    if (!output) {
-      throw new Error('AI did not return a valid output.');
-    }
-
-    // Sort predictions by date just in case the AI doesn't return them in order
-    const sortedPredictions = output.dailyPredictions.sort((a, b) => {
-      try {
-        const dateA = parse(a.day, 'dd MMMM yyyy', new Date(input.startDate), {
-          locale: idLocale,
-        });
-        const dateB = parse(b.day, 'dd MMMM yyyy', new Date(input.startDate), {
-          locale: idLocale,
-        });
-        if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-          return 0; // Don't sort if dates are invalid
+        if (!output) {
+          throw new Error('AI did not return a valid output.');
         }
-        return dateA.getTime() - dateB.getTime();
-      } catch (e) {
-        // Handle parsing error if the date format is wrong
-        console.warn(`Could not parse date for sorting: ${a.day} or ${b.day}`);
-        return 0;
-      }
-    });
 
-    return {...output, dailyPredictions: sortedPredictions};
+        // Sort predictions by date just in case the AI doesn't return them in order
+        const sortedPredictions = output.dailyPredictions.sort((a, b) => {
+          try {
+            const dateA = parse(a.day, 'dd MMMM yyyy', new Date(input.startDate), {
+              locale: idLocale,
+            });
+            const dateB = parse(b.day, 'dd MMMM yyyy', new Date(input.startDate), {
+              locale: idLocale,
+            });
+            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
+              return 0; // Don't sort if dates are invalid
+            }
+            return dateA.getTime() - dateB.getTime();
+          } catch (e) {
+            // Handle parsing error if the date format is wrong
+            console.warn(`Could not parse date for sorting: ${a.day} or ${b.day}`);
+            return 0;
+          }
+        });
+
+        return {...output, dailyPredictions: sortedPredictions};
+    } catch (error: any) {
+        console.error("Internal Flow Error:", error);
+        // Clean up error message for quota limits
+        if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+            throw new Error("ERROR_QUOTA: Kuota harian AI Gemini telah habis. Silakan coba lagi besok atau gunakan akun berbayar.");
+        }
+        throw error;
+    }
   }
 );

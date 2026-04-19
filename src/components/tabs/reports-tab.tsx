@@ -51,7 +51,7 @@ export default function ReportsTab() {
         const month = parseInt(selectedMonth, 10);
         const monthName = months.find(m => m.value === month)?.name || '';
         
-        // --- DATA FILTERED BY PERIOD ---
+        // --- DATA FILTERED BY PERIOD (REAL-TIME FILTERING) ---
         const dailyProdDataForPeriod = eggProduction.daily.filter(d => {
             const date = new Date(d.date);
             return date.getFullYear() === year && date.getMonth() + 1 === month;
@@ -62,13 +62,13 @@ export default function ReportsTab() {
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
         
-        // --- SUMMARY CALCULATIONS FOR SELECTED PERIOD (REAL-TIME ACCURACY) ---
+        // --- SUMMARY CALCULATIONS FOR SELECTED PERIOD ---
         const totalEggsInPeriod = dailyProdDataForPeriod.reduce((sum, d) => sum + d.totalEggs, 0);
         const totalIncomeInPeriod = financeDataForPeriod.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
         const totalExpenseInPeriod = financeDataForPeriod.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
         const netProfitInPeriod = totalIncomeInPeriod - totalExpenseInPeriod;
         
-        // Get population (using current or last recorded in period if available)
+        // Get current duck population
         const totalDucksNow = ducks.reduce((sum, d) => sum + d.quantity, 0);
         
         // --- FEED STOCK AND ESTIMATION CALCULATION ---
@@ -105,7 +105,7 @@ export default function ReportsTab() {
             // --- PERIOD-SPECIFIC SUMMARY DATA ---
             autoTable(doc, {
                 startY: finalY,
-                head: [[`Ringkasan Laporan (${monthName} ${year})`, 'Jumlah']],
+                head: [[`Ringkasan Laporan Bulanan (${monthName} ${year})`, 'Jumlah']],
                 body: [
                     ['Total Populasi Bebek', `${totalDucksNow.toLocaleString('id-ID')} ekor`],
                     ['Total Produksi Telur', `${totalEggsInPeriod.toLocaleString('id-ID')} butir`],
@@ -119,7 +119,7 @@ export default function ReportsTab() {
             });
             finalY = (doc as any).lastAutoTable.finalY + 10;
             
-            // --- DETAIL PRODUKSI HARIAN (for selected period) ---
+            // --- DETAIL PRODUKSI HARIAN ---
             if(dailyProdDataForPeriod.length > 0) {
                  autoTable(doc, {
                     startY: finalY,
@@ -137,7 +137,7 @@ export default function ReportsTab() {
                 finalY = (doc as any).lastAutoTable.finalY + 10;
             }
 
-            // --- DETAIL KEUANGAN (for selected period) ---
+            // --- DETAIL KEUANGAN ---
             const debitTransactions = financeDataForPeriod.filter(t => t.type === 'debit');
             const creditTransactions = financeDataForPeriod.filter(t => t.type === 'credit');
 
