@@ -1,15 +1,17 @@
 
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Egg, Package, Wallet, Wheat, TrendingUp, TrendingDown, CalendarDays, Users, BarChart2, DollarSign, AlertCircle, ShieldOff } from "lucide-react";
-import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { Bar, ResponsiveContainer, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid, Legend, Line, LineChart } from "recharts";
 import { useAppStore } from "@/hooks/use-app-store";
 import { cn } from "@/lib/utils";
 import { format, getDaysInMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, footer }: { title: string, value: string, valueClassName?: string, icon: React.ElementType, iconClassName?: string, footer?: React.ReactNode }) => (
     <Card>
@@ -30,6 +32,7 @@ const StatCard = ({ title, value, valueClassName, icon: Icon, iconClassName, foo
 
 export default function HomeTab() {
   const { ducks, eggProduction, feed, finance } = useAppStore();
+  const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
   const totalDucks = ducks.reduce((sum, duck) => sum + duck.quantity, 0);
   
@@ -251,20 +254,43 @@ export default function HomeTab() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Grafik Produksi 30 Hari Terakhir</CardTitle>
-          <BarChart2 className="h-5 w-5 text-muted-foreground" />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-transparent">
+                <BarChart2 className="h-5 w-5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setChartType('bar')}>Grafik Bar</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setChartType('line')}>Grafik Line</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardHeader>
         <CardContent>
             <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
-              <RechartsBarChart accessibilityLayer data={chartData}>
-                <CartesianGrid vertical={false} />
-                <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Legend />
-                <Bar yAxisId="left" dataKey="produksiTelur" radius={4} fill="var(--color-produksiTelur)" />
-                <Bar yAxisId="right" dataKey="produktifitas" radius={4} fill="var(--color-produktifitas)" />
-              </RechartsBarChart>
+              {chartType === 'bar' ? (
+                <RechartsBarChart accessibilityLayer data={chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="produksiTelur" radius={4} fill="var(--color-produksiTelur)" />
+                  <Bar yAxisId="right" dataKey="produktifitas" radius={4} fill="var(--color-produktifitas)" />
+                </RechartsBarChart>
+              ) : (
+                <LineChart accessibilityLayer data={chartData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} fontSize={12} />
+                  <YAxis yAxisId="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="produksiTelur" stroke="var(--color-produksiTelur)" strokeWidth={2} dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="produktifitas" stroke="var(--color-produktifitas)" strokeWidth={2} dot={false} />
+                </LineChart>
+              )}
             </ChartContainer>
         </CardContent>
       </Card>
