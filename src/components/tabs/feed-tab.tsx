@@ -119,7 +119,7 @@ const FeedForm = ({ feed, onSave }: { feed?: Feed, onSave: (data: any) => void }
                   </div>
                   <div className="space-y-2">
                     <Label>Harga / Kg</Label>
-                    <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted"/>
+                    <Input type="text" value={`Rp ${(watch("pricePerBag") / 50 || 0).toLocaleString('id-ID')}`} readOnly className="bg-muted text-yellow-600 dark:text-yellow-400 font-bold"/>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="schema">Skema Pakan (gram)</Label>
@@ -387,7 +387,7 @@ export default function FeedTab() {
                         {isFinite(itemDaysLeft) ? `${Math.floor(itemDaysLeft)} Hari` : '-'}
                       </TableCell>
                       <TableCell className="text-center">Rp {item.pricePerBag.toLocaleString('id-ID')}</TableCell>
-                      <TableCell className="text-center">Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
+                      <TableCell className="text-center text-yellow-600 dark:text-yellow-400 font-bold">Rp {item.pricePerKg.toLocaleString('id-ID')}</TableCell>
                       <TableCell className="text-green-700 dark:text-green-400 font-semibold text-center">{item.schema} - {schemaPercentage.toFixed(1)}%</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
