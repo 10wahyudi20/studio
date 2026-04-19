@@ -231,8 +231,8 @@ const SimpleCalculator = () => {
     const totalPakanKg = (Number(bebekQty) * Number(skemaGram)) / 1000;
 
     return (
-        <div className="p-4 bg-background rounded-lg shadow-xl border w-80 flex flex-col gap-4">
-            <div className="flex gap-1 bg-muted/50 p-1 rounded-md">
+        <div className="p-4 bg-background rounded-lg shadow-xl border w-80 h-[460px] flex flex-col gap-4 overflow-hidden">
+            <div className="flex-shrink-0 flex gap-1 bg-muted/50 p-1 rounded-md">
                 <Button 
                     variant={calcMode === 'standart' ? 'secondary' : 'ghost'} 
                     size="sm" 
@@ -259,101 +259,103 @@ const SimpleCalculator = () => {
                 </Button>
             </div>
 
-            {calcMode === 'standart' ? (
-                <>
-                    <div className="bg-muted text-right p-4 rounded-md text-foreground">
-                         <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
-                         <div className={cn("font-code overflow-x-auto", displayFontSizeClass())}>
-                            {formattedDisplayValue}
-                         </div>
+            <div className="flex-grow flex flex-col justify-start">
+                {calcMode === 'standart' ? (
+                    <div className="flex flex-col gap-4">
+                        <div className="bg-muted text-right p-4 rounded-md text-foreground h-20 flex flex-col justify-center">
+                             <div className="text-sm text-muted-foreground h-6 truncate" title={history}>{history}</div>
+                             <div className={cn("font-code overflow-x-auto", displayFontSizeClass())}>
+                                {formattedDisplayValue}
+                             </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                             {buttons.map(btn => (
+                                <Button
+                                    key={btn}
+                                    onClick={() => handleButtonClick(btn)}
+                                    className={cn("text-xl font-bold h-12", getButtonClass(btn))}
+                                >
+                                    {btn}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
-                         {buttons.map(btn => (
-                            <Button
-                                key={btn}
-                                onClick={() => handleButtonClick(btn)}
-                                className={cn("text-xl font-bold h-12", getButtonClass(btn))}
-                            >
-                                {btn}
-                            </Button>
-                        ))}
+                ) : calcMode === 'skema' ? (
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <Label htmlFor="skema_bebek" className="text-xs text-muted-foreground">Jumlah Bebek (Ekor)</Label>
+                            <Input id="skema_bebek" type="number" value={bebekQty} onChange={(e) => setBebekQty(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="skema_gram" className="text-xs text-muted-foreground">Skema Pakan (Gram/Ekor)</Label>
+                            <Input id="skema_gram" type="number" value={skemaGram} onChange={(e) => setSkemaGram(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
+                        </div>
+                        <div className="bg-primary/10 p-6 rounded-md border border-primary/20 text-center my-4">
+                            <div className="text-xs text-primary font-semibold uppercase tracking-wider mb-2">Total Kebutuhan Pakan</div>
+                            <div className="text-4xl font-black text-primary">{totalPakanKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-sm font-bold">Kg</span></div>
+                        </div>
+                        <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => { setBebekQty(""); setSkemaGram(""); }}>
+                            <Trash2 className="h-3 w-3 mr-2" /> Bersihkan
+                        </Button>
                     </div>
-                </>
-            ) : calcMode === 'skema' ? (
-                <div className="space-y-4 py-2">
-                    <div className="space-y-2">
-                        <Label htmlFor="skema_bebek" className="text-xs text-muted-foreground">Jumlah Bebek (Ekor)</Label>
-                        <Input id="skema_bebek" type="number" value={bebekQty} onChange={(e) => setBebekQty(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="skema_gram" className="text-xs text-muted-foreground">Skema Pakan (Gram/Ekor)</Label>
-                        <Input id="skema_gram" type="number" value={skemaGram} onChange={(e) => setSkemaGram(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
-                    </div>
-                    <div className="bg-primary/10 p-4 rounded-md border border-primary/20 text-center">
-                        <div className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">Total Kebutuhan Pakan</div>
-                        <div className="text-3xl font-black text-primary">{totalPakanKg.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span className="text-sm font-bold">Kg</span></div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => { setBebekQty(""); setSkemaGram(""); }}>
-                        <Trash2 className="h-3 w-3 mr-2" /> Bersihkan
-                    </Button>
-                </div>
-            ) : (
-                <div className="space-y-3 py-1">
-                    <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-muted-foreground uppercase px-1">
-                        <div className="col-span-6 text-center">Nama Pakan</div>
-                        <div className="col-span-3 text-center">Nilai</div>
-                        <div className="col-span-3 text-center">%</div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                        {rincianRows.map((row, idx) => (
-                            <div key={idx} className="grid grid-cols-12 gap-2">
-                                <Input 
-                                    type="text" 
-                                    value={row.name} 
-                                    onChange={(e) => handleRincianChange(idx, 'name', e.target.value)} 
-                                    placeholder="Pakan..." 
-                                    className="col-span-6 h-8 text-xs px-2" 
-                                />
-                                <Input 
-                                    type="number" 
-                                    value={row.value} 
-                                    onChange={(e) => handleRincianChange(idx, 'value', e.target.value)} 
-                                    placeholder="0" 
-                                    className="col-span-3 h-8 text-xs text-center px-1 font-bold" 
-                                />
-                                <Input 
-                                    type="number" 
-                                    value={row.percent} 
-                                    onChange={(e) => handleRincianChange(idx, 'percent', e.target.value)} 
-                                    placeholder="0" 
-                                    className="col-span-3 h-8 text-xs text-center px-1" 
-                                />
-                            </div>
-                        ))}
-                    </div>
+                ) : (
+                    <div className="space-y-3 py-1">
+                        <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-muted-foreground uppercase px-1">
+                            <div className="col-span-6 text-center">Nama Pakan</div>
+                            <div className="col-span-3 text-center">Nilai</div>
+                            <div className="col-span-3 text-center">%</div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            {rincianRows.map((row, idx) => (
+                                <div key={idx} className="grid grid-cols-12 gap-2">
+                                    <Input 
+                                        type="text" 
+                                        value={row.name} 
+                                        onChange={(e) => handleRincianChange(idx, 'name', e.target.value)} 
+                                        placeholder="Pakan..." 
+                                        className="col-span-6 h-8 text-xs px-2" 
+                                    />
+                                    <Input 
+                                        type="number" 
+                                        value={row.value} 
+                                        onChange={(e) => handleRincianChange(idx, 'value', e.target.value)} 
+                                        placeholder="0" 
+                                        className="col-span-3 h-8 text-xs text-center px-1 font-bold" 
+                                    />
+                                    <Input 
+                                        type="number" 
+                                        value={row.percent} 
+                                        onChange={(e) => handleRincianChange(idx, 'percent', e.target.value)} 
+                                        placeholder="0" 
+                                        className="col-span-3 h-8 text-xs text-center px-1" 
+                                    />
+                                </div>
+                            ))}
+                        </div>
 
-                    <div className="grid grid-cols-12 gap-2 mt-4 pt-2 border-t border-dashed">
-                        <div className="col-span-6 flex items-center justify-center text-[10px] font-bold text-muted-foreground italic">
-                            Ringkasan Campuran
-                        </div>
-                        <div className="col-span-3 bg-primary/10 rounded py-1.5 text-center">
-                            <div className="text-[8px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
-                            <div className="text-xs font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
-                        </div>
-                        <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent > 100 ? "bg-red-500/10" : "bg-green-500/10")}>
-                            <div className="text-[8px] uppercase font-bold opacity-70">Total %</div>
-                            <div className={cn("text-xs font-black", totalRincianPercent > 100 ? "text-red-600" : "text-green-600")}>
-                                {totalRincianPercent}%
+                        <div className="grid grid-cols-12 gap-2 mt-4 pt-2 border-t border-dashed">
+                            <div className="col-span-6 flex items-center justify-center text-[10px] font-bold text-muted-foreground italic">
+                                Ringkasan Campuran
+                            </div>
+                            <div className="col-span-3 bg-primary/10 rounded py-1.5 text-center">
+                                <div className="text-[8px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
+                                <div className="text-xs font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
+                            </div>
+                            <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent > 100 ? "bg-red-500/10" : "bg-green-500/10")}>
+                                <div className="text-[8px] uppercase font-bold opacity-70">Total %</div>
+                                <div className={cn("text-xs font-black", totalRincianPercent > 100 ? "text-red-600" : "text-green-600")}>
+                                    {totalRincianPercent}%
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground mt-2" onClick={clearRincian}>
-                        <Trash2 className="h-3 w-3 mr-2" /> Bersihkan Rincian
-                    </Button>
-                </div>
-            )}
+                        <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground mt-4" onClick={clearRincian}>
+                            <Trash2 className="h-3 w-3 mr-2" /> Bersihkan Rincian
+                        </Button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
