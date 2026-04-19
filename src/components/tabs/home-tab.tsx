@@ -249,8 +249,9 @@ export default function HomeTab() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Grafik Produksi 30 Hari Terakhir</CardTitle>
+          <BarChart2 className="h-5 w-5 text-muted-foreground" />
         </CardHeader>
         <CardContent>
             <ChartContainer config={chartConfig} className="min-h-[320px] w-full">
