@@ -221,10 +221,10 @@ const SimpleCalculator = () => {
 
     const getButtonClass = (btn: string) => {
         if (btn === "AC") return "bg-destructive hover:bg-destructive/90 text-destructive-foreground";
-        if (btn === "0") return "col-span-2";
+        if (btn === "0") return "col-span-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground";
         if (["/", "*", "-", "+", "="].includes(btn)) return "bg-accent hover:bg-accent/90 text-accent-foreground";
         if (["DEL", "%"].includes(btn)) return "bg-muted hover:bg-muted/90 text-muted-foreground";
-        return "bg-secondary hover:bg-secondary/80";
+        return "bg-secondary hover:bg-secondary/80 text-secondary-foreground";
     };
 
     // Skema Logic
