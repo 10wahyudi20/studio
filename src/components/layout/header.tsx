@@ -300,7 +300,7 @@ const SimpleCalculator = () => {
                     </div>
                 ) : (
                     <div className="space-y-3 py-1">
-                        <div className="grid grid-cols-12 gap-2 text-[10px] font-bold text-muted-foreground uppercase px-1">
+                        <div className="grid grid-cols-12 gap-2 text-xs font-bold text-muted-foreground uppercase px-1">
                             <div className="col-span-6 text-center">Nama Pakan</div>
                             <div className="col-span-3 text-center">Nilai</div>
                             <div className="col-span-3 text-center">%</div>
@@ -314,37 +314,37 @@ const SimpleCalculator = () => {
                                         value={row.name} 
                                         onChange={(e) => handleRincianChange(idx, 'name', e.target.value)} 
                                         placeholder="Pakan..." 
-                                        className="col-span-6 h-8 text-xs px-2" 
+                                        className="col-span-6 h-10 text-sm px-2" 
                                     />
                                     <Input 
                                         type="number" 
                                         value={row.value} 
                                         onChange={(e) => handleRincianChange(idx, 'value', e.target.value)} 
                                         placeholder="0" 
-                                        className="col-span-3 h-8 text-xs text-center px-1 font-bold" 
+                                        className="col-span-3 h-10 text-sm text-center px-1 font-bold" 
                                     />
                                     <Input 
                                         type="number" 
                                         value={row.percent} 
                                         onChange={(e) => handleRincianChange(idx, 'percent', e.target.value)} 
                                         placeholder="0" 
-                                        className="col-span-3 h-8 text-xs text-center px-1" 
+                                        className="col-span-3 h-10 text-sm text-center px-1" 
                                     />
                                 </div>
                             ))}
                         </div>
 
                         <div className="grid grid-cols-12 gap-2 mt-4 pt-2 border-t border-dashed">
-                            <div className="col-span-6 flex items-center justify-center text-[10px] font-bold text-muted-foreground italic">
+                            <div className="col-span-6 flex items-center justify-center text-xs font-bold text-muted-foreground italic">
                                 Ringkasan Campuran
                             </div>
                             <div className="col-span-3 bg-primary/10 rounded py-1.5 text-center">
-                                <div className="text-[8px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
-                                <div className="text-xs font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
+                                <div className="text-[10px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
+                                <div className="text-sm font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
                             </div>
                             <div className={cn("col-span-3 rounded py-1.5 text-center", totalRincianPercent > 100 ? "bg-red-500/10" : "bg-green-500/10")}>
-                                <div className="text-[8px] uppercase font-bold opacity-70">Total %</div>
-                                <div className={cn("text-xs font-black", totalRincianPercent > 100 ? "text-red-600" : "text-green-600")}>
+                                <div className="text-[10px] uppercase font-bold opacity-70">Total %</div>
+                                <div className={cn("text-sm font-black", totalRincianPercent > 100 ? "text-red-600" : "text-green-600")}>
                                     {totalRincianPercent}%
                                 </div>
                             </div>
