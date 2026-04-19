@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -52,7 +51,7 @@ export default function ReportsTab() {
         const month = parseInt(selectedMonth, 10);
         const monthName = months.find(m => m.value === month)?.name || '';
         
-        // --- DATA FOR DETAILED TABLES (FILTERED BY PERIOD) ---
+        // --- DATA FILTERED BY PERIOD ---
         const dailyProdDataForPeriod = eggProduction.daily.filter(d => {
             const date = new Date(d.date);
             return date.getFullYear() === year && date.getMonth() + 1 === month;
@@ -63,18 +62,20 @@ export default function ReportsTab() {
             return date.getFullYear() === year && date.getMonth() + 1 === month;
         });
         
-        // --- DATA FOR ALL-TIME SUMMARY ---
-        const totalDucks = ducks.reduce((sum, d) => sum + d.quantity, 0);
-        const totalEggsAllTime = eggProduction.daily.reduce((sum, d) => sum + d.totalEggs, 0);
-        const totalIncomeAllTime = finance.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
-        const totalExpenseAllTime = finance.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
-        const netProfitAllTime = totalIncomeAllTime - totalExpenseAllTime;
+        // --- SUMMARY CALCULATIONS FOR SELECTED PERIOD (REAL-TIME ACCURACY) ---
+        const totalEggsInPeriod = dailyProdDataForPeriod.reduce((sum, d) => sum + d.totalEggs, 0);
+        const totalIncomeInPeriod = financeDataForPeriod.filter(t => t.type === 'debit').reduce((sum, t) => sum + t.total, 0);
+        const totalExpenseInPeriod = financeDataForPeriod.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.total, 0);
+        const netProfitInPeriod = totalIncomeInPeriod - totalExpenseInPeriod;
+        
+        // Get population (using current or last recorded in period if available)
+        const totalDucksNow = ducks.reduce((sum, d) => sum + d.quantity, 0);
         
         // --- FEED STOCK AND ESTIMATION CALCULATION ---
         const totalStock = feed.reduce((sum, item) => sum + item.stock, 0);
         const activeFeeds = feed.filter(f => f.stock > 0);
         const totalDailySchema = activeFeeds.reduce((sum, item) => sum + item.schema, 0);
-        const dailyFeedConsumptionKg = (totalDucks * totalDailySchema) / 1000;
+        const dailyFeedConsumptionKg = (totalDucksNow * totalDailySchema) / 1000;
         const feedDaysLeft = dailyFeedConsumptionKg > 0 ? totalStock / dailyFeedConsumptionKg : Infinity;
         const feedEstimationText = isFinite(feedDaysLeft) ? `${Math.floor(feedDaysLeft)} hari` : 'N/A';
 
@@ -82,7 +83,7 @@ export default function ReportsTab() {
             toast({
                 variant: "destructive",
                 title: "Data Tidak Ditemukan",
-                description: `Tidak ada data apapun yang dapat dicetak.`
+                description: `Tidak ada data apapun yang dapat dicetak untuk periode ${monthName} ${year}.`
             });
             setIsLoading(false);
             return;
@@ -95,22 +96,22 @@ export default function ReportsTab() {
             doc.setFontSize(20);
             doc.text(`Laporan Bulanan - ${companyInfo.name}`, 14, 22);
             doc.setFontSize(11);
-            doc.text(`Periode Detail: ${monthName} ${year}`, 14, 30);
+            doc.text(`Periode: ${monthName} ${year}`, 14, 30);
             doc.setFontSize(9);
             doc.text(`${companyInfo.address} | ${companyInfo.phone} | ${companyInfo.email}`, 14, 35);
 
             let finalY = 45;
 
-            // --- ALL-TIME SUMMARY DATA ---
+            // --- PERIOD-SPECIFIC SUMMARY DATA ---
             autoTable(doc, {
                 startY: finalY,
-                head: [['Ringkasan Umum (Keseluruhan)', 'Jumlah']],
+                head: [[`Ringkasan Laporan (${monthName} ${year})`, 'Jumlah']],
                 body: [
-                    ['Total Populasi Bebek', `${totalDucks.toLocaleString('id-ID')} ekor`],
-                    ['Total Produksi Telur', `${totalEggsAllTime.toLocaleString('id-ID')} butir`],
-                    ['Total Pemasukan', `Rp ${totalIncomeAllTime.toLocaleString('id-ID')}`],
-                    ['Total Pengeluaran', `Rp ${totalExpenseAllTime.toLocaleString('id-ID')}`],
-                    ['Laba / Rugi Bersih', `Rp ${netProfitAllTime.toLocaleString('id-ID')}`],
+                    ['Total Populasi Bebek', `${totalDucksNow.toLocaleString('id-ID')} ekor`],
+                    ['Total Produksi Telur', `${totalEggsInPeriod.toLocaleString('id-ID')} butir`],
+                    ['Total Pemasukan (Debit)', `Rp ${totalIncomeInPeriod.toLocaleString('id-ID')}`],
+                    ['Total Pengeluaran (Kredit)', `Rp ${totalExpenseInPeriod.toLocaleString('id-ID')}`],
+                    ['Laba / Rugi Bersih', `Rp ${netProfitInPeriod.toLocaleString('id-ID')}`],
                 ],
                 theme: 'grid',
                 headStyles: { fillColor: [66, 165, 245] },
@@ -178,7 +179,7 @@ export default function ReportsTab() {
              if(feed.length > 0) {
                 autoTable(doc, {
                     startY: finalY,
-                    head: [['Stok Pakan (Saat Laporan Dibuat)', 'Jumlah Stok']],
+                    head: [['Stok Pakan (Kondisi Saat Ini)', 'Jumlah Stok']],
                     body: [
                         ...feed.map(f => [
                             `${f.name} (${f.supplier})`,
@@ -198,7 +199,7 @@ export default function ReportsTab() {
             if (lastPrediction) {
                 doc.addPage();
                 doc.setFontSize(20);
-                doc.text('Hasil Prediksi AI', 14, 22);
+                doc.text('Hasil Prediksi Produksi AI', 14, 22);
                 finalY = 30;
 
                 const predictionHeader = `Total Prediksi: ${lastPrediction.totalPredictedProduction.toLocaleString('id-ID')} Butir`;
@@ -242,7 +243,7 @@ export default function ReportsTab() {
             // Open the PDF in a new tab
             doc.output('dataurlnewwindow');
 
-            toast({ title: "Laporan Dibuat!", description: "Laporan telah dibuka di tab baru." });
+            toast({ title: "Laporan Dibuat!", description: `Laporan periode ${monthName} ${year} telah dibuka di tab baru.` });
 
         } catch (error) {
             console.error("Failed to generate PDF", error);
@@ -258,7 +259,7 @@ export default function ReportsTab() {
       <Card>
         <CardHeader>
           <CardTitle>Buat Laporan Bulanan</CardTitle>
-          <CardDescription>Pilih periode untuk membuat laporan PDF yang terperinci.</CardDescription>
+          <CardDescription>Pilih periode untuk membuat laporan PDF yang terperinci dan akurat secara real-time.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col sm:flex-row items-center gap-4">
           <div className="w-full sm:w-auto flex-grow">
@@ -302,7 +303,3 @@ export default function ReportsTab() {
     </div>
   );
 }
-
-    
-
-    
