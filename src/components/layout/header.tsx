@@ -335,7 +335,7 @@ const SimpleCalculator = () => {
                                         type="text" 
                                         value={row.percent + "%"} 
                                         readOnly 
-                                        className="col-span-3 h-10 text-[10px] text-center px-1 bg-muted/30 font-medium" 
+                                        className="col-span-3 h-10 text-sm text-center px-1 bg-muted/30 font-bold" 
                                     />
                                 </div>
                             ))}
