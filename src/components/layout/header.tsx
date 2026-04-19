@@ -292,11 +292,11 @@ const SimpleCalculator = () => {
                     <div className="space-y-4 py-2">
                         <div className="space-y-2">
                             <Label htmlFor="skema_bebek" className="text-xs text-muted-foreground">Jumlah Bebek (Ekor)</Label>
-                            <Input id="skema_bebek" type="number" value={bebekQty} onChange={(e) => setBebekQty(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
+                            <Input id="skema_bebek" type="number" value={bebekQty} onChange={(e) => setBebekQty(e.target.value)} placeholder="0" className="h-10 text-lg font-bold text-green-500" />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="skema_gram" className="text-xs text-muted-foreground">Skema Pakan (Gram/Ekor)</Label>
-                            <Input id="skema_gram" type="number" value={skemaGram} onChange={(e) => setSkemaGram(e.target.value)} placeholder="0" className="h-10 text-lg font-bold" />
+                            <Input id="skema_gram" type="number" value={skemaGram} onChange={(e) => setSkemaGram(e.target.value)} placeholder="0" className="h-10 text-lg font-bold text-green-500" />
                         </div>
                         <div className="bg-primary/10 p-6 rounded-md border border-primary/20 text-center my-4">
                             <div className="text-xs text-primary font-semibold uppercase tracking-wider mb-2">Total Kebutuhan Pakan</div>
@@ -349,9 +349,9 @@ const SimpleCalculator = () => {
                                 <div className="text-[10px] uppercase font-bold text-primary opacity-70">Total Nilai</div>
                                 <div className="text-sm font-black text-primary">{totalRincianValue.toLocaleString('id-ID')}</div>
                             </div>
-                            <div className={cn("col-span-3 rounded py-1.5 text-center", (totalRincianPercent > 0 && Math.abs(totalRincianPercent - 100) > 0.5) ? "bg-red-500/10" : "bg-green-500/10")}>
+                            <div className={cn("col-span-3 rounded py-1.5 text-center", (totalRincianPercent > 0 && Math.abs(totalRincianPercent - 100) > 0.01) ? "bg-red-500/10" : "bg-green-500/10")}>
                                 <div className="text-[10px] uppercase font-bold opacity-70">Total %</div>
-                                <div className={cn("text-sm font-black", (totalRincianPercent > 0 && Math.abs(totalRincianPercent - 100) > 0.5) ? "text-red-600" : "text-green-600")}>
+                                <div className={cn("text-sm font-black", (totalRincianPercent > 0 && Math.abs(totalRincianPercent - 100) > 0.01) ? "text-red-600" : "text-green-600")}>
                                     {totalRincianValue > 0 ? totalRincianPercent.toFixed(1) : "0"}%
                                 </div>
                             </div>
