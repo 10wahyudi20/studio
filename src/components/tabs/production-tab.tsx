@@ -1323,7 +1323,6 @@ export default function ProductionTab() {
                                         <Bar
                                             key={duck.id}
                                             dataKey={`kdg_${duck.cage}`}
-                                            stackId="a"
                                             fill={`var(--color-kdg_${duck.cage})`}
                                             name={`Kdg ${duck.cage}`}
                                         />
