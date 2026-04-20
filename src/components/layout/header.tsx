@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, Sparkles, Send, Loader2, User, Bot } from "lucide-react";
+import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, Sparkles, Send, Loader2, User, Bot, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { aiAssistant } from "@/ai/flows/ai-assistant-flow";
 import { ScrollArea } from "../ui/scroll-area";
+import { Textarea } from "../ui/textarea";
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -43,7 +44,10 @@ const AIAssistant = () => {
 
     React.useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            const viewport = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+            if (viewport) {
+                viewport.scrollTop = viewport.scrollHeight;
+            }
         }
     }, [messages, isLoading]);
 
@@ -70,60 +74,117 @@ const AIAssistant = () => {
     };
 
     return (
-        <div className="flex flex-col h-[500px] w-full max-w-md bg-background rounded-lg shadow-xl overflow-hidden border">
-            <div className="bg-primary p-4 text-primary-foreground flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                <span className="font-bold">Asisten AI (Riset & Edukasi)</span>
+        <div className="flex flex-col h-[550px] w-full max-w-xl bg-background rounded-xl overflow-hidden">
+            {/* Elegant Header */}
+            <div className="bg-muted/30 px-6 py-4 border-b flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-bold leading-tight">Asisten Gemini AI</h3>
+                        <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Model 2.0 Flash</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <ScrollArea className="flex-grow p-4" viewportRef={scrollRef}>
-                <div className="space-y-4">
+
+            {/* Redesigned Chat Area */}
+            <ScrollArea className="flex-grow px-4" ref={scrollRef}>
+                <div className="space-y-6 py-6 max-w-lg mx-auto">
                     {messages.length === 0 && (
-                        <div className="text-center text-muted-foreground py-8">
-                            <Bot className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                            <p className="text-sm">Halo! Saya asisten pribadi AI Anda. Apa yang ingin Anda tanyakan hari ini untuk riset atau edukasi?</p>
+                        <div className="text-center py-12 space-y-4">
+                            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-muted mb-2">
+                                <Sparkles className="h-7 w-7 text-muted-foreground opacity-50" />
+                            </div>
+                            <h2 className="text-xl font-bold tracking-tight">Apa yang bisa saya bantu hari ini?</h2>
+                            <p className="text-xs text-muted-foreground px-8 leading-relaxed">
+                                Saya adalah asisten riset dan edukasi Anda. Ajukan pertanyaan seputar peternakan, nutrisi, atau hal lainnya.
+                            </p>
                         </div>
                     )}
+                    
                     {messages.map((msg, idx) => (
-                        <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
-                            <div className={cn("h-8 w-8 rounded-full flex items-center justify-center shrink-0", msg.role === 'user' ? "bg-accent" : "bg-muted")}>
-                                {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                            </div>
+                        <div key={idx} className={cn(
+                            "flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300",
+                            msg.role === 'user' ? "flex-row-reverse" : "flex-row"
+                        )}>
+                            {/* Simple Avatar */}
                             <div className={cn(
-                                "max-w-[80%] p-3 rounded-lg text-sm whitespace-pre-wrap shadow-sm",
-                                msg.role === 'user' ? "bg-primary text-primary-foreground" : "bg-muted border"
+                                "h-8 w-8 rounded-full flex items-center justify-center shrink-0 border text-[10px] font-bold",
+                                msg.role === 'user' ? "bg-accent/10 border-accent/20" : "bg-primary/10 border-primary/20"
                             )}>
-                                {msg.content}
+                                {msg.role === 'user' ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4 text-primary" />}
+                            </div>
+
+                            {/* Gemini Style Bubble */}
+                            <div className={cn(
+                                "relative max-w-[85%] px-4 py-3 text-sm leading-relaxed shadow-sm",
+                                msg.role === 'user' 
+                                    ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-none" 
+                                    : "bg-muted border rounded-2xl rounded-tl-none"
+                            )}>
+                                <div className="whitespace-pre-wrap">{msg.content}</div>
                             </div>
                         </div>
                     ))}
+
+                    {/* Gemini Thinking Animation */}
                     {isLoading && (
-                        <div className="flex gap-3">
-                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                                <Bot className="h-4 w-4 animate-bounce" />
+                        <div className="flex gap-3 animate-pulse">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                                <Sparkles className="h-4 w-4 text-primary" />
                             </div>
-                            <div className="bg-muted border p-3 rounded-lg text-sm italic text-muted-foreground">
-                                Mengetik...
+                            <div className="bg-muted border rounded-2xl rounded-tl-none px-5 py-3 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"></span>
                             </div>
                         </div>
                     )}
                 </div>
             </ScrollArea>
-            <div className="p-4 border-t bg-muted/30">
-                <form 
-                    onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
-                    className="flex gap-2"
-                >
-                    <Input 
-                        value={input} 
-                        onChange={(e) => setInput(e.target.value)} 
-                        placeholder="Tanyakan sesuatu..." 
-                        disabled={isLoading}
-                        className="bg-background"
-                    />
-                    <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
-                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    </Button>
-                </form>
+
+            {/* Floating Style Input Area */}
+            <div className="p-4 bg-background border-t">
+                <div className="max-w-lg mx-auto">
+                    <form 
+                        onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
+                        className="relative group"
+                    >
+                        <Textarea 
+                            value={input} 
+                            onChange={(e) => setInput(e.target.value)} 
+                            placeholder="Ketik pertanyaan untuk riset..." 
+                            disabled={isLoading}
+                            rows={1}
+                            className="min-h-[52px] max-h-32 py-4 px-5 pr-14 resize-none bg-muted/30 rounded-2xl border-2 border-transparent focus-visible:border-primary/30 focus-visible:ring-0 transition-all text-sm"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSend();
+                                }
+                            }}
+                        />
+                        <Button 
+                            type="submit" 
+                            size="icon" 
+                            disabled={isLoading || !input.trim()}
+                            className="absolute right-2 bottom-2 h-9 w-9 rounded-xl shadow-lg transition-transform active:scale-95"
+                        >
+                            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                        </Button>
+                    </form>
+                    <div className="flex items-center justify-center gap-1.5 mt-3 text-[10px] text-muted-foreground font-medium">
+                        <Info className="h-3 w-3" />
+                        <span>Gunakan untuk edukasi. Gemini dapat memberikan info yang tidak akurat.</span>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -540,11 +601,11 @@ export default function Header() {
                     </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none outline-none">
+              <DialogContent className="sm:max-w-xl p-0 bg-transparent border-0 shadow-none outline-none overflow-hidden">
                   <DialogHeader className="sr-only">
-                      <DialogTitle>Asisten AI Personal</DialogTitle>
+                      <DialogTitle>Asisten Gemini AI</DialogTitle>
                       <DialogDescription>
-                          Tanyakan apa saja kepada AI asisten Anda untuk edukasi dan riset.
+                          Interaksi dengan model AI Gemini untuk riset dan edukasi peternakan.
                       </DialogDescription>
                   </DialogHeader>
                   <AIAssistant />
