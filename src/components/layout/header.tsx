@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, Sparkles, Send, Loader2, User, Bot, Info } from "lucide-react";
+import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, Sparkles, Send, Loader2, User, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -20,8 +20,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { aiAssistant } from "@/ai/flows/ai-assistant-flow";
-import { ScrollArea } from "../ui/scroll-area";
-import { Textarea } from "../ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -75,7 +75,6 @@ const AIAssistant = () => {
 
     return (
         <div className="flex flex-col h-[550px] w-full max-w-xl bg-background rounded-xl overflow-hidden">
-            {/* Elegant Header */}
             <div className="bg-muted/30 px-6 py-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
                     <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
@@ -94,7 +93,6 @@ const AIAssistant = () => {
                 </div>
             </div>
 
-            {/* Redesigned Chat Area */}
             <ScrollArea className="flex-grow px-4" ref={scrollRef}>
                 <div className="space-y-6 py-6 max-w-lg mx-auto">
                     {messages.length === 0 && (
@@ -114,7 +112,6 @@ const AIAssistant = () => {
                             "flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300",
                             msg.role === 'user' ? "flex-row-reverse" : "flex-row"
                         )}>
-                            {/* Simple Avatar */}
                             <div className={cn(
                                 "h-8 w-8 rounded-full flex items-center justify-center shrink-0 border text-[10px] font-bold",
                                 msg.role === 'user' ? "bg-accent/10 border-accent/20" : "bg-primary/10 border-primary/20"
@@ -122,7 +119,6 @@ const AIAssistant = () => {
                                 {msg.role === 'user' ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4 text-primary" />}
                             </div>
 
-                            {/* Gemini Style Bubble */}
                             <div className={cn(
                                 "relative max-w-[85%] px-4 py-3 text-sm leading-relaxed shadow-sm",
                                 msg.role === 'user' 
@@ -134,7 +130,6 @@ const AIAssistant = () => {
                         </div>
                     ))}
 
-                    {/* Gemini Thinking Animation */}
                     {isLoading && (
                         <div className="flex gap-3 animate-pulse">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
@@ -150,7 +145,6 @@ const AIAssistant = () => {
                 </div>
             </ScrollArea>
 
-            {/* Floating Style Input Area */}
             <div className="p-4 bg-background border-t">
                 <div className="max-w-lg mx-auto">
                     <form 
@@ -616,7 +610,7 @@ export default function Header() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button size="icon" variant="ghost" onClick={handleSave} className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                      <Save className={cn("h-5 w-5", isDirty ? "text-accent blinking-save" : "text-blue-500")} />
+                      <Save className={cn("h-5 w-5", isDirty ? "text-accent" : "text-blue-500")} />
                       <span className="sr-only">Simpan Data</span>
                   </Button>
                 </TooltipTrigger>
@@ -631,7 +625,7 @@ export default function Header() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                       <DialogTrigger asChild>
-                          <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0">
+                          <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
                               <Calculator className="h-5 w-5 text-foreground" />
                               <span className="sr-only">Kalkulator</span>
                           </Button>

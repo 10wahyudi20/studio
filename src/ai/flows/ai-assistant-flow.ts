@@ -24,10 +24,6 @@ const AiAssistantOutputSchema = z.object({
 });
 export type AiAssistantOutput = z.infer<typeof AiAssistantOutputSchema>;
 
-export async function aiAssistant(input: AiAssistantInput): Promise<AiAssistantOutput> {
-  return aiAssistantFlow(input);
-}
-
 const aiAssistantFlow = ai.defineFlow(
   {
     name: 'aiAssistantFlow',
@@ -58,13 +54,15 @@ const aiAssistantFlow = ai.defineFlow(
     } catch (error: any) {
         console.error("Internal AI Assistant Flow Error:", error);
         
-        // Handle 429 Too Many Requests or Quota Exceeded specifically
         if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
             return { reply: "Mohon maaf, kuota harian Asisten AI (Model 2.0 Flash) telah mencapai batas atau frekuensi permintaan terlalu tinggi. Silakan coba lagi dalam beberapa saat atau besok hari." };
         }
         
-        // Handle other possible errors
         return { reply: "Maaf, terjadi gangguan koneksi dengan server AI. Silakan coba kirim pesan Anda kembali." };
     }
   }
 );
+
+export async function aiAssistant(input: AiAssistantInput): Promise<AiAssistantOutput> {
+  return aiAssistantFlow(input);
+}
