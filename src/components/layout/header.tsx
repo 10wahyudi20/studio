@@ -1,8 +1,7 @@
-
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2 } from "lucide-react";
+import { Calculator, LogOut, Save, Wifi, Phone, Mail, Cloud, WifiOff, Trash2, Sparkles, Send, Loader2, User, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 import { useAppStore } from "@/hooks/use-app-store";
@@ -20,6 +19,8 @@ import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { aiAssistant } from "@/ai/flows/ai-assistant-flow";
+import { ScrollArea } from "../ui/scroll-area";
 
 // Duck Icon SVG
 const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -32,6 +33,101 @@ const DuckIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M11.372 13.061C11.12 12.56 10.636 12 10.001 12c-.552 0-1 .448-1 1s.449 1 1 1c.552 0 1.135-.448 1.499-1.24.331.144.69.24 1.059.24 1.381 0 2.5-1.119 2.5-2.5s-1.119-2.5-2.5-2.5c-1.282 0-2.343.967-2.484 2.212C12.19 11.08 12 10.562 12 10c0-1.339 1.01-2.433 2.288-2.494C14.624 5.438 16.657 4 19.001 4c2.761 0 5 2.239 5 5s-2.239 5-5 5c-1.636 0-3.111-.79-4.029-2.035a3.465 3.465 0 0 1-1.21.285c-1.112 0-2.11-.539-2.73-1.378a3.53 3.53 0 0 1-.66.814C4.249 13.921 2 14.058 2 12.5c0-.663.486-1.22 1.123-1.428.21-.069.428-.103.649-.103.422 0 .821.143 1.145.404.223.18.423.388.599.615a4.52 4.52 0 0 0 .543.61c.45.494 1.066.8 1.741.8.498 0 .97-.158 1.372-.439z" />
     </svg>
   );
+
+// AI Assistant Component
+const AIAssistant = () => {
+    const [messages, setMessages] = React.useState<{role: 'user' | 'model', content: string}[]>([]);
+    const [input, setInput] = React.useState("");
+    const [isLoading, setIsLoading] = React.useState(false);
+    const scrollRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages, isLoading]);
+
+    const handleSend = async () => {
+        if (!input.trim() || isLoading) return;
+
+        const userMsg = input.trim();
+        setInput("");
+        setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+        setIsLoading(true);
+
+        try {
+            const response = await aiAssistant({
+                message: userMsg,
+                history: messages
+            });
+            setMessages(prev => [...prev, { role: 'model', content: response.reply }]);
+        } catch (error) {
+            console.error("AI Error:", error);
+            setMessages(prev => [...prev, { role: 'model', content: "Maaf, terjadi kesalahan saat menghubungi asisten AI. Silakan coba lagi." }]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-[500px] w-full max-w-md bg-background rounded-lg shadow-xl overflow-hidden border">
+            <div className="bg-primary p-4 text-primary-foreground flex items-center gap-2">
+                <Sparkles className="h-5 w-5" />
+                <span className="font-bold">Asisten AI (Riset & Edukasi)</span>
+            </div>
+            <ScrollArea className="flex-grow p-4" viewportRef={scrollRef}>
+                <div className="space-y-4">
+                    {messages.length === 0 && (
+                        <div className="text-center text-muted-foreground py-8">
+                            <Bot className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                            <p className="text-sm">Halo! Saya asisten pribadi AI Anda. Apa yang ingin Anda tanyakan hari ini untuk riset atau edukasi?</p>
+                        </div>
+                    )}
+                    {messages.map((msg, idx) => (
+                        <div key={idx} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
+                            <div className={cn("h-8 w-8 rounded-full flex items-center justify-center shrink-0", msg.role === 'user' ? "bg-accent" : "bg-muted")}>
+                                {msg.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
+                            </div>
+                            <div className={cn(
+                                "max-w-[80%] p-3 rounded-lg text-sm whitespace-pre-wrap shadow-sm",
+                                msg.role === 'user' ? "bg-primary text-primary-foreground" : "bg-muted border"
+                            )}>
+                                {msg.content}
+                            </div>
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <div className="flex gap-3">
+                            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                <Bot className="h-4 w-4 animate-bounce" />
+                            </div>
+                            <div className="bg-muted border p-3 rounded-lg text-sm italic text-muted-foreground">
+                                Mengetik...
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </ScrollArea>
+            <div className="p-4 border-t bg-muted/30">
+                <form 
+                    onSubmit={(e) => { e.preventDefault(); handleSend(); }} 
+                    className="flex gap-2"
+                >
+                    <Input 
+                        value={input} 
+                        onChange={(e) => setInput(e.target.value)} 
+                        placeholder="Tanyakan sesuatu..." 
+                        disabled={isLoading}
+                        className="bg-background"
+                    />
+                    <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 // Simple Calculator Component
 const SimpleCalculator = () => {
@@ -427,6 +523,34 @@ export default function Header() {
 
         <div className="flex items-center gap-2">
             <ModeToggle />
+            
+            <Dialog>
+              <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                      <DialogTrigger asChild>
+                          <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
+                              <Sparkles className="h-5 w-5 text-accent animate-pulse" />
+                              <span className="sr-only">Asisten AI</span>
+                          </Button>
+                      </DialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-transparent border-none shadow-none text-[10px] p-0">
+                      <p>Asisten AI</p>
+                    </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <DialogContent className="sm:max-w-min p-0 bg-transparent border-0 shadow-none outline-none">
+                  <DialogHeader className="sr-only">
+                      <DialogTitle>Asisten AI Personal</DialogTitle>
+                      <DialogDescription>
+                          Tanyakan apa saja kepada AI asisten Anda untuk edukasi dan riset.
+                      </DialogDescription>
+                  </DialogHeader>
+                  <AIAssistant />
+              </DialogContent>
+            </Dialog>
+
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
