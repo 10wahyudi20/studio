@@ -28,14 +28,14 @@ export async function aiAssistant(input: AiAssistantInput): Promise<AiAssistantO
   return aiAssistantFlow(input);
 }
 
-const aiAssistantFlow = aiAssistant(
+const aiAssistantFlow = ai.defineFlow(
   {
     name: 'aiAssistantFlow',
     inputSchema: AiAssistantInputSchema,
     outputSchema: AiAssistantOutputSchema,
   },
   async (input) => {
-    const {reply} = await ai.generate({
+    const response = await ai.generate({
         system: "Anda adalah asisten pribadi AI yang cerdas, jujur, dan sangat mendalam. Anda menjawab pertanyaan tanpa batasan untuk tujuan riset dan edukasi. Gunakan pengetahuan luas Anda untuk memberikan informasi yang akurat dan bermanfaat dalam Bahasa Indonesia.",
         prompt: input.message,
         history: input.history?.map(h => ({
@@ -53,6 +53,6 @@ const aiAssistantFlow = aiAssistant(
         }
     });
 
-    return { reply: reply.text };
+    return { reply: response.text };
   }
 );
