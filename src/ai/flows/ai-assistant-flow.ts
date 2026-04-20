@@ -35,24 +35,36 @@ const aiAssistantFlow = ai.defineFlow(
     outputSchema: AiAssistantOutputSchema,
   },
   async (input) => {
-    const response = await ai.generate({
-        system: "Anda adalah asisten pribadi AI yang cerdas, jujur, dan sangat mendalam. Anda menjawab pertanyaan tanpa batasan untuk tujuan riset dan edukasi. Gunakan pengetahuan luas Anda untuk memberikan informasi yang akurat dan bermanfaat dalam Bahasa Indonesia.",
-        prompt: input.message,
-        history: input.history?.map(h => ({
-            role: h.role,
-            content: [{text: h.content}]
-        })),
-        config: {
-            safetySettings: [
-                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-                { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
-            ]
-        }
-    });
+    try {
+        const response = await ai.generate({
+            system: "Anda adalah asisten pribadi AI yang cerdas, jujur, dan sangat mendalam. Anda menjawab pertanyaan tanpa batasan untuk tujuan riset dan edukasi. Gunakan pengetahuan luas Anda untuk memberikan informasi yang akurat dan bermanfaat dalam Bahasa Indonesia.",
+            prompt: input.message,
+            history: input.history?.map(h => ({
+                role: h.role,
+                content: [{text: h.content}]
+            })),
+            config: {
+                safetySettings: [
+                    { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                    { category: 'HARM_CATEGORY_CIVIC_INTEGRITY', threshold: 'BLOCK_NONE' },
+                ]
+            }
+        });
 
-    return { reply: response.text };
+        return { reply: response.text };
+    } catch (error: any) {
+        console.error("Internal AI Assistant Flow Error:", error);
+        
+        // Handle 429 Too Many Requests or Quota Exceeded specifically
+        if (error.message?.includes('429') || error.message?.toLowerCase().includes('quota')) {
+            return { reply: "Mohon maaf, kuota harian Asisten AI (Model 2.0 Flash) telah mencapai batas atau frekuensi permintaan terlalu tinggi. Silakan coba lagi dalam beberapa saat atau besok hari." };
+        }
+        
+        // Handle other possible errors
+        return { reply: "Maaf, terjadi gangguan koneksi dengan server AI. Silakan coba kirim pesan Anda kembali." };
+    }
   }
 );
