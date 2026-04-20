@@ -591,7 +591,7 @@ export default function Header() {
                     <TooltipTrigger asChild>
                       <DialogTrigger asChild>
                           <Button size="icon" variant="ghost" className="bg-transparent border-none hover:bg-transparent hover:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0">
-                              <Sparkles className="h-5 w-5 text-accent animate-pulse" />
+                              <Sparkles className="h-5 w-5 text-accent" />
                               <span className="sr-only">Asisten AI</span>
                           </Button>
                       </DialogTrigger>
